@@ -2,12 +2,8 @@ name: Get Hot News
 
 on:
   schedule:
-    - cron: "0 */12 * * *"   # 每天 00:00 和 12:00（上海时间），每半天一次
+    - cron: "0 */12 * * *"
   workflow_dispatch:
-
-concurrency:
-  group: crawler-${{ github.ref_name }}
-  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -15,7 +11,7 @@ permissions:
 
 jobs:
   crawl:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
 
     steps:
@@ -35,13 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --frozen --no-dev
-
-      - name: Verify required files
-        run: |
-          if [ ! -f config/config.yaml ]; then
-            echo "Error: Config missing"
-            exit 1
-          fi
 
       - name: Run crawler
         env:
@@ -75,6 +64,14 @@ jobs:
           S3_REGION: ${{ secrets.S3_REGION }}
           GITHUB_ACTIONS: true
         run: uv run python -m trendradar
+
+      - name: Commit and Push Database
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add output/*.db
+          git commit -m "Auto-update database to prevent duplicate push" || echo "No changes to commit"
+          git push
 
       - name: Convert DB to JSON with Full Content
         run: |
@@ -129,7 +126,6 @@ jobs:
                   if f.endswith(".db"):
                       all_items.extend(extract_table(os.path.join(rss_dir, f), "rss_items"))
 
-          # 获取上海时间 (UTC+8) 的当前日期
           tz_sh = timezone(timedelta(hours=8))
           today_str = datetime.now(tz_sh).strftime('%Y-%m-%d')
           print(f"Filtering data for today: {today_str}")
