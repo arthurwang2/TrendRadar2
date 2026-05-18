@@ -33,32 +33,39 @@ rss:
     enabled: true
     max_age_days: 2
   feeds:
-    # 填入你指定的高质量官方源
-    - id: "people-daily"
-      name: "人民日报"
-      url: "http://rss.people.com.cn/rss/people.xml"
-    - id: "people-domestic"
-      name: "人民网-国内新闻"
-      url: "http://www.people.com.cn/rss/GB/59476/1.xml"
+    # 央媒及主流媒体高质量源
+    - id: "cctv-xwlb"
+      name: "央视新闻-新闻联播"
+      url: "https://rsshub.app/cctv/xwlb"
     - id: "xinhua-yw"
       name: "新华网-要闻"
-      url: "http://www.xinhuanet.com/rss/news.xml"
-    - id: "cctv-yw"
-      name: "央视新闻-要闻"
-      url: "https://news.cctv.com/rss/1_1.xml"
-    - id: "xinhua-world"
-      name: "新华网-国际新闻"
-      url: "http://www.xinhuanet.com/rss/world.xml"
-    - id: "people-politics"
-      name: "人民网-时政"
-      url: "http://www.people.com.cn/rss/GB/59476/2.xml"
+      url: "https://rsshub.app/xinhua/news"
+    - id: "people-yw"
+      name: "人民网-要闻"
+      url: "https://rsshub.app/people/news/yw"
+    - id: "thepaper-tt"
+      name: "澎湃新闻-头条"
+      url: "https://rsshub.app/thepaper/featured"
+    - id: "jiemian-tx"
+      name: "界面新闻-天下"
+      url: "https://rsshub.app/jiemian/lists/82"
+    # 上海新能源与商务政策专属监控源
+    - id: "sh-sheitc"
+      name: "上海市经信委-最新动态"
+      url: "https://rsshub.app/gov/shanghai/sheitc/xwdt"
+    - id: "sh-sww"
+      name: "上海市商务委-新闻动态"
+      url: "https://rsshub.app/gov/shanghai/sww/xwdt"
+    - id: "sh-fgw-energy"
+      name: "上海市发改委(新能源办)-政策文件"
+      url: "https://rsshub.app/gov/shanghai/fgw/zcwj"
 
 report:
   mode: "daily"
   display_mode: "keyword"
   sort_by_position_first: true
   rank_threshold: 5
-  max_news_per_keyword: 10 # 既然是做本地分析的数据源，放宽抓取数量
+  max_news_per_keyword: 10
 
 filter:
   method: "keyword"
@@ -73,7 +80,7 @@ display:
     hotlist: true
     rss: true
     standalone: false
-    ai_analysis: false      # 彻底关闭网页端的 AI 分析模块
+    ai_analysis: false
 
 notification:
   enabled: true
@@ -87,7 +94,7 @@ storage:
     sqlite: true
     txt: false
     html: true
-    json: true              # 必须开启：生成 JSON 文件供你本地分析
+    json: true
   local:
     data_dir: "output"
     retention_days: 0
@@ -101,10 +108,10 @@ ai:
   max_tokens: 5000
 
 ai_analysis:
-  enabled: false            # 彻底关闭系统自带的 AI 请求
+  enabled: false
 
 ai_translation:
-  enabled: false            # 彻底关闭翻译
+  enabled: false
 
 advanced:
   debug: false
