@@ -53,23 +53,23 @@ rss:
     - id: "thepaper-tt"
       name: "澎湃新闻-头条"
       url: "https://rsshub.app/thepaper/featured"
-      max_age_days: 1
+      max_age_days: 2
     
     # 上海新能源与商务政策专属监控源
     - id: "sh-sheitc"
       name: "上海市经信委-最新动态"
       url: "https://rsshub.app/gov/shanghai/sheitc/xwdt"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "sh-sww"
       name: "上海市商务委-新闻动态"
       url: "https://rsshub.app/gov/shanghai/sww/xwdt"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "sh-fgw-energy"
       name: "上海市发改委(新能源办)-政策文件"
       url: "https://rsshub.app/gov/shanghai/fgw/zcwj"
-      max_age_days: 1
+      max_age_days: 2
       
     # 汽车行业垂直源及宏观政策源
     - id: "cnautonews"
@@ -91,42 +91,42 @@ rss:
     - id: "xiaomi-auto"
       name: "小米汽车"
       url: "https://rsshub.app/wechat/mp/home/xiaomi"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "byd-auto"
       name: "比亚迪"
       url: "https://rsshub.app/wechat/mp/home/byd"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "nio"
       name: "蔚来"
       url: "https://rsshub.app/wechat/mp/home/nio"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "lixiang-auto"
       name: "理想汽车"
       url: "https://rsshub.app/wechat/mp/home/lixiang"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "xiaopeng-auto"
       name: "小鹏汽车"
       url: "https://rsshub.app/wechat/mp/home/xiaopeng"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "zeekr"
       name: "极氪"
       url: "https://rsshub.app/wechat/mp/home/zeekr"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "aito"
       name: "问界"
       url: "https://rsshub.app/wechat/mp/home/aito"
-      max_age_days: 1
+      max_age_days: 2
 
     - id: "leapmotor"
       name: "零跑汽车"
       url: "https://rsshub.app/wechat/mp/home/leapmotor"
-      max_age_days: 1
+      max_age_days: 2
 
 report:
   mode: "daily"
