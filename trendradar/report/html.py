@@ -138,10 +138,12 @@ def render_html_content(
             .today-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
             .today-icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; }
             .today-icon img { width: 44px; height: 44px; object-fit: contain; filter: brightness(1.05) drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
-            .today-emoji-fb { font-size: 38px; line-height: 1; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
             
-            .today-temp { font-size: 32px; font-weight: 200; color: var(--tw); letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
-            .today-unit { font-size: 14px; font-weight: 300; color: var(--tm); }
+            .today-temp-row { display: flex; align-items: baseline; gap: 2px; margin-bottom: 3px; }
+            .today-temp { font-size: 38px; font-weight: 200; color: var(--tw); letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+            .today-unit { font-size: 16px; font-weight: 300; color: var(--tm); }
+            .today-city { font-size: 38px; font-weight: 200; color: var(--tw); margin-left: 6px; letter-spacing: -1.5px; line-height: 1; }
+            
             .today-desc { font-size: 12px; font-weight: 500; color: var(--tw); margin-top: 2px; }
             .today-range { font-size: 10.5px; color: var(--tm); margin-top: 2px; font-variant-numeric: tabular-nums; }
             
@@ -163,7 +165,6 @@ def render_html_content(
             .tmr-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: auto; }
             .tmr-icon { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; }
             .tmr-icon img { width: 34px; height: 34px; object-fit: contain; filter: brightness(1.05) drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
-            .tmr-emoji-fb { font-size: 30px; line-height: 1; display: none; }
             
             .tmr-desc { font-size: 13px; font-weight: 600; color: var(--tw); margin-bottom: 2px; }
             .tmr-range { font-size: 10.5px; color: var(--tm); font-variant-numeric: tabular-nums; }
@@ -178,57 +179,38 @@ def render_html_content(
             .tmr-bar-track { height: 3px; border-radius: 2px; background: var(--gl); position: relative; overflow: hidden; }
             .tmr-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, #60a5fa, #f97316); transition: left .9s ease, right .9s ease; }
 
-            /* TSLA 股票卡 */
-            .tsla-card {
+            /* TSLA + 工服 整合卡 */
+            .combo-card {
                 background: var(--gb); border: 1px solid var(--bdl);
                 border-radius: 14px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 12px 14px;
+                padding: 14px 16px;
             }
-            .tsla-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-            .tsla-left { display: flex; flex-direction: column; gap: 2px; }
-            .tsla-ticker { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--tw); }
-            .tsla-logo { width: 20px; height: 20px; background: #e82127; border-radius: 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(232,33,39,0.35); flex-shrink: 0; }
-            .tsla-logo svg { width: 12px; height: 12px; }
-            .tsla-name { font-size: 9.5px; color: var(--td); }
-            .tsla-right { text-align: right; }
+            .combo-inner { display: flex; align-items: center; }
+            .combo-tsla { flex: 0 0 auto; padding-right: 16px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 16px; }
+            .tsla-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+            .tsla-logo { width: 22px; height: 22px; background: #e82127; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+            .tsla-logo svg { width: 13px; height: 13px; }
+            .tsla-ticker { font-size: 13px; font-weight: 700; color: var(--tw); }
             .tsla-price { font-size: 20px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; line-height: 1.1; }
-            .tsla-chg { font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 3px; display: inline-block; font-variant-numeric: tabular-nums; }
-            .tsla-chg.up { background: rgba(74,222,128,0.15); color: #4ade80; }
-            .tsla-chg.down { background: rgba(248,113,113,0.15); color: #f87171; }
+            .tsla-chg { font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 5px; margin-top: 3px; display: inline-block; font-variant-numeric: tabular-nums; }
+            .tsla-chg.up { background: rgba(74,222,128,0.18); color: #4ade80; }
+            .tsla-chg.down { background: rgba(248,113,113,0.18); color: #f87171; }
             .tsla-chg.flat { background: rgba(255,255,255,0.10); color: var(--tm); }
-            .tsla-chart { width: 100%; height: 38px; margin-bottom: 8px; }
-            #tslaCanvas { width: 100%; height: 100%; display: block; }
-            .tsla-grid { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--bdl); padding-top: 8px; }
-            .tsla-cell { display: flex; flex-direction: column; gap: 2px; }
-            .tsla-cell-label { font-size: 9px; color: var(--td); }
-            .tsla-cell-val { font-size: 11px; color: var(--tw); font-weight: 600; font-variant-numeric: tabular-nums; }
-            .tsla-status { font-size: 9.5px; color: var(--td); text-align: right; margin-top: 5px; }
 
-            /* 工服卡 */
-            .uniform-card {
-                background: var(--gb); border: 1px solid var(--bdl);
-                border-radius: 14px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 12px 14px;
-            }
-            .uniform-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-            .uniform-label { font-size: 9px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
-            .uniform-date { font-size: 9.5px; color: var(--td); }
-            .uniform-body { display: flex; align-items: center; gap: 12px; }
-            .uniform-swatch { flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.28); box-shadow: 0 3px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18); transition: background .6s ease; }
+            .combo-uniform { flex: 1; display: flex; align-items: center; gap: 10px; }
+            .uniform-swatch { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.30); box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
             .uniform-info { flex: 1; }
             .uniform-color-name { font-size: 14px; font-weight: 700; color: var(--tw); margin-bottom: 3px; }
-            .uniform-hint { font-size: 11px; color: var(--tm); line-height: 1.45; }
-            .uniform-week { display: flex; gap: 4px; align-items: center; }
-            .uniform-day-dot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-            .uniform-day-label { font-size: 8.5px; color: var(--td); }
-            .uniform-dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.13); transition: transform .2s; }
-            .uniform-day-dot.today .uniform-dot { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 5px rgba(255,255,255,0.35); transform: scale(1.25); }
-            .uniform-day-dot.tomorrow .uniform-dot { border-color: rgba(255,255,255,0.45); transform: scale(1.1); }
+            .uniform-hint { font-size: 10.5px; color: var(--tm); line-height: 1.45; }
+            .uniform-week { display: flex; gap: 4px; align-items: center; margin-left: auto; }
+            .udot-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+            .udot-lbl { font-size: 8px; color: var(--td); }
+            .udot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.14); }
+            .udot-wrap.today .udot { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 5px rgba(255,255,255,0.35); }
+            .udot-wrap.tomorrow .udot { border-color: rgba(255,255,255,0.45); }
 
-            /* 城市+更新 */
-            .wt-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; margin-top: 2px; }
-            .wt-location { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--tm); }
-            .wt-location svg { width: 10px; height: 10px; opacity: 0.6; }
+            /* 更新时间 (城市已移至上面) */
+            .wt-footer { display: flex; align-items: center; justify-content: flex-end; padding: 0 2px; margin-top: 2px; }
             .wt-update { font-size: 10px; color: var(--td); }
 
             /* 骨架 */
@@ -455,11 +437,14 @@ def render_html_content(
                 .content { padding: 16px; }
                 .footer { padding: 14px 18px; }
                 .today-temp { font-size: 28px; }
+                .today-city { font-size: 28px; }
                 .today-icon-img { width: 36px; height: 36px; }
-                .today-emoji-fb { font-size: 32px; }
                 .today-details { display: none; }
-                .uniform-week { display: none; }
-                .tsla-grid { grid-template-columns: repeat(2,1fr); gap: 6px; }
+                .combo-inner { flex-direction: column; align-items: stretch; gap: 14px; }
+                .combo-tsla { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-right: 0; padding-bottom: 12px; margin-right: 0; display: flex; justify-content: space-between; align-items: center; }
+                .tsla-top { margin-bottom: 0; }
+                .tsla-price { text-align: right; }
+                .uniform-week { margin-left: 0; margin-top: 8px; justify-content: flex-end; }
                 .save-buttons { position: static; margin-bottom: 14px; display: flex; gap: 8px; justify-content: center; width: 100%; }
                 .save-btn-group { flex: 1; }
                 .save-btn { width: 100%; border-radius: 6px 0 0 6px; }
@@ -538,58 +523,34 @@ def render_html_content(
                         </div>
                     </div>
 
-                    <!-- TSLA 股票 -->
-                    <div class="tsla-card" id="tslaCard" style="display:none;">
-                        <div class="tsla-top">
-                            <div class="tsla-left">
-                                <div class="tsla-ticker">
-                                    <div class="tsla-logo">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                                    </div>
-                                    TSLA
+                    <!-- TSLA + 工服 整合卡 -->
+                    <div class="card-plain combo-card" id="comboCard" style="display:none;">
+                        <div class="combo-inner">
+                            <!-- 左侧：TSLA -->
+                            <div class="combo-tsla">
+                                <div class="tsla-top">
+                                    <div class="tsla-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+                                    <div class="tsla-ticker">TSLA</div>
                                 </div>
-                                <div class="tsla-name">Tesla, Inc. · NASDAQ</div>
+                                <div>
+                                    <div class="tsla-price" id="tslaPrice">--</div>
+                                    <div class="tsla-chg flat" id="tslaChg">--</div>
+                                </div>
                             </div>
-                            <div class="tsla-right">
-                                <div class="tsla-price" id="tslaPrice">--</div>
-                                <div class="tsla-chg flat" id="tslaChg">--</div>
+                            <!-- 右侧：工服 -->
+                            <div class="combo-uniform">
+                                <div class="uniform-swatch" id="uniformSwatch"></div>
+                                <div class="uniform-info">
+                                    <div class="uniform-color-name" id="uniformColorName">—</div>
+                                    <div class="uniform-hint" id="uniformHint">—</div>
+                                </div>
+                                <div class="uniform-week" id="uniformWeek"></div>
                             </div>
-                        </div>
-                        <div class="tsla-chart"><canvas id="tslaCanvas"></canvas></div>
-                        <div class="tsla-grid">
-                            <div class="tsla-cell"><span class="tsla-cell-label">今开</span><span class="tsla-cell-val" id="tslaOpen">--</span></div>
-                            <div class="tsla-cell"><span class="tsla-cell-label">最高</span><span class="tsla-cell-val" id="tslaHigh">--</span></div>
-                            <div class="tsla-cell"><span class="tsla-cell-label">最低</span><span class="tsla-cell-val" id="tslaLow">--</span></div>
-                            <div class="tsla-cell"><span class="tsla-cell-label">昨收</span><span class="tsla-cell-val" id="tslaPrev">--</span></div>
-                        </div>
-                        <div class="tsla-status" id="tslaStatus"></div>
-                    </div>
-
-                    <!-- 工服卡 -->
-                    <div class="uniform-card" id="uniformCard" style="display:none;">
-                        <div class="uniform-header">
-                            <div class="uniform-label">明日工服</div>
-                            <div class="uniform-date" id="uniformDate"></div>
-                        </div>
-                        <div class="uniform-body">
-                            <div class="uniform-swatch" id="uniformSwatch"></div>
-                            <div class="uniform-info">
-                                <div class="uniform-color-name" id="uniformColorName">—</div>
-                                <div class="uniform-hint" id="uniformHint">—</div>
-                            </div>
-                            <div class="uniform-week" id="uniformWeek"></div>
                         </div>
                     </div>
 
-                    <!-- 城市+更新 -->
+                    <!-- 更新时间 -->
                     <div class="wt-footer" id="wtFooter" style="display:none;">
-                        <div class="wt-location">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-                                <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                            <span id="wtCity">—</span>
-                        </div>
                         <div class="wt-update" id="wtUpdate">—</div>
                     </div>
                 </div>
@@ -1603,38 +1564,53 @@ def render_html_content(
                 var weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
 
                 document.getElementById('tmrDate').textContent = (tmr.getMonth() + 1) + '月' + tmr.getDate() + '日·' + weekNames[tmr.getDay()];
-                document.getElementById('uniformDate').textContent = weekNames[tmr.getDay()];
+                var uniformDateEl = document.getElementById('uniformDate');
+                if (uniformDateEl) uniformDateEl.textContent = weekNames[tmr.getDay()];
 
-                // ── 1. 天气与图标配置 ──
-                // 彻底解决 OWM 图片加载失败问题：使用大号 Emoji 作为图标，100% 兼容无破图
+                // 城市中文映射
+                var cityMap = {
+                    'Shanghai':'上海', 'Beijing':'北京', 'Guangzhou':'广州', 'Shenzhen':'深圳',
+                    'Chengdu':'成都', 'Hangzhou':'杭州', 'Wuhan':'武汉', 'Xi\\'an':'西安',
+                    'Chongqing':'重庆', 'Nanjing':'南京', 'Suzhou':'苏州', 'Tianjin':'天津',
+                    'Zhengzhou':'郑州', 'Changsha':'长沙', 'Dongguan':'东莞', 'Qingdao':'青岛',
+                    'Shenyang':'沈阳', 'Hefei':'合肥', 'Foshan':'佛山', 'Jinan':'济南'
+                };
+
+                // ── 1. 天气与图标配置 (OWM 真实图标) ──
                 var WMO = {
-                    0: {t:'晴', e:'☀️'},
-                    1: {t:'大部晴', e:'🌤️'},
-                    2: {t:'多云', e:'⛅'},
-                    3: {t:'阴', e:'☁️'},
-                    45:{t:'雾', e:'🌫️'},
-                    48:{t:'雾凇', e:'🌫️'},
-                    51:{t:'毛毛雨', e:'🌦️'},
-                    53:{t:'毛毛雨', e:'🌦️'},
-                    55:{t:'大毛毛雨', e:'🌧️'},
-                    61:{t:'小雨', e:'🌧️'},
-                    63:{t:'中雨', e:'🌧️'},
-                    65:{t:'大雨', e:'🌧️'},
-                    71:{t:'小雪', e:'🌨️'},
-                    73:{t:'中雪', e:'🌨️'},
-                    75:{t:'大雪', e:'❄️'},
-                    77:{t:'冰粒', e:'🌨️'},
-                    80:{t:'阵雨', e:'🌦️'},
-                    81:{t:'中阵雨', e:'🌧️'},
-                    82:{t:'强阵雨', e:'⛈️'},
-                    85:{t:'阵雪', e:'🌨️'},
-                    86:{t:'强阵雪', e:'❄️'},
-                    95:{t:'雷暴', e:'⛈️'},
-                    96:{t:'雷暴冰雹', e:'⛈️'},
-                    99:{t:'强雷暴', e:'⛈️'},
+                    0:{d:'01d',n:'01n',t:'晴'},
+                    1:{d:'02d',n:'02n',t:'大部晴'},
+                    2:{d:'03d',n:'03n',t:'多云'},
+                    3:{d:'04d',n:'04n',t:'阴'},
+                    45:{d:'50d',n:'50n',t:'雾'},
+                    48:{d:'50d',n:'50n',t:'雾凇'},
+                    51:{d:'09d',n:'09n',t:'毛毛雨'},
+                    53:{d:'09d',n:'09n',t:'毛毛雨'},
+                    55:{d:'09d',n:'09n',t:'细雨'},
+                    61:{d:'10d',n:'10n',t:'小雨'},
+                    63:{d:'10d',n:'10n',t:'中雨'},
+                    65:{d:'10d',n:'10n',t:'大雨'},
+                    71:{d:'13d',n:'13n',t:'小雪'},
+                    73:{d:'13d',n:'13n',t:'中雪'},
+                    75:{d:'13d',n:'13n',t:'大雪'},
+                    77:{d:'13d',n:'13n',t:'冰粒'},
+                    80:{d:'09d',n:'09n',t:'阵雨'},
+                    81:{d:'09d',n:'09n',t:'阵雨'},
+                    82:{d:'09d',n:'09n',t:'大雨'},
+                    85:{d:'13d',n:'13n',t:'阵雪'},
+                    86:{d:'13d',n:'13n',t:'大雪'},
+                    95:{d:'11d',n:'11n',t:'雷暴'},
+                    96:{d:'11d',n:'11n',t:'雷暴冰雹'},
+                    99:{d:'11d',n:'11n',t:'强雷暴'},
                 };
                 function wdesc(c){ return (WMO[c]||WMO[3]).t; }
-                function wemoji(c){ return (WMO[c]||WMO[3]).e; }
+
+                function setIcon(container, code, isDay, size){
+                    var e = WMO[code]||WMO[3];
+                    var file = (isDay ? e.d : e.n);
+                    var desc = e.t;
+                    container.innerHTML = '<img src="https://openweathermap.org/img/wn/'+file+'@4x.png" style="width:'+size+'px;height:'+size+'px;object-fit:contain;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.22));" alt="'+desc+'">';
+                }
 
                 var SKY={
                     sd:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
@@ -1661,9 +1637,10 @@ def render_html_content(
                 var svgTherm='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>';
 
                 function windLabel(k){
-                    if(k<1)return'静风';if(k<6)return'软风';if(k<12)return'轻风';
-                    if(k<20)return'微风';if(k<29)return'和风';if(k<39)return'清风';
-                    if(k<50)return'强风';return'大风';
+                    if(k<12)return'微风';
+                    if(k<29)return'中风';
+                    if(k<39)return'强风';
+                    return'大风';
                 }
 
                 // ── 2. 渲染今日天气 ──
@@ -1674,18 +1651,19 @@ def render_html_content(
                     var tmax=data.daily?Math.round(data.daily.temperature_2m_max[0]):null;
                     var tmin=data.daily?Math.round(data.daily.temperature_2m_min[0]):null;
 
+                    var cnCity = cityMap[city] || city;
+
                     document.getElementById('mainHeader').style.background=getSky(code,isDay);
                     var el=document.getElementById('todayCard');
                     el.innerHTML='';
 
                     var topDiv=document.createElement('div'); topDiv.className='today-top';
-                    var iconWrap=document.createElement('div'); iconWrap.className='today-icon-wrap';
-                    // 直接使用 Emoji，彻底解决空白破图问题
-                    iconWrap.innerHTML='<div style="font-size:42px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));">'+wemoji(code)+'</div>';
+                    var iconWrap=document.createElement('div'); iconWrap.className='today-icon';
+                    setIcon(iconWrap, code, isDay, 56);
                     topDiv.appendChild(iconWrap);
 
                     var mainDiv=document.createElement('div'); mainDiv.className='today-main';
-                    mainDiv.innerHTML='<div class="today-temp">'+temp+'<span class="today-unit">°C</span></div>'+
+                    mainDiv.innerHTML='<div class="today-temp-row"><span class="today-temp">'+temp+'</span><span class="today-unit">°C</span><span class="today-city">'+cnCity+'</span></div>'+
                         '<div class="today-desc">'+wdesc(code)+'</div>'+
                         (tmax!==null?'<div class="today-range">最高 '+tmax+'° · 最低 '+tmin+'°</div>':'');
                     topDiv.appendChild(mainDiv);
@@ -1698,7 +1676,6 @@ def render_html_content(
                         '<div class="detail-row">'+svgWind+'<span>'+wind+' km/h</span><span class="detail-val">'+windLabel(wind)+'</span></div>';
                     el.appendChild(detDiv);
 
-                    document.getElementById('wtCity').textContent=city;
                     var t=new Date();
                     document.getElementById('wtUpdate').textContent='更新于 '+pad(t.getHours())+':'+pad(t.getMinutes());
                     document.getElementById('wtFooter').style.display='flex';
@@ -1717,8 +1694,7 @@ def render_html_content(
                     document.getElementById('tmrRange').textContent='最高 '+tmax+'° / 最低 '+tmin+'°';
 
                     var iconWrap=document.getElementById('tmrIconWrap');
-                    // 直接使用 Emoji
-                    iconWrap.innerHTML='<div style="font-size:32px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15));">'+wemoji(code)+'</div>';
+                    setIcon(iconWrap, code, true, 34);
 
                     var statsHtml='';
                     if(pop!==null) statsHtml+='<div class="tmr-stat">'+svgDrop.replace('viewBox','style="width:10px;height:10px;opacity:.7;" viewBox')+'<span class="tmr-stat-val">'+pop+'%</span><span>降水</span></div>';
@@ -1782,61 +1758,31 @@ def render_html_content(
                     [1,2,3,4,5,6,0].forEach(function(d){
                         var uu=UNIFORMS[dayToIdx(d)];
                         var dot=document.createElement('div');
-                        dot.className='uniform-day-dot'+(d===todayDow?' today':'')+(d===tmrDow?' tomorrow':'');
-                        dot.innerHTML='<div class="uniform-dot" style="background:'+uu.color+';"></div><div class="uniform-day-label">'+dayLabels[d]+'</div>';
+                        dot.className='udot-wrap'+(d===todayDow?' today':'')+(d===tmrDow?' tomorrow':'');
+                        dot.innerHTML='<div class="udot" style="background:'+uu.color+';"></div><div class="udot-lbl">'+dayLabels[d]+'</div>';
                         weekEl.appendChild(dot);
                     });
-                    document.getElementById('uniformCard').style.display='block';
+                    document.getElementById('comboCard').style.display='block';
                 }
 
-                // ── 5. 特斯拉股票 ──
-                function drawChart(isUp){
-                    var canvas=document.getElementById('tslaCanvas');
-                    if(!canvas)return;
-                    var ctx=canvas.getContext('2d');
-                    var wrap=canvas.parentElement;
-                    var w=wrap.offsetWidth,h=wrap.offsetHeight;
-                    var dpr=Math.min(window.devicePixelRatio||1,2);
-                    canvas.width=w*dpr;canvas.height=h*dpr;ctx.scale(dpr,dpr);
-                    ctx.clearRect(0,0,w,h);
-                    var pts=[{x:0,y:h/2}],y=h/2;
-                    for(var i=1;i<18;i++){y+=((Math.random()-0.48)*(h*0.55));y=Math.max(4,Math.min(h-4,y));pts.push({x:i*w/17,y:y});}
-                    pts.push({x:w,y:isUp?5:h-5});
-                    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
-                    for(var i=1;i<pts.length-2;i++){var xc=(pts[i].x+pts[i+1].x)/2,yc=(pts[i].y+pts[i+1].y)/2;ctx.quadraticCurveTo(pts[i].x,pts[i].y,xc,yc);}
-                    ctx.quadraticCurveTo(pts[pts.length-2].x,pts[pts.length-2].y,pts[pts.length-1].x,pts[pts.length-1].y);
-                    ctx.strokeStyle=isUp?'#4ade80':'#f87171';ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
-                    ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
-                    var grad=ctx.createLinearGradient(0,0,0,h);
-                    grad.addColorStop(0,isUp?'rgba(74,222,128,0.20)':'rgba(248,113,113,0.20)');
-                    grad.addColorStop(1,'rgba(0,0,0,0)');
-                    ctx.fillStyle=grad;ctx.fill();
-                }
+                // ── 5. 特斯拉股票 (精简版) ──
                 function fetchTsla(){
                     var s=document.createElement('script');
                     s.src='https://qt.gtimg.cn/q=usTSLA';
                     s.onload=function(){
                         var raw=window.v_usTSLA;
-                        if(!raw){document.getElementById('tslaCard').style.display='block';return;}
+                        if(!raw){document.getElementById('comboCard').style.display='block';return;}
                         var d=raw.split('~');
-                        if(d.length<35){document.getElementById('tslaCard').style.display='block';return;}
-                        var price=parseFloat(d[3]),prev=parseFloat(d[4]),open=parseFloat(d[5]);
-                        var change=parseFloat(d[31]),pct=parseFloat(d[32]),high=parseFloat(d[33]),low=parseFloat(d[34]);
+                        if(d.length<35){document.getElementById('comboCard').style.display='block';return;}
+                        var price=parseFloat(d[3]);
+                        var change=parseFloat(d[31]),pct=parseFloat(d[32]);
                         document.getElementById('tslaPrice').textContent=price.toFixed(2);
-                        document.getElementById('tslaOpen').textContent=open.toFixed(2);
-                        document.getElementById('tslaHigh').textContent=high.toFixed(2);
-                        document.getElementById('tslaLow').textContent=low.toFixed(2);
-                        document.getElementById('tslaPrev').textContent=prev.toFixed(2);
                         var chgEl=document.getElementById('tslaChg');
                         if(change>=0){chgEl.className='tsla-chg up';chgEl.textContent='+'+change.toFixed(2)+' (+'+pct.toFixed(2)+'%)';}
                         else{chgEl.className='tsla-chg down';chgEl.textContent=change.toFixed(2)+' ('+pct.toFixed(2)+'%)';}
-                        var nowUTC=new Date(),etH=((nowUTC.getUTCHours()-4+24)%24);
-                        var isOpen=(etH>9||(etH===9&&nowUTC.getUTCMinutes()>=30))&&etH<16&&nowUTC.getUTCDay()>=1&&nowUTC.getUTCDay()<=5;
-                        document.getElementById('tslaStatus').textContent=isOpen?'● 盘中实时':'○ 盘后数据';
-                        document.getElementById('tslaCard').style.display='block';
-                        setTimeout(function(){drawChart(change>=0);},60);
+                        document.getElementById('comboCard').style.display='block';
                     };
-                    s.onerror=function(){document.getElementById('tslaCard').style.display='block';};
+                    s.onerror=function(){document.getElementById('comboCard').style.display='block';};
                     document.head.appendChild(s);
                 }
 
