@@ -42,39 +42,39 @@ rss:
     # 央媒及主流媒体高质量源
     - id: "cctv-xwlb"
       name: "央视新闻-新闻联播"
-      url: "https://rsshub.rss.tips/cctv/xwlb"
+      url: "https://rsshub.app/cctv/xwlb"
       max_age_days: 1
 
     - id: "xinhua-yw"
       name: "新华网-要闻"
-      url: "https://rsshub.rss.tips/xinhua/news"
+      url: "https://rsshub.app/xinhua/news"
       max_age_days: 1
 
     - id: "thepaper-tt"
       name: "澎湃新闻-头条"
-      url: "https://rsshub.rss.tips/thepaper/featured"
+      url: "https://rsshub.app/thepaper/featured"
       max_age_days: 1
     
     # 上海新能源与商务政策专属监控源
     - id: "sh-sheitc"
       name: "上海市经信委-最新动态"
-      url: "https://rsshub.rss.tips/gov/shanghai/sheitc/xwdt"
+      url: "https://rsshub.app/gov/shanghai/sheitc/xwdt"
       max_age_days: 1
 
     - id: "sh-sww"
       name: "上海市商务委-新闻动态"
-      url: "https://rsshub.rss.tips/gov/shanghai/sww/xwdt"
+      url: "https://rsshub.app/gov/shanghai/sww/xwdt"
       max_age_days: 1
 
     - id: "sh-fgw-energy"
       name: "上海市发改委(新能源办)-政策文件"
-      url: "https://rsshub.rss.tips/gov/shanghai/fgw/zcwj"
+      url: "https://rsshub.app/gov/shanghai/fgw/zcwj"
       max_age_days: 1
       
     # 汽车行业垂直源及宏观政策源
     - id: "cnautonews"
       name: "中国汽车报"
-      url: "https://www.cnautonews.com/rss.xml"
+      url: "https://www.cnautonews.com/rss.xml" # 注意：该网站SSL证书有问题，需配合修改代码中 requests 的 verify=False
       max_age_days: 2
 
     - id: "evtimes"
@@ -84,48 +84,48 @@ rss:
 
     - id: "miit-gov"
       name: "工信部官网"
-      url: "https://www.miit.gov.cn/rss.xml"
+      url: "https://rsshub.app/gov/miit/wjfb" # 已修复404，替换为 RSSHub 抓取工信部文件发布
       max_age_days: 2
 
     # 新能源车企官方微信公众号
     - id: "xiaomi-auto"
       name: "小米汽车"
-      url: "https://rsshub.rss.tips/wechat/mp/home/xiaomi"
+      url: "https://rsshub.app/wechat/mp/home/xiaomi"
       max_age_days: 1
 
     - id: "byd-auto"
       name: "比亚迪"
-      url: "https://rsshub.rss.tips/wechat/mp/home/byd"
+      url: "https://rsshub.app/wechat/mp/home/byd"
       max_age_days: 1
 
     - id: "nio"
       name: "蔚来"
-      url: "https://rsshub.rss.tips/wechat/mp/home/nio"
+      url: "https://rsshub.app/wechat/mp/home/nio"
       max_age_days: 1
 
     - id: "lixiang-auto"
       name: "理想汽车"
-      url: "https://rsshub.rss.tips/wechat/mp/home/lixiang"
+      url: "https://rsshub.app/wechat/mp/home/lixiang"
       max_age_days: 1
 
     - id: "xiaopeng-auto"
       name: "小鹏汽车"
-      url: "https://rsshub.rss.tips/wechat/mp/home/xiaopeng"
+      url: "https://rsshub.app/wechat/mp/home/xiaopeng"
       max_age_days: 1
 
     - id: "zeekr"
       name: "极氪"
-      url: "https://rsshub.rss.tips/wechat/mp/home/zeekr"
+      url: "https://rsshub.app/wechat/mp/home/zeekr"
       max_age_days: 1
 
     - id: "aito"
       name: "问界"
-      url: "https://rsshub.rss.tips/wechat/mp/home/aito"
+      url: "https://rsshub.app/wechat/mp/home/aito"
       max_age_days: 1
 
     - id: "leapmotor"
       name: "零跑汽车"
-      url: "https://rsshub.rss.tips/wechat/mp/home/leapmotor"
+      url: "https://rsshub.app/wechat/mp/home/leapmotor"
       max_age_days: 1
 
 report:
