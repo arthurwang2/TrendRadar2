@@ -60,7 +60,6 @@ def render_html_content(
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>雷达简报</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
         <style>
             * { box-sizing: border-box; }
             :root {
@@ -91,7 +90,7 @@ def render_html_content(
                 box-shadow: 0 2px 16px rgba(0,0,0,0.06);
             }
 
-            /* ===== 新版 Header (天气+简报) ===== */
+            /* ===== 新版 Header ===== */
             .header {
                 position: relative;
                 overflow: hidden;
@@ -119,7 +118,7 @@ def render_html_content(
             .header-top {
                 position: relative; z-index: 2;
                 display: flex; align-items: center; justify-content: space-between;
-                margin-top: 40px; /* 避开右上角保存按钮 */
+                margin-top: 40px; 
                 margin-bottom: 16px;
             }
             .header-title {
@@ -147,7 +146,7 @@ def render_html_content(
             /* ===== 天气面板 ===== */
             .weather-panel {
                 position: relative; z-index: 2;
-                display: flex; flex-direction: column; gap: 9px;
+                display: flex; flex-direction: column; gap: 12px;
             }
 
             /* 今日主卡 */
@@ -167,13 +166,13 @@ def render_html_content(
             }
             .weather-today.loading { justify-content: center; opacity: 0.55; }
 
-            .wt-lottie-wrap {
+            .wt-icon-wrap {
                 flex-shrink: 0; width: 72px; height: 72px;
                 position: relative; display: flex; align-items: center; justify-content: center;
             }
-            .wt-lottie-wrap > div {
-                width: 72px !important; height: 72px !important;
-                filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+            .wt-icon {
+                width: 72px; height: 72px; object-fit: contain;
+                filter: brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.25));
             }
 
             .wt-center { flex: 1; padding: 0 12px; border-right: 1px solid var(--glass-border-light); }
@@ -195,38 +194,39 @@ def render_html_content(
                 padding: 12px 4px 10px; overflow: hidden;
             }
             .hourly-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; padding: 0 13px; margin-bottom: 9px; }
-            .hourly-scroll { display: flex; gap: 3px; overflow-x: auto; padding: 0 9px 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+            .hourly-scroll { display: flex; gap: 4px; overflow-x: auto; padding: 0 9px 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
             .hourly-scroll::-webkit-scrollbar { display: none; }
-            .hourly-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 9px; border-radius: 11px; min-width: 52px; cursor: default; }
+            .hourly-item { 
+                flex-shrink: 0; display: flex; flex-direction: column; align-items: center; 
+                justify-content: flex-start; gap: 6px; padding: 8px 6px; 
+                border-radius: 12px; min-width: 56px; height: 86px; cursor: default; 
+            }
             .hourly-item.now { background: var(--glass-heavy); border: 1px solid var(--glass-border); }
-            .hourly-time { font-size: 10.5px; color: var(--tm); font-variant-numeric: tabular-nums; font-weight: 500; }
+            .hourly-time { font-size: 11px; color: var(--tm); font-variant-numeric: tabular-nums; font-weight: 500; line-height: 1; }
             .hourly-item.now .hourly-time { color: var(--tw); font-weight: 700; }
-            .hourly-lottie { width: 28px; height: 28px; flex-shrink: 0; }
-            .hourly-lottie > div { width: 28px !important; height: 28px !important; filter: brightness(0) invert(1); }
-            .hourly-temp { font-size: 12.5px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; }
-            .hourly-pop { font-size: 9.5px; color: #7dd3fc; font-weight: 600; }
+            .hourly-icon { width: 28px; height: 28px; object-fit: contain; filter: brightness(0) invert(1); flex-shrink: 0; }
+            .hourly-temp { font-size: 13px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; line-height: 1; margin-top: auto; }
 
             /* 明日预报 */
             .weather-tomorrow {
                 background: var(--glass-mid); border: 1px solid var(--glass-border-light);
                 border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 12px 15px;
+                padding: 14px 16px;
             }
-            .tmr-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-            .tmr-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
-            .tmr-date { font-size: 10.5px; color: var(--td); }
-            .tmr-body { display: flex; align-items: center; gap: 13px; }
-            .tmr-lottie { width: 44px; height: 44px; flex-shrink: 0; }
-            .tmr-lottie > div { width: 44px !important; height: 44px !important; filter: brightness(0) invert(1); }
+            .tmr-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .tmr-label { font-size: 10px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .tmr-date { font-size: 11px; color: var(--td); }
+            .tmr-body { display: flex; align-items: center; gap: 14px; }
+            .tmr-icon { width: 44px; height: 44px; object-fit: contain; filter: brightness(0) invert(1); flex-shrink: 0; }
             .tmr-info { flex: 1; }
-            .tmr-desc { font-size: 13px; font-weight: 600; color: var(--tw); margin-bottom: 3px; }
-            .tmr-range { font-size: 11px; color: var(--tm); font-variant-numeric: tabular-nums; }
+            .tmr-desc { font-size: 14px; font-weight: 600; color: var(--tw); margin-bottom: 4px; }
+            .tmr-range { font-size: 12px; color: var(--tm); font-variant-numeric: tabular-nums; }
             .tmr-stats { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-            .tmr-stat { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--tm); }
-            .tmr-stat svg { width: 11px; height: 11px; opacity: 0.7; }
+            .tmr-stat { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--tm); }
+            .tmr-stat svg { width: 12px; height: 12px; opacity: 0.7; }
             .tmr-stat-val { color: var(--tw); font-weight: 600; }
-            .tmr-bar-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--glass-border-light); }
-            .tmr-bar-label { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--td); margin-bottom: 5px; }
+            .tmr-bar-wrap { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border-light); }
+            .tmr-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--td); margin-bottom: 6px; }
             .tmr-bar-track { height: 4px; border-radius: 2px; background: var(--glass-light); position: relative; overflow: hidden; }
             .tmr-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, #60a5fa, #f97316); transition: left .9s ease, right .9s ease; }
 
@@ -234,11 +234,11 @@ def render_html_content(
             .weather-uniform {
                 background: var(--glass-mid); border: 1px solid var(--glass-border-light);
                 border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 12px 15px;
+                padding: 14px 16px;
             }
-            .uniform-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-            .uniform-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
-            .uniform-date { font-size: 10.5px; color: var(--td); }
+            .uniform-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .uniform-label { font-size: 10px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .uniform-date { font-size: 11px; color: var(--td); }
             .uniform-body { display: flex; align-items: center; gap: 14px; }
             .uniform-swatch {
                 flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%;
@@ -247,8 +247,8 @@ def render_html_content(
                 transition: background .6s ease;
             }
             .uniform-info { flex: 1; }
-            .uniform-color-name { font-size: 15px; font-weight: 700; color: var(--tw); margin-bottom: 3px; }
-            .uniform-hint { font-size: 11px; color: var(--tm); line-height: 1.5; }
+            .uniform-color-name { font-size: 15px; font-weight: 700; color: var(--tw); margin-bottom: 4px; }
+            .uniform-hint { font-size: 12px; color: var(--tm); line-height: 1.5; }
             .uniform-week { display: flex; gap: 5px; align-items: center; }
             .uniform-day-dot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
             .uniform-day-label { font-size: 9px; color: var(--td); }
@@ -268,111 +268,32 @@ def render_html_content(
             }
 
             /* 城市+更新 */
-            .wt-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 3px; }
-            .wt-location { display: flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--tm); }
-            .wt-location svg { width: 11px; height: 11px; opacity: 0.65; }
-            .wt-update { font-size: 10.5px; color: var(--td); }
+            .wt-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; margin-top: 2px; }
+            .wt-location { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--tm); }
+            .wt-location svg { width: 12px; height: 12px; opacity: 0.65; }
+            .wt-update { font-size: 11px; color: var(--td); }
 
             /* 骨架 */
             @keyframes shimmer { 0%, 100% { opacity: .3; } 50% { opacity: .65; } }
             .skeleton { animation: shimmer 1.6s ease-in-out infinite; background: var(--glass-mid); border-radius: 8px; }
 
             /* ===== 原有 Header 按钮及其他样式 ===== */
-            .save-buttons {
-                position: absolute;
-                top: 16px;
-                right: 16px;
-                display: flex;
-                gap: 8px;
-                z-index: 10;
-            }
-
-            .save-btn-group {
-                position: relative;
-                display: flex;
-            }
-
-            .save-btn {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-                padding: 10px 18px;
-                border-radius: 6px 0 0 6px;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 500;
-                transition: all 0.2s ease;
-                backdrop-filter: blur(10px);
-                white-space: nowrap;
-                min-height: 38px;
-                border-right: none;
-            }
-
+            .save-buttons { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 10; }
+            .save-btn-group { position: relative; display: flex; }
+            .save-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 18px; border-radius: 6px 0 0 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s ease; backdrop-filter: blur(10px); white-space: nowrap; min-height: 38px; border-right: none; }
             .save-btn:hover { background: rgba(255, 255, 255, 0.3); }
-            .save-btn:active { transform: translateY(0); }
-            .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-            .save-dropdown-trigger {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-                padding: 10px 10px;
-                border-radius: 0 6px 6px 0;
-                cursor: pointer;
-                font-size: 11px;
-                transition: all 0.2s ease;
-                backdrop-filter: blur(10px);
-                min-height: 38px;
-                display: flex;
-                align-items: center;
-            }
-
+            .save-dropdown-trigger { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 10px; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 11px; transition: all 0.2s ease; backdrop-filter: blur(10px); min-height: 38px; display: flex; align-items: center; }
             .save-dropdown-trigger:hover { background: rgba(255, 255, 255, 0.35); }
-
-            .save-dropdown-menu {
-                position: absolute;
-                top: 100%;
-                right: 0;
-                margin-top: 4px;
-                background: rgba(30, 30, 50, 0.92);
-                backdrop-filter: blur(16px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 8px;
-                padding: 4px;
-                min-width: 140px;
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(-4px);
-                transition: all 0.2s ease;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            }
-
-            .save-btn-group:hover .save-dropdown-menu,
-            .save-dropdown-menu:hover {
-                opacity: 1;
-                visibility: visible;
-                transform: translateY(0);
-            }
-
-            .save-dropdown-item {
-                display: block; width: 100%; padding: 9px 14px; background: none; border: none;
-                color: white; font-size: 13px; cursor: pointer; border-radius: 5px;
-                text-align: left; transition: background 0.15s; white-space: nowrap;
-            }
+            .save-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 4px; background: rgba(30, 30, 50, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 4px; min-width: 140px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+            .save-btn-group:hover .save-dropdown-menu, .save-dropdown-menu:hover { opacity: 1; visibility: visible; transform: translateY(0); }
+            .save-dropdown-item { display: block; width: 100%; padding: 9px 14px; background: none; border: none; color: white; font-size: 13px; cursor: pointer; border-radius: 5px; text-align: left; transition: background 0.15s; white-space: nowrap; }
             .save-dropdown-item:hover { background: rgba(255, 255, 255, 0.15); }
-
-            .dropdown-icon {
-                width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; flex-shrink: 0;
-            }
+            .dropdown-icon { width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; flex-shrink: 0; }
 
             .content { padding: 24px; }
             .word-group { margin-bottom: 40px; }
             .word-group:first-child { margin-top: 0; }
-
-            .word-header {
-                display: flex; align-items: center; justify-content: space-between;
-                margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
-            }
+            .word-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
             .word-info { display: flex; align-items: center; gap: 12px; }
             .word-name { font-size: 17px; font-weight: 600; color: #1a1a1a; }
             .word-count { color: #666; font-size: 13px; font-weight: 500; }
@@ -380,24 +301,10 @@ def render_html_content(
             .word-count.warm { color: #ea580c; font-weight: 600; }
             .word-index { color: #999; font-size: 12px; }
 
-            .news-item {
-                margin-bottom: 20px; padding: 16px 0; border-bottom: 1px solid #f5f5f5;
-                position: relative; display: flex; gap: 12px; align-items: center;
-            }
+            .news-item { margin-bottom: 20px; padding: 16px 0; border-bottom: 1px solid #f5f5f5; position: relative; display: flex; gap: 12px; align-items: center; }
             .news-item:last-child { border-bottom: none; }
-            .news-item.new::after {
-                content: "NEW"; position: absolute; top: 12px; right: 0;
-                background: #fbbf24; color: #92400e; font-size: 9px; font-weight: 700;
-                padding: 3px 6px; border-radius: 4px; letter-spacing: 0.5px;
-            }
-
-            .news-number {
-                color: #999; font-size: 13px; font-weight: 600; min-width: 20px;
-                text-align: center; flex-shrink: 0; background: #f8f9fa; border-radius: 50%;
-                width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-                align-self: flex-start; margin-top: 8px; position: relative; cursor: pointer;
-                transition: background 0.15s, color 0.15s;
-            }
+            .news-item.new::after { content: "NEW"; position: absolute; top: 12px; right: 0; background: #fbbf24; color: #92400e; font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 4px; letter-spacing: 0.5px; }
+            .news-number { color: #999; font-size: 13px; font-weight: 600; min-width: 20px; text-align: center; flex-shrink: 0; background: #f8f9fa; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; align-self: flex-start; margin-top: 8px; position: relative; cursor: pointer; transition: background 0.15s, color 0.15s; }
             .news-number .num-text { transition: opacity 0.15s; }
             .news-number .copy-icon { position: absolute; opacity: 0; transition: opacity 0.15s; }
             .news-item:hover .news-number .num-text { opacity: 0; }
@@ -409,7 +316,6 @@ def render_html_content(
 
             .news-content { flex: 1; min-width: 0; padding-right: 40px; }
             .news-item.new .news-content { padding-right: 50px; }
-
             .news-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
             .source-name { color: #666; font-size: 12px; font-weight: 500; }
             .keyword-tag { color: #2563eb; font-size: 12px; font-weight: 500; background: #eff6ff; padding: 2px 6px; border-radius: 4px; }
@@ -563,11 +469,13 @@ def render_html_content(
                 .save-buttons { position: static; margin-bottom: 16px; display: flex; gap: 8px; justify-content: center; width: 100%; }
                 .save-btn-group { flex: 1; }
                 .save-btn { width: 100%; border-radius: 6px 0 0 6px; }
-                .wt-temp { font-size: 40px; }
-                .wt-lottie-wrap { width: 56px; height: 56px; }
-                .wt-lottie-wrap > div { width: 56px !important; height: 56px !important; }
+                .wt-temp { font-size: 44px; }
+                .wt-icon-wrap { width: 64px; height: 64px; }
+                .wt-icon { width: 64px; height: 64px; }
                 .wt-right { display: none; }
                 .wt-center { border-right: none; }
+                .hourly-item { min-width: 52px; padding: 6px 4px; }
+                .hourly-icon { width: 24px; height: 24px; }
                 .uniform-week { display: none; }
             }
         </style>
@@ -611,6 +519,7 @@ def render_html_content(
 
                 <!-- 天气面板 -->
                 <div class="weather-panel" id="weatherPanel">
+                    
                     <!-- 今日主卡 -->
                     <div class="weather-today loading" id="wtToday">
                         <div class="skeleton" style="width:62px;height:62px;border-radius:50%;margin-right:16px;flex-shrink:0;"></div>
@@ -633,7 +542,7 @@ def render_html_content(
                             <div class="tmr-date" id="tmrDate"></div>
                         </div>
                         <div class="tmr-body">
-                            <div class="tmr-lottie" id="tmrLottie"></div>
+                            <img class="tmr-icon" id="tmrIcon" src="" alt="">
                             <div class="tmr-info">
                                 <div class="tmr-desc" id="tmrDesc">—</div>
                                 <div class="tmr-range" id="tmrRange">—</div>
@@ -679,6 +588,7 @@ def render_html_content(
                         </div>
                         <div class="wt-update" id="wtUpdate">—</div>
                     </div>
+
                 </div>
             </div>
 
@@ -705,7 +615,6 @@ def render_html_content(
     if report_data["stats"]:
         total_count = len(report_data["stats"])
 
-        # 生成 Tab 栏 HTML
         tab_bar_html = '<div class="tab-bar">'
         for tab_i, tab_stat in enumerate(report_data["stats"]):
             escaped_tab_word = html_escape(tab_stat["word"])
@@ -716,8 +625,6 @@ def render_html_content(
 
         for i, stat in enumerate(report_data["stats"], 1):
             count = stat["count"]
-
-            # 确定热度等级
             if count >= 10:
                 count_class = "hot"
             elif count >= 5:
@@ -737,7 +644,6 @@ def render_html_content(
                         <div class="word-index"><span class="collapse-icon">▼</span>{i}/{total_count}</div>
                     </div>"""
 
-            # 处理每个词组下的新闻标题，给每条新闻标上序号
             for j, title_data in enumerate(stat["titles"], 1):
                 is_new = title_data.get("is_new", False)
                 new_class = "new" if is_new else ""
@@ -748,52 +654,35 @@ def render_html_content(
                         <div class="news-content">
                             <div class="news-header">"""
 
-                # 根据 display_mode 决定显示来源还是关键词
                 if display_mode == "keyword":
-                    # keyword 模式：显示来源
                     stats_html += f'<span class="source-name">{html_escape(title_data["source_name"])}</span>'
                 else:
-                    # platform 模式：显示关键词
                     matched_keyword = title_data.get("matched_keyword", "")
                     if matched_keyword:
                         stats_html += f'<span class="keyword-tag">[{html_escape(matched_keyword)}]</span>'
 
-                # 处理排名显示
                 ranks = title_data.get("ranks", [])
                 if ranks:
                     min_rank = min(ranks)
                     max_rank = max(ranks)
                     rank_threshold = title_data.get("rank_threshold", 10)
-
-                    # 确定排名等级
                     if min_rank <= 3:
                         rank_class = "top"
                     elif min_rank <= rank_threshold:
                         rank_class = "high"
                     else:
                         rank_class = ""
-
                     if min_rank == max_rank:
                         rank_text = str(min_rank)
                     else:
                         rank_text = f"{min_rank}-{max_rank}"
-
                     stats_html += f'<span class="rank-num {rank_class}">{rank_text}</span>'
 
-                # 处理时间显示
                 time_display = title_data.get("time_display", "")
                 if time_display:
-                    # 简化时间显示格式，将波浪线替换为~
-                    simplified_time = (
-                        time_display.replace(" ~ ", "~")
-                        .replace("[", "")
-                        .replace("]", "")
-                    )
-                    stats_html += (
-                        f'<span class="time-info">{html_escape(simplified_time)}</span>'
-                    )
+                    simplified_time = time_display.replace(" ~ ", "~").replace("[", "").replace("]", "")
+                    stats_html += f'<span class="time-info">{html_escape(simplified_time)}</span>'
 
-                # 处理出现次数
                 count_info = title_data.get("count", 1)
                 if count_info > 1:
                     stats_html += f'<span class="count-info">{count_info}次</span>'
@@ -802,7 +691,6 @@ def render_html_content(
                             </div>
                             <div class="news-title">"""
 
-                # 处理标题和链接
                 escaped_title = html_escape(title_data["title"])
                 link_url = title_data.get("mobile_url") or title_data.get("url", "")
 
@@ -820,13 +708,11 @@ def render_html_content(
             stats_html += """
                 </div>"""
 
-    # 给热榜统计添加外层包装
     if stats_html:
         stats_html = f"""
                 <div class="hotlist-section">{tab_bar_html}{stats_html}
                 </div>"""
 
-    # 生成新增新闻区域的HTML
     new_titles_html = ""
     if show_new_section and report_data["new_titles"]:
         new_titles_html += f"""
@@ -842,11 +728,8 @@ def render_html_content(
                     <div class="new-source-group">
                         <div class="new-source-title">{escaped_source} · {titles_count}条</div>"""
 
-            # 为新增新闻也添加序号
             for idx, title_data in enumerate(source_data["titles"], 1):
                 ranks = title_data.get("ranks", [])
-
-                # 处理新增新闻的排名显示
                 rank_class = ""
                 if ranks:
                     min_rank = min(ranks)
@@ -854,7 +737,6 @@ def render_html_content(
                         rank_class = "top"
                     elif min_rank <= title_data.get("rank_threshold", 10):
                         rank_class = "high"
-
                     if len(ranks) == 1:
                         rank_text = str(ranks[0])
                     else:
@@ -869,7 +751,6 @@ def render_html_content(
                             <div class="new-item-content">
                                 <div class="new-item-title">"""
 
-                # 处理新增新闻的链接
                 escaped_title = html_escape(title_data["title"])
                 link_url = title_data.get("mobile_url") or title_data.get("url", "")
 
@@ -883,21 +764,16 @@ def render_html_content(
                                 </div>
                             </div>
                         </div>"""
-
             new_titles_html += """
                     </div>"""
-
         new_titles_html += """
                     </div>
                 </div>"""
 
-    # 生成 RSS 统计内容
     def render_rss_stats_html(stats: List[Dict], title: str = "RSS 订阅更新") -> str:
-        if not stats:
-            return ""
+        if not stats: return ""
         total_count = sum(stat.get("count", 0) for stat in stats)
-        if total_count == 0:
-            return ""
+        if total_count == 0: return ""
 
         rss_html = f"""
                 <div class="rss-section">
@@ -910,8 +786,7 @@ def render_html_content(
         for stat in stats:
             keyword = stat.get("word", "")
             titles = stat.get("titles", [])
-            if not titles:
-                continue
+            if not titles: continue
             keyword_count = len(titles)
             rss_html += f"""
                     <div class="feed-group">
@@ -931,12 +806,9 @@ def render_html_content(
                         <div class="rss-item">
                             <div class="rss-meta">"""
 
-                if time_display:
-                    rss_html += f'<span class="rss-time">{html_escape(time_display)}</span>'
-                if source_name:
-                    rss_html += f'<span class="rss-author">{html_escape(source_name)}</span>'
-                if is_new:
-                    rss_html += '<span class="rss-author" style="color: #dc2626;">NEW</span>'
+                if time_display: rss_html += f'<span class="rss-time">{html_escape(time_display)}</span>'
+                if source_name: rss_html += f'<span class="rss-author">{html_escape(source_name)}</span>'
+                if is_new: rss_html += '<span class="rss-author" style="color: #dc2626;">NEW</span>'
 
                 rss_html += """
                             </div>
@@ -959,30 +831,24 @@ def render_html_content(
                 </div>"""
         return rss_html
 
-    # 生成独立展示区内容
     def render_standalone_html(data: Optional[Dict]) -> str:
-        if not data:
-            return ""
+        if not data: return ""
         platforms = data.get("platforms", [])
         rss_feeds = data.get("rss_feeds", [])
-        if not platforms and not rss_feeds:
-            return ""
+        if not platforms and not rss_feeds: return ""
 
         total_platform_items = sum(len(p.get("items", [])) for p in platforms)
         total_rss_items = sum(len(f.get("items", [])) for f in rss_feeds)
         total_count = total_platform_items + total_rss_items
-        if total_count == 0:
-            return ""
+        if total_count == 0: return ""
 
         all_groups = []
         for p in platforms:
             items = p.get("items", [])
-            if items:
-                all_groups.append({"name": p.get("name", p.get("id", "")), "count": len(items)})
+            if items: all_groups.append({"name": p.get("name", p.get("id", "")), "count": len(items)})
         for f in rss_feeds:
             items = f.get("items", [])
-            if items:
-                all_groups.append({"name": f.get("name", f.get("id", "")), "count": len(items)})
+            if items: all_groups.append({"name": f.get("name", f.get("id", "")), "count": len(items)})
 
         standalone_html = f"""
                 <div class="standalone-section">
@@ -1009,8 +875,7 @@ def render_html_content(
         for platform in platforms:
             platform_name = platform.get("name", platform.get("id", ""))
             items = platform.get("items", [])
-            if not items:
-                continue
+            if not items: continue
 
             standalone_html += f"""
                     <div class="standalone-group" data-standalone-tab="{group_idx}">
@@ -1037,24 +902,16 @@ def render_html_content(
                 if ranks:
                     min_rank = min(ranks)
                     max_rank = max(ranks)
-                    if min_rank <= 3:
-                        rank_class = "top"
-                    elif min_rank <= 10:
-                        rank_class = "high"
-                    else:
-                        rank_class = ""
-                    if min_rank == max_rank:
-                        rank_text = str(min_rank)
-                    else:
-                        rank_text = f"{min_rank}-{max_rank}"
+                    if min_rank <= 3: rank_class = "top"
+                    elif min_rank <= 10: rank_class = "high"
+                    else: rank_class = ""
+                    if min_rank == max_rank: rank_text = str(min_rank)
+                    else: rank_text = f"{min_rank}-{max_rank}"
                     standalone_html += f'<span class="rank-num {rank_class}">{rank_text}</span>'
                 elif rank > 0:
-                    if rank <= 3:
-                        rank_class = "top"
-                    elif rank <= 10:
-                        rank_class = "high"
-                    else:
-                        rank_class = ""
+                    if rank <= 3: rank_class = "top"
+                    elif rank <= 10: rank_class = "high"
+                    else: rank_class = ""
                     standalone_html += f'<span class="rank-num {rank_class}">{rank}</span>'
 
                 if first_time and last_time and first_time != last_time:
@@ -1083,7 +940,6 @@ def render_html_content(
                                 </div>
                             </div>
                         </div>"""
-
             standalone_html += """
                     </div>"""
             group_idx += 1
@@ -1091,8 +947,7 @@ def render_html_content(
         for feed in rss_feeds:
             feed_name = feed.get("name", feed.get("id", ""))
             items = feed.get("items", [])
-            if not items:
-                continue
+            if not items: continue
 
             standalone_html += f"""
                     <div class="standalone-group" data-standalone-tab="{group_idx}">
@@ -1143,7 +998,6 @@ def render_html_content(
                                 </div>
                             </div>
                         </div>"""
-
             standalone_html += """
                     </div>"""
             group_idx += 1
@@ -1167,8 +1021,7 @@ def render_html_content(
     }
 
     def add_section_divider(content: str) -> str:
-        if not content or 'class="' not in content:
-            return content
+        if not content or 'class="' not in content: return content
         first_class_pos = content.find('class="')
         if first_class_pos != -1:
             insert_pos = first_class_pos + len('class="')
@@ -1181,18 +1034,15 @@ def render_html_content(
         if region == "new_items":
             new_html, rss_new = content
             if new_html:
-                if has_previous_content:
-                    new_html = add_section_divider(new_html)
+                if has_previous_content: new_html = add_section_divider(new_html)
                 html += new_html
                 has_previous_content = True
             if rss_new:
-                if has_previous_content:
-                    rss_new = add_section_divider(rss_new)
+                if has_previous_content: rss_new = add_section_divider(rss_new)
                 html += rss_new
                 has_previous_content = True
         elif content:
-            if has_previous_content:
-                content = add_section_divider(content)
+            if has_previous_content: content = add_section_divider(content)
             html += content
             has_previous_content = True
 
@@ -1374,7 +1224,6 @@ def render_html_content(
                 }
             }
 
-            // 独立展示区 Tab 切换
             function initStandaloneTabs() {
                 var tabBar = document.querySelector('.standalone-tab-bar');
                 if (!tabBar) return;
@@ -1418,29 +1267,19 @@ def render_html_content(
             }
 
             function prepareForScreenshot() {
-                var state = {
-                    wasWide: document.body.classList.contains('wide-mode'),
-                    hiddenGroups: []
-                };
+                var state = { wasWide: document.body.classList.contains('wide-mode'), hiddenGroups: [] };
                 document.body.classList.remove('wide-mode');
                 state.wasDark = document.body.classList.contains('dark-mode');
                 document.body.classList.remove('dark-mode');
                 document.querySelectorAll('.word-group[data-tab-index]').forEach(function(g, i) {
-                    if (g.style.display === 'none') {
-                        state.hiddenGroups.push(i);
-                        g.style.display = '';
-                    }
+                    if (g.style.display === 'none') { state.hiddenGroups.push(i); g.style.display = ''; }
                 });
                 state.hiddenStandaloneGroups = [];
                 document.querySelectorAll('.standalone-group[data-standalone-tab]').forEach(function(g, i) {
-                    if (g.style.display === 'none') {
-                        state.hiddenStandaloneGroups.push(i);
-                        g.style.display = '';
-                    }
+                    if (g.style.display === 'none') { state.hiddenStandaloneGroups.push(i); g.style.display = ''; }
                 });
                 document.querySelectorAll('.tab-bar, .standalone-tab-bar, .search-bar, .fab-bar, .toggle-wide-btn').forEach(function(el) {
-                    el.dataset.prevDisplay = el.style.display || '';
-                    el.style.display = 'none';
+                    el.dataset.prevDisplay = el.style.display || ''; el.style.display = 'none';
                 });
                 document.querySelectorAll('.toggle-dark-btn').forEach(function(el) {
                     el.dataset.prevDisplay = el.style.display || ''; el.style.display = 'none';
@@ -1454,39 +1293,28 @@ def render_html_content(
                 if (state.wasWide) document.body.classList.add('wide-mode');
                 if (state.wasDark) document.body.classList.add('dark-mode');
                 var groups = document.querySelectorAll('.word-group[data-tab-index]');
-                state.hiddenGroups.forEach(function(i) {
-                    if (groups[i]) groups[i].style.display = 'none';
-                });
+                state.hiddenGroups.forEach(function(i) { if (groups[i]) groups[i].style.display = 'none'; });
                 var standaloneGroups = document.querySelectorAll('.standalone-group[data-standalone-tab]');
                 if (state.hiddenStandaloneGroups) {
-                    state.hiddenStandaloneGroups.forEach(function(i) {
-                        if (standaloneGroups[i]) standaloneGroups[i].style.display = 'none';
-                    });
+                    state.hiddenStandaloneGroups.forEach(function(i) { if (standaloneGroups[i]) standaloneGroups[i].style.display = 'none'; });
                 }
                 document.querySelectorAll('.tab-bar, .standalone-tab-bar, .search-bar, .fab-bar, .toggle-wide-btn').forEach(function(el) {
-                    el.style.display = el.dataset.prevDisplay || '';
-                    delete el.dataset.prevDisplay;
+                    el.style.display = el.dataset.prevDisplay || ''; delete el.dataset.prevDisplay;
                 });
                 document.querySelectorAll('.toggle-dark-btn').forEach(function(el) {
                     el.style.display = el.dataset.prevDisplay || ''; delete el.dataset.prevDisplay;
                 });
                 document.querySelectorAll('.reading-progress').forEach(function(el) { el.style.display = ''; });
                 document.querySelectorAll('.header-watermark').forEach(function(el) { el.style.display = ''; });
-                initTabVisibility();
-                initCollapseVisibility();
-                initStandaloneTabVisibility();
+                initTabVisibility(); initCollapseVisibility(); initStandaloneTabVisibility();
                 var fabBar = document.querySelector('.fab-bar');
                 if (fabBar && window.scrollY > 300) fabBar.classList.add('visible');
             }
 
             async function saveAsImage() {
-                const button = event.target;
-                const originalText = button.textContent;
-
+                const button = event.target; const originalText = button.textContent;
                 try {
-                    button.textContent = '生成中...';
-                    button.disabled = true;
-                    window.scrollTo(0, 0);
+                    button.textContent = '生成中...'; button.disabled = true; window.scrollTo(0, 0);
                     await new Promise(resolve => setTimeout(resolve, 200));
 
                     var screenshotState = prepareForScreenshot();
@@ -1496,65 +1324,36 @@ def render_html_content(
 
                     const container = document.querySelector('.container');
                     const canvas = await html2canvas(container, {
-                        backgroundColor: '#ffffff',
-                        scale: 1.5,
-                        useCORS: true,
-                        allowTaint: false,
-                        imageTimeout: 10000,
-                        removeContainer: false,
-                        foreignObjectRendering: false,
-                        logging: false,
-                        width: container.offsetWidth,
-                        height: container.offsetHeight,
-                        x: 0, y: 0, scrollX: 0, scrollY: 0,
-                        windowWidth: window.innerWidth,
-                        windowHeight: window.innerHeight
+                        backgroundColor: '#ffffff', scale: 1.5, useCORS: true, allowTaint: false,
+                        imageTimeout: 10000, removeContainer: false, foreignObjectRendering: false, logging: false,
+                        width: container.offsetWidth, height: container.offsetHeight,
+                        x: 0, y: 0, scrollX: 0, scrollY: 0, windowWidth: window.innerWidth, windowHeight: window.innerHeight
                     });
 
-                    buttons.style.visibility = 'visible';
-                    restoreAfterScreenshot(screenshotState);
+                    buttons.style.visibility = 'visible'; restoreAfterScreenshot(screenshotState);
 
-                    const link = document.createElement('a');
-                    const now = new Date();
+                    const link = document.createElement('a'); const now = new Date();
                     const filename = `TrendRadar_雷达简报_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}$${String(now.getDate()).padStart(2, '0')}_$${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.png`;
 
-                    link.download = filename;
-                    link.href = canvas.toDataURL('image/png', 1.0);
-
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    link.download = filename; link.href = canvas.toDataURL('image/png', 1.0);
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
 
                     button.textContent = '保存成功!';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
-
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
                 } catch (error) {
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'visible';
-                    restoreAfterScreenshot(screenshotState);
-                    button.textContent = '保存失败';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
+                    const buttons = document.querySelector('.save-buttons'); buttons.style.visibility = 'visible';
+                    restoreAfterScreenshot(screenshotState); button.textContent = '保存失败';
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
                 }
             }
 
             async function saveAsMultipleImages() {
-                const button = event.target;
-                const originalText = button.textContent;
-                const container = document.querySelector('.container');
-                const scale = 1.5;
-                const maxHeight = 5000 / scale;
+                const button = event.target; const originalText = button.textContent;
+                const container = document.querySelector('.container'); const scale = 1.5; const maxHeight = 5000 / scale;
                 var screenshotState2 = prepareForScreenshot();
 
                 try {
-                    button.textContent = '分析中...';
-                    button.disabled = true;
-
+                    button.textContent = '分析中...'; button.disabled = true;
                     const newsItems = Array.from(container.querySelectorAll('.news-item'));
                     const wordGroups = Array.from(container.querySelectorAll('.word-group'));
                     const newSection = container.querySelector('.new-section');
@@ -1562,245 +1361,134 @@ def render_html_content(
                     const header = container.querySelector('.header');
                     const footer = container.querySelector('.footer');
 
-                    const containerRect = container.getBoundingClientRect();
-                    const elements = [];
-
-                    elements.push({
-                        type: 'header',
-                        element: header,
-                        top: 0,
-                        bottom: header.offsetHeight,
-                        height: header.offsetHeight
-                    });
+                    const containerRect = container.getBoundingClientRect(); const elements = [];
+                    elements.push({ type: 'header', element: header, top: 0, bottom: header.offsetHeight, height: header.offsetHeight });
 
                     if (errorSection) {
                         const rect = errorSection.getBoundingClientRect();
-                        elements.push({
-                            type: 'error',
-                            element: errorSection,
-                            top: rect.top - containerRect.top,
-                            bottom: rect.bottom - containerRect.top,
-                            height: rect.height
-                        });
+                        elements.push({ type: 'error', element: errorSection, top: rect.top - containerRect.top, bottom: rect.bottom - containerRect.top, height: rect.height });
                     }
 
                     wordGroups.forEach(group => {
                         const groupRect = group.getBoundingClientRect();
                         const groupNewsItems = group.querySelectorAll('.news-item');
-
                         const wordHeader = group.querySelector('.word-header');
                         if (wordHeader) {
                             const headerRect = wordHeader.getBoundingClientRect();
-                            elements.push({
-                                type: 'word-header',
-                                element: wordHeader,
-                                parent: group,
-                                top: groupRect.top - containerRect.top,
-                                bottom: headerRect.bottom - containerRect.top,
-                                height: headerRect.height
-                            });
+                            elements.push({ type: 'word-header', element: wordHeader, parent: group, top: groupRect.top - containerRect.top, bottom: headerRect.bottom - containerRect.top, height: headerRect.height });
                         }
-
                         groupNewsItems.forEach(item => {
                             const rect = item.getBoundingClientRect();
-                            elements.push({
-                                type: 'news-item',
-                                element: item,
-                                parent: group,
-                                top: rect.top - containerRect.top,
-                                bottom: rect.bottom - containerRect.top,
-                                height: rect.height
-                            });
+                            elements.push({ type: 'news-item', element: item, parent: group, top: rect.top - containerRect.top, bottom: rect.bottom - containerRect.top, height: rect.height });
                         });
                     });
 
                     if (newSection) {
                         const rect = newSection.getBoundingClientRect();
-                        elements.push({
-                            type: 'new-section',
-                            element: newSection,
-                            top: rect.top - containerRect.top,
-                            bottom: rect.bottom - containerRect.top,
-                            height: rect.height
-                        });
+                        elements.push({ type: 'new-section', element: newSection, top: rect.top - containerRect.top, bottom: rect.bottom - containerRect.top, height: rect.height });
                     }
 
                     const footerRect = footer.getBoundingClientRect();
-                    elements.push({
-                        type: 'footer',
-                        element: footer,
-                        top: footerRect.top - containerRect.top,
-                        bottom: footerRect.bottom - containerRect.top,
-                        height: footer.offsetHeight
-                    });
+                    elements.push({ type: 'footer', element: footer, top: footerRect.top - containerRect.top, bottom: footerRect.bottom - containerRect.top, height: footer.offsetHeight });
 
-                    const segments = [];
-                    let currentSegment = { start: 0, end: 0, height: 0, includeHeader: true };
-                    let headerHeight = header.offsetHeight;
-                    currentSegment.height = headerHeight;
+                    const segments = []; let currentSegment = { start: 0, end: 0, height: 0, includeHeader: true };
+                    let headerHeight = header.offsetHeight; currentSegment.height = headerHeight;
 
                     for (let i = 1; i < elements.length; i++) {
-                        const element = elements[i];
-                        const potentialHeight = element.bottom - currentSegment.start;
-
+                        const element = elements[i]; const potentialHeight = element.bottom - currentSegment.start;
                         if (potentialHeight > maxHeight && currentSegment.height > headerHeight) {
-                            currentSegment.end = elements[i - 1].bottom;
-                            segments.push(currentSegment);
-                            currentSegment = {
-                                start: currentSegment.end,
-                                end: 0,
-                                height: element.bottom - currentSegment.end,
-                                includeHeader: false
-                            };
+                            currentSegment.end = elements[i - 1].bottom; segments.push(currentSegment);
+                            currentSegment = { start: currentSegment.end, end: 0, height: element.bottom - currentSegment.end, includeHeader: false };
                         } else {
-                            currentSegment.height = potentialHeight;
-                            currentSegment.end = element.bottom;
+                            currentSegment.height = potentialHeight; currentSegment.end = element.bottom;
                         }
                     }
-
-                    if (currentSegment.height > 0) {
-                        currentSegment.end = container.offsetHeight;
-                        segments.push(currentSegment);
-                    }
+                    if (currentSegment.height > 0) { currentSegment.end = container.offsetHeight; segments.push(currentSegment); }
 
                     button.textContent = `生成中 (0/${segments.length})...`;
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'hidden';
+                    const buttons = document.querySelector('.save-buttons'); buttons.style.visibility = 'hidden';
 
                     const images = [];
                     for (let i = 0; i < segments.length; i++) {
-                        const segment = segments[i];
-                        button.textContent = `生成中 ($${i + 1}/$${segments.length})...`;
-
+                        const segment = segments[i]; button.textContent = `生成中 ($${i + 1}/$${segments.length})...`;
                         const tempContainer = document.createElement('div');
-                        tempContainer.style.cssText = `
-                            position: absolute; left: -9999px; top: 0;
-                            width: ${container.offsetWidth}px; background: white;
-                        `;
+                        tempContainer.style.cssText = `position: absolute; left: -9999px; top: 0; width: ${container.offsetWidth}px; background: white;`;
                         tempContainer.className = 'container';
 
                         const clonedContainer = container.cloneNode(true);
                         const clonedButtons = clonedContainer.querySelector('.save-buttons');
                         if (clonedButtons) { clonedButtons.style.display = 'none'; }
 
-                        tempContainer.appendChild(clonedContainer);
-                        document.body.appendChild(tempContainer);
-
+                        tempContainer.appendChild(clonedContainer); document.body.appendChild(tempContainer);
                         await new Promise(resolve => setTimeout(resolve, 100));
 
                         const canvas = await html2canvas(clonedContainer, {
-                            backgroundColor: '#ffffff',
-                            scale: scale,
-                            useCORS: true,
-                            allowTaint: false,
-                            imageTimeout: 10000,
-                            logging: false,
-                            width: container.offsetWidth,
-                            height: segment.end - segment.start,
-                            x: 0, y: segment.start,
-                            windowWidth: window.innerWidth,
-                            windowHeight: window.innerHeight
+                            backgroundColor: '#ffffff', scale: scale, useCORS: true, allowTaint: false,
+                            imageTimeout: 10000, logging: false, width: container.offsetWidth, height: segment.end - segment.start,
+                            x: 0, y: segment.start, windowWidth: window.innerWidth, windowHeight: window.innerHeight
                         });
 
-                        images.push(canvas.toDataURL('image/png', 1.0));
-                        document.body.removeChild(tempContainer);
+                        images.push(canvas.toDataURL('image/png', 1.0)); document.body.removeChild(tempContainer);
                     }
 
                     buttons.style.visibility = 'visible';
-
                     const now = new Date();
                     const baseFilename = `TrendRadar_雷达简报_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}$${String(now.getDate()).padStart(2, '0')}_$${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
                     for (let i = 0; i < images.length; i++) {
-                        const link = document.createElement('a');
-                        link.download = `$${baseFilename}_part$${i + 1}.png`;
-                        link.href = images[i];
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        const link = document.createElement('a'); link.download = `$${baseFilename}_part$${i + 1}.png`;
+                        link.href = images[i]; document.body.appendChild(link); link.click(); document.body.removeChild(link);
                         await new Promise(resolve => setTimeout(resolve, 100));
                     }
 
                     button.textContent = `已保存 ${segments.length} 张图片!`;
                     restoreAfterScreenshot(screenshotState2);
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
 
                 } catch (error) {
-                    const buttons = document.querySelector('.save-buttons');
-                    buttons.style.visibility = 'visible';
-                    restoreAfterScreenshot(screenshotState2);
-                    button.textContent = '保存失败';
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }, 2000);
+                    const buttons = document.querySelector('.save-buttons'); buttons.style.visibility = 'visible';
+                    restoreAfterScreenshot(screenshotState2); button.textContent = '保存失败';
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
                 }
             }
 
             function saveAsMarkdown() {
-                var lines = [];
-                var now = new Date();
+                var lines = []; var now = new Date();
                 var dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
                 var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
                 var headerTitle = document.querySelector('.header-title');
-                lines.push('# ' + (headerTitle ? headerTitle.textContent.trim() : '雷达简报'));
-                lines.push('');
+                lines.push('# ' + (headerTitle ? headerTitle.textContent.trim() : '雷达简报')); lines.push('');
 
                 function extractItem(item, idx) {
                     var titleEl = item.querySelector('.news-title a');
-                    var titleText = '';
-                    var url = '';
-                    if (titleEl) {
-                        titleText = titleEl.textContent.trim();
-                        url = titleEl.href || '';
-                    } else {
-                        var titleDiv = item.querySelector('.news-title') || item.querySelector('.new-item-title');
-                        if (titleDiv) titleText = titleDiv.textContent.trim();
-                    }
+                    var titleText = ''; var url = '';
+                    if (titleEl) { titleText = titleEl.textContent.trim(); url = titleEl.href || ''; }
+                    else { var titleDiv = item.querySelector('.news-title') || item.querySelector('.new-item-title'); if (titleDiv) titleText = titleDiv.textContent.trim(); }
                     if (!titleText) return '';
 
                     var meta = [];
                     var rank = item.querySelector('.rank-num, .new-item-rank');
                     if (rank && rank.textContent.trim() && rank.textContent.trim() !== '?') meta.push('#' + rank.textContent.trim());
-                    var source = item.querySelector('.source-name');
-                    if (source) meta.push(source.textContent.trim());
-                    var keyword = item.querySelector('.keyword-tag');
-                    if (keyword) meta.push(keyword.textContent.trim());
-                    var time = item.querySelector('.time-info');
-                    if (time) meta.push(time.textContent.trim());
-                    var count = item.querySelector('.count-info');
-                    if (count) meta.push(count.textContent.trim());
+                    var source = item.querySelector('.source-name'); if (source) meta.push(source.textContent.trim());
+                    var keyword = item.querySelector('.keyword-tag'); if (keyword) meta.push(keyword.textContent.trim());
+                    var time = item.querySelector('.time-info'); if (time) meta.push(time.textContent.trim());
+                    var count = item.querySelector('.count-info'); if (count) meta.push(count.textContent.trim());
 
                     var line = idx + '. ';
-                    if (url) {
-                        line += '[' + titleText.replace(/[[\]]/g, '') + '](' + url + ')';
-                    } else {
-                        line += titleText;
-                    }
+                    if (url) { line += '[' + titleText.replace(/[[\]]/g, '') + '](' + url + ')'; } else { line += titleText; }
                     if (meta.length) line += '  `' + meta.join(' | ') + '`';
                     return line;
                 }
 
                 var wordGroups = document.querySelectorAll('.hotlist-section > .word-group');
                 if (wordGroups.length) {
-                    lines.push('## 热点新闻');
-                    lines.push('');
+                    lines.push('## 热点新闻'); lines.push('');
                     wordGroups.forEach(function(group) {
-                        var wordName = group.querySelector('.word-name');
-                        var wordCount = group.querySelector('.word-count');
-                        if (wordName) {
-                            lines.push('### ' + wordName.textContent.trim() + (wordCount ? ' (' + wordCount.textContent.trim() + ')' : ''));
-                            lines.push('');
-                        }
+                        var wordName = group.querySelector('.word-name'); var wordCount = group.querySelector('.word-count');
+                        if (wordName) { lines.push('### ' + wordName.textContent.trim() + (wordCount ? ' (' + wordCount.textContent.trim() + ')' : '')); lines.push(''); }
                         var items = group.querySelectorAll('.news-item');
-                        items.forEach(function(item, i) {
-                            var line = extractItem(item, i + 1);
-                            if (line) lines.push(line);
-                        });
+                        items.forEach(function(item, i) { var line = extractItem(item, i + 1); if (line) lines.push(line); });
                         lines.push('');
                     });
                 }
@@ -1808,20 +1496,13 @@ def render_html_content(
                 var newSection = document.querySelector('.new-section');
                 if (newSection) {
                     var newTitle = newSection.querySelector('.new-section-title');
-                    lines.push('## ' + (newTitle ? newTitle.textContent.trim() : '本次新增热点'));
-                    lines.push('');
+                    lines.push('## ' + (newTitle ? newTitle.textContent.trim() : '本次新增热点')); lines.push('');
                     var sourceGroups = newSection.querySelectorAll('.new-source-group');
                     sourceGroups.forEach(function(sg) {
                         var srcTitle = sg.querySelector('.new-source-title');
-                        if (srcTitle) {
-                            lines.push('### ' + srcTitle.textContent.trim());
-                            lines.push('');
-                        }
+                        if (srcTitle) { lines.push('### ' + srcTitle.textContent.trim()); lines.push(''); }
                         var items = sg.querySelectorAll('.new-item');
-                        items.forEach(function(item, i) {
-                            var line = extractItem(item, i + 1);
-                            if (line) lines.push(line);
-                        });
+                        items.forEach(function(item, i) { var line = extractItem(item, i + 1); if (line) lines.push(line); });
                         lines.push('');
                     });
                 }
@@ -1829,21 +1510,13 @@ def render_html_content(
                 var standaloneSection = document.querySelector('.standalone-section');
                 if (standaloneSection) {
                     var standaloneTitle = standaloneSection.querySelector('.standalone-section-title');
-                    lines.push('## ' + (standaloneTitle ? standaloneTitle.textContent.trim() : '独立展示区'));
-                    lines.push('');
+                    lines.push('## ' + (standaloneTitle ? standaloneTitle.textContent.trim() : '独立展示区')); lines.push('');
                     var groups = standaloneSection.querySelectorAll('.standalone-group');
                     groups.forEach(function(group) {
-                        var name = group.querySelector('.standalone-name');
-                        var cnt = group.querySelector('.standalone-count');
-                        if (name) {
-                            lines.push('### ' + name.textContent.trim() + (cnt ? ' (' + cnt.textContent.trim() + ')' : ''));
-                            lines.push('');
-                        }
+                        var name = group.querySelector('.standalone-name'); var cnt = group.querySelector('.standalone-count');
+                        if (name) { lines.push('### ' + name.textContent.trim() + (cnt ? ' (' + cnt.textContent.trim() + ')' : '')); lines.push(''); }
                         var items = group.querySelectorAll('.news-item');
-                        items.forEach(function(item, i) {
-                            var line = extractItem(item, i + 1);
-                            if (line) lines.push(line);
-                        });
+                        items.forEach(function(item, i) { var line = extractItem(item, i + 1); if (line) lines.push(line); });
                         lines.push('');
                     });
                 }
@@ -1852,28 +1525,19 @@ def render_html_content(
                 if (errorSection) {
                     var errorItems = errorSection.querySelectorAll('.error-item');
                     if (errorItems.length) {
-                        lines.push('## 抓取异常');
-                        lines.push('');
-                        errorItems.forEach(function(item) {
-                            lines.push('- ' + item.textContent.trim());
-                        });
+                        lines.push('## 抓取异常'); lines.push('');
+                        errorItems.forEach(function(item) { lines.push('- ' + item.textContent.trim()); });
                         lines.push('');
                     }
                 }
 
-                lines.push('---');
-                lines.push('*Generated by TrendRadar*');
+                lines.push('---'); lines.push('*Generated by TrendRadar*');
 
                 var md = lines.join('\\n');
                 var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-                var link = document.createElement('a');
-                var filename = 'TrendRadar_' + dateStr + '_' + timeStr.replace(':', '') + '.md';
-                link.download = filename;
-                link.href = URL.createObjectURL(blob);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
+                var link = document.createElement('a'); var filename = 'TrendRadar_' + dateStr + '_' + timeStr.replace(':', '') + '.md';
+                link.download = filename; link.href = URL.createObjectURL(blob);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
             }
 
             document.addEventListener('DOMContentLoaded', function() {
@@ -1898,25 +1562,16 @@ def render_html_content(
                 var searchBar = document.querySelector('.search-bar');
                 if (searchBar) searchBar.style.display = 'block';
 
-                initTabs();
-                initBackToTop();
-                initCollapse();
-                initStandaloneTabs();
+                initTabs(); initBackToTop(); initCollapse(); initStandaloneTabs();
 
                 document.addEventListener('keydown', function(e) {
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                     var helpBtn = document.querySelector('.fab-help');
                     switch(e.key) {
                         case '?':
-                            if (helpBtn) {
-                                helpBtn.classList.toggle('show-tip');
-                                var fabBar = document.querySelector('.fab-bar');
-                                if (fabBar) fabBar.classList.add('visible');
-                            }
+                            if (helpBtn) { helpBtn.classList.toggle('show-tip'); var fabBar = document.querySelector('.fab-bar'); if (fabBar) fabBar.classList.add('visible'); }
                             break;
-                        case 'Escape':
-                            if (helpBtn) helpBtn.classList.remove('show-tip');
-                            break;
+                        case 'Escape': if (helpBtn) helpBtn.classList.remove('show-tip'); break;
                         case 'w': case 'W': toggleWideMode(); break;
                         case 'd': case 'D': toggleDarkMode(); break;
                         case '/': e.preventDefault(); var si = document.querySelector('.search-input'); if (si) si.focus(); break;
@@ -1944,12 +1599,8 @@ def render_html_content(
                         e.stopPropagation();
                         var text = titleEl.textContent.trim() + ' ' + titleEl.href;
                         navigator.clipboard.writeText(text).then(function() {
-                            numEl.classList.add('copied');
-                            numEl.querySelector('.copy-icon').innerHTML = checkSvg;
-                            setTimeout(function() {
-                                numEl.classList.remove('copied');
-                                numEl.querySelector('.copy-icon').innerHTML = copySvg;
-                            }, 1500);
+                            numEl.classList.add('copied'); numEl.querySelector('.copy-icon').innerHTML = checkSvg;
+                            setTimeout(function() { numEl.classList.remove('copied'); numEl.querySelector('.copy-icon').innerHTML = copySvg; }, 1500);
                         });
                     });
                 });
@@ -1962,11 +1613,9 @@ def render_html_content(
                     var radius = 120;
                     header.addEventListener('mousemove', function(e) {
                         var rect = watermark.getBoundingClientRect();
-                        var x = e.clientX - rect.left;
-                        var y = e.clientY - rect.top;
+                        var x = e.clientX - rect.left; var y = e.clientY - rect.top;
                         var maskVal = 'radial-gradient(circle ' + radius + 'px at ' + x + 'px ' + y + 'px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.12) 55%, transparent 100%)';
-                        watermark.style.webkitMaskImage = maskVal;
-                        watermark.style.maskImage = maskVal;
+                        watermark.style.webkitMaskImage = maskVal; watermark.style.maskImage = maskVal;
                         watermark.style.color = 'rgba(255, 255, 255, 0.18)';
                     });
 
@@ -1976,7 +1625,6 @@ def render_html_content(
                         watermark.style.color = 'rgba(255, 255, 255, 0.055)';
                     });
                 })();
-
             });
 
             // ===== 天气套件初始化逻辑 =====
@@ -1988,55 +1636,40 @@ def render_html_content(
 
                 document.getElementById('tmrDate').textContent = (tmr.getMonth() + 1) + '月' + tmr.getDate() + '日 · ' + weekNames[tmr.getDay()];
 
-                var CDN = 'https://cdn.jsdelivr.net/npm/@basmilius/weather-icons@2.0.1/production/line/lottie/';
+                // 使用 Meteocons 原生 Animated SVGs 代替 Lottie JS，100% 兼容性
+                var CDN = 'https://cdn.jsdelivr.net/npm/@basmilius/weather-icons@2.0.1/production/line/all/';
 
-                // WMO → Meteocons line lottie 文件名 (已修复毛毛雨问题)
+                // WMO 映射表 (精确映射到已存在的 SVG)
                 var WMO = {
-                    0:  {d:'clear-day',              n:'clear-night',              t:'晴'},
-                    1:  {d:'mostly-clear-day',       n:'mostly-clear-night',       t:'大部晴'},
-                    2:  {d:'partly-cloudy-day',      n:'partly-cloudy-night',      t:'多云'},
-                    3:  {d:'overcast',               n:'overcast',                 t:'阴'},
-                    45: {d:'fog',                    n:'fog',                      t:'雾'},
-                    48: {d:'fog',                    n:'fog',                      t:'雾凇'},
+                    0:  {d:'clear-day', n:'clear-night', t:'晴'},
+                    1:  {d:'partly-cloudy-day', n:'partly-cloudy-night', t:'大部晴'},
+                    2:  {d:'partly-cloudy-day', n:'partly-cloudy-night', t:'多云'},
+                    3:  {d:'overcast-day', n:'overcast-night', t:'阴'},
+                    45: {d:'fog-day', n:'fog-night', t:'雾'},
+                    48: {d:'fog-day', n:'fog-night', t:'雾凇'},
                     51: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'毛毛雨'},
                     53: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'毛毛雨'},
                     55: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'大毛毛雨'},
                     61: {d:'partly-cloudy-day-rain', n:'partly-cloudy-night-rain', t:'小雨'},
-                    63: {d:'rain',                   n:'rain',                     t:'中雨'},
-                    65: {d:'extreme-rain',           n:'extreme-rain',             t:'大雨'},
+                    63: {d:'rain', n:'rain', t:'中雨'},
+                    65: {d:'extreme-rain', n:'extreme-rain', t:'大雨'},
                     71: {d:'partly-cloudy-day-snow', n:'partly-cloudy-night-snow', t:'小雪'},
-                    73: {d:'snow',                   n:'snow',                     t:'中雪'},
-                    75: {d:'extreme-snow',           n:'extreme-snow',             t:'大雪'},
-                    77: {d:'sleet',                  n:'sleet',                    t:'冰粒'},
+                    73: {d:'snow', n:'snow', t:'中雪'},
+                    75: {d:'extreme-snow', n:'extreme-snow', t:'大雪'},
+                    77: {d:'sleet', n:'sleet', t:'冰粒'},
                     80: {d:'partly-cloudy-day-rain', n:'partly-cloudy-night-rain', t:'阵雨'},
-                    81: {d:'rain',                   n:'rain',                     t:'中阵雨'},
-                    82: {d:'extreme-rain',           n:'extreme-rain',             t:'强阵雨'},
-                    85: {d:'snow',                   n:'snow',                     t:'阵雪'},
-                    86: {d:'extreme-snow',           n:'extreme-snow',             t:'强阵雪'},
-                    95: {d:'thunderstorms-day',      n:'thunderstorms-night',      t:'雷暴'},
+                    81: {d:'rain', n:'rain', t:'中阵雨'},
+                    82: {d:'extreme-rain', n:'extreme-rain', t:'强阵雨'},
+                    85: {d:'snow', n:'snow', t:'阵雪'},
+                    86: {d:'extreme-snow', n:'extreme-snow', t:'强阵雪'},
+                    95: {d:'thunderstorms-day', n:'thunderstorms-night', t:'雷暴'},
                     96: {d:'thunderstorms-day-overcast-rain', n:'thunderstorms-night-overcast-rain', t:'雷暴冰雹'},
                     99: {d:'thunderstorms-day-overcast-rain', n:'thunderstorms-night-overcast-rain', t:'强雷暴'},
                 };
 
                 function wmoGet(c) { return WMO[c] || WMO[3]; }
-                function lottieFile(c, isDay) { var e = wmoGet(c); return CDN + (isDay ? e.d : e.n) + '.json'; }
+                function iconUrl(c, isDay) { var e = wmoGet(c); return CDN + (isDay ? e.d : e.n) + '.svg'; }
                 function wmoDesc(c) { return wmoGet(c).t; }
-
-                function loadLottie(container, url) {
-                    if (!container) return;
-                    container.innerHTML = '';
-                    var wrap = document.createElement('div');
-                    container.appendChild(wrap);
-                    try {
-                        lottie.loadAnimation({
-                            container: wrap,
-                            renderer: 'svg',
-                            loop: true,
-                            autoplay: true,
-                            path: url
-                        });
-                    } catch(e) {}
-                }
 
                 var SKY = {
                     0:  {d:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
@@ -2144,8 +1777,12 @@ def render_html_content(
 
                     var el = document.getElementById('wtToday');
                     el.classList.remove('loading');
+                    // 使用原生 img 标签加载 Animated SVG，加入 fallback
+                    var fallbackSrc = CDN + 'partly-cloudy-day.svg';
+                    var imgHtml = '<img class="wt-icon" src="' + iconUrl(code, isDay) + '" alt="' + wmoDesc(code) + '" onerror="if(this.src.indexOf(\'rain.svg\')===-1){this.src=\'' + CDN + 'rain.svg\';}else{this.style.display=\'none\';}">';
+
                     el.innerHTML =
-                        '<div class="wt-lottie-wrap" id="todayLottieWrap"></div>' +
+                        '<div class="wt-icon-wrap">' + imgHtml + '</div>' +
                         '<div class="wt-center">' +
                             '<div class="wt-temp-row"><span class="wt-temp">' + temp + '</span><span class="wt-unit">°C</span></div>' +
                             '<div class="wt-desc">' + wmoDesc(code) + '</div>' +
@@ -2157,9 +1794,6 @@ def render_html_content(
                             '<div class="wt-detail">' + svgWind + '<span>风速</span><span class="wt-detail-val">' + wind + ' km/h</span></div>' +
                             '<div class="wt-detail">' + svgWind + '<span>风况</span><span class="wt-detail-val">' + windLabel(wind) + '</span></div>' +
                         '</div>';
-
-                    // 绑定 Lottie (在今日卡片内部)
-                    loadLottie(document.getElementById('todayLottieWrap'), lottieFile(code, isDay));
 
                     document.getElementById('wtCity').textContent = city;
                     var t = new Date();
@@ -2188,18 +1822,15 @@ def render_html_content(
                         var pop = pops ? pops[j] : 0;
                         var item = document.createElement('div');
                         item.className = 'hourly-item' + (isNow ? ' now' : '');
-                        var lottieId = 'hlottie-' + j;
+                        
+                        var imgHtml = '<img class="hourly-icon" src="' + iconUrl(codes[j], isD) + '" onerror="if(this.src.indexOf(\'rain.svg\')===-1){this.src=\'' + CDN + 'rain.svg\';}else{this.style.opacity=0;}">';
+                        
                         item.innerHTML =
                             '<div class="hourly-time">' + (isNow ? '现在' : pad(dt.getHours()) + ':00') + '</div>' +
-                            '<div class="hourly-lottie" id="' + lottieId + '"></div>' +
+                            imgHtml +
                             '<div class="hourly-temp">' + Math.round(temps[j]) + '°</div>' +
                             (pop > 20 ? '<div class="hourly-pop">' + pop + '%</div>' : '<div class="hourly-pop" style="opacity:0">·</div>');
                         scroll.appendChild(item);
-                        (function(id, code, day) {
-                            setTimeout(function() {
-                                loadLottie(document.getElementById(id), lottieFile(code, day));
-                            }, (j - startIdx) * 60);
-                        })(lottieId, codes[j], isD);
                     }
                     document.getElementById('wtHourly').style.display = 'block';
                 }
@@ -2215,7 +1846,9 @@ def render_html_content(
                     document.getElementById('tmrDesc').textContent = wmoDesc(code);
                     document.getElementById('tmrRange').textContent = '最高 ' + tmax + '°  /  最低 ' + tmin + '°';
 
-                    loadLottie(document.getElementById('tmrLottie'), lottieFile(code, true));
+                    var tmrIcon = document.getElementById('tmrIcon');
+                    tmrIcon.src = iconUrl(code, true);
+                    tmrIcon.onerror = function() { if(this.src.indexOf('rain.svg')===-1) this.src = CDN + 'rain.svg'; else this.style.display = 'none'; };
 
                     var statsHtml = '';
                     if (pop !== null) statsHtml += '<div class="tmr-stat">' + svgDrop.replace('class="wt-detail-icon"', 'style="width:11px;height:11px;opacity:.7;"') + '<span class="tmr-stat-val">' + pop + '%</span><span>降水</span></div>';
