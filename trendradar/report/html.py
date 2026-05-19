@@ -58,10 +58,21 @@ def render_html_content(
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>热点新闻分析</title>
+        <title>雷达简报</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
         <style>
             * { box-sizing: border-box; }
+            :root {
+                --glass-heavy: rgba(255,255,255,0.18);
+                --glass-mid: rgba(255,255,255,0.12);
+                --glass-light: rgba(255,255,255,0.07);
+                --glass-border: rgba(255,255,255,0.26);
+                --glass-border-light: rgba(255,255,255,0.14);
+                --tw: rgba(255,255,255,0.97);
+                --tm: rgba(255,255,255,0.70);
+                --td: rgba(255,255,255,0.45);
+            }
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
                 margin: 0;
@@ -80,33 +91,193 @@ def render_html_content(
                 box-shadow: 0 2px 16px rgba(0,0,0,0.06);
             }
 
+            /* ===== 新版 Header (天气+简报) ===== */
             .header {
-                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                color: white;
-                padding: 32px 24px;
-                text-align: center;
                 position: relative;
-                overflow: visible;
+                overflow: hidden;
+                padding: 24px 22px 22px;
+                background: linear-gradient(160deg, #1a6fba 0%, #3b8fd4 40%, #6fb3e8 100%);
+                transition: background 1.4s ease;
             }
-
+            .header-glow {
+                position: absolute; inset: 0; pointer-events: none; z-index: 0;
+                background:
+                    radial-gradient(ellipse 55% 45% at 85% 5%, rgba(255,255,255,0.10) 0%, transparent 65%),
+                    radial-gradient(ellipse 35% 35% at 5% 95%, rgba(0,0,0,0.12) 0%, transparent 60%);
+            }
             .header-watermark {
-                position: absolute;
-                top: 50%;
-                left: 50%;
+                position: absolute; top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                font-size: clamp(40px, 8vw, 80px);
-                font-weight: 900;
-                letter-spacing: 0.05em;
-                color: rgba(255, 255, 255, 0.15);
-                pointer-events: none;
-                z-index: 1;
-                white-space: nowrap;
-                -webkit-mask-image: radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-                mask-image: radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-                transition: -webkit-mask-image 0.3s ease, mask-image 0.3s ease;
-                user-select: none;
+                font-size: clamp(38px, 8vw, 76px); font-weight: 900; letter-spacing: 0.06em;
+                color: rgba(255,255,255,0.055); pointer-events: none; white-space: nowrap;
+                user-select: none; z-index: 1;
+                transition: color .3s, -webkit-mask-image .3s, mask-image .3s;
+                -webkit-mask-image: radial-gradient(circle 0px at 50% 50%, black 0%, transparent 100%);
+                mask-image: radial-gradient(circle 0px at 50% 50%, black 0%, transparent 100%);
             }
 
+            .header-top {
+                position: relative; z-index: 2;
+                display: flex; align-items: center; justify-content: space-between;
+                margin-top: 40px; /* 避开右上角保存按钮 */
+                margin-bottom: 16px;
+            }
+            .header-title {
+                font-size: 20px; font-weight: 700;
+                color: var(--tw); letter-spacing: 0.3px;
+            }
+            .gen-time-pill {
+                display: flex; align-items: center; gap: 6px;
+                background: var(--glass-heavy);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px; padding: 5px 12px;
+                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                font-size: 12px; font-weight: 600; color: var(--tw);
+            }
+            .gen-dot {
+                width: 6px; height: 6px; border-radius: 50%;
+                background: #4ade80; flex-shrink: 0;
+                animation: pulse-dot 2.2s ease-in-out infinite;
+            }
+            @keyframes pulse-dot {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.5; transform: scale(0.75); }
+            }
+
+            /* ===== 天气面板 ===== */
+            .weather-panel {
+                position: relative; z-index: 2;
+                display: flex; flex-direction: column; gap: 9px;
+            }
+
+            /* 今日主卡 */
+            .weather-today {
+                background: var(--glass-heavy);
+                border: 1px solid var(--glass-border);
+                border-radius: 20px;
+                backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+                padding: 16px 18px 14px;
+                display: flex; align-items: center;
+                min-height: 86px; position: relative; overflow: hidden;
+                transition: opacity .4s;
+            }
+            .weather-today::before {
+                content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+            }
+            .weather-today.loading { justify-content: center; opacity: 0.55; }
+
+            .wt-lottie-wrap {
+                flex-shrink: 0; width: 72px; height: 72px;
+                position: relative; display: flex; align-items: center; justify-content: center;
+            }
+            .wt-lottie-wrap > div {
+                width: 72px !important; height: 72px !important;
+                filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+            }
+
+            .wt-center { flex: 1; padding: 0 12px; border-right: 1px solid var(--glass-border-light); }
+            .wt-temp-row { display: flex; align-items: flex-start; gap: 2px; line-height: 1; margin-bottom: 3px; }
+            .wt-temp { font-size: 50px; font-weight: 200; color: var(--tw); letter-spacing: -3px; font-variant-numeric: tabular-nums; line-height: 1; }
+            .wt-unit { font-size: 21px; font-weight: 300; color: var(--tm); margin-top: 6px; }
+            .wt-desc { font-size: 13px; font-weight: 500; color: var(--tw); margin-bottom: 5px; }
+            .wt-range { font-size: 11px; color: var(--tm); font-variant-numeric: tabular-nums; }
+
+            .wt-right { flex-shrink: 0; padding-left: 15px; display: flex; flex-direction: column; gap: 6px; }
+            .wt-detail { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--tm); white-space: nowrap; }
+            .wt-detail-icon { width: 13px; height: 13px; opacity: 0.75; flex-shrink: 0; }
+            .wt-detail-val { color: var(--tw); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+            /* 逐小时 */
+            .weather-hourly {
+                background: var(--glass-mid); border: 1px solid var(--glass-border-light);
+                border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 12px 4px 10px; overflow: hidden;
+            }
+            .hourly-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; padding: 0 13px; margin-bottom: 9px; }
+            .hourly-scroll { display: flex; gap: 3px; overflow-x: auto; padding: 0 9px 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+            .hourly-scroll::-webkit-scrollbar { display: none; }
+            .hourly-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 9px; border-radius: 11px; min-width: 52px; cursor: default; }
+            .hourly-item.now { background: var(--glass-heavy); border: 1px solid var(--glass-border); }
+            .hourly-time { font-size: 10.5px; color: var(--tm); font-variant-numeric: tabular-nums; font-weight: 500; }
+            .hourly-item.now .hourly-time { color: var(--tw); font-weight: 700; }
+            .hourly-lottie { width: 28px; height: 28px; flex-shrink: 0; }
+            .hourly-lottie > div { width: 28px !important; height: 28px !important; filter: brightness(0) invert(1); }
+            .hourly-temp { font-size: 12.5px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; }
+            .hourly-pop { font-size: 9.5px; color: #7dd3fc; font-weight: 600; }
+
+            /* 明日预报 */
+            .weather-tomorrow {
+                background: var(--glass-mid); border: 1px solid var(--glass-border-light);
+                border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 12px 15px;
+            }
+            .tmr-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .tmr-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .tmr-date { font-size: 10.5px; color: var(--td); }
+            .tmr-body { display: flex; align-items: center; gap: 13px; }
+            .tmr-lottie { width: 44px; height: 44px; flex-shrink: 0; }
+            .tmr-lottie > div { width: 44px !important; height: 44px !important; filter: brightness(0) invert(1); }
+            .tmr-info { flex: 1; }
+            .tmr-desc { font-size: 13px; font-weight: 600; color: var(--tw); margin-bottom: 3px; }
+            .tmr-range { font-size: 11px; color: var(--tm); font-variant-numeric: tabular-nums; }
+            .tmr-stats { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+            .tmr-stat { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--tm); }
+            .tmr-stat svg { width: 11px; height: 11px; opacity: 0.7; }
+            .tmr-stat-val { color: var(--tw); font-weight: 600; }
+            .tmr-bar-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--glass-border-light); }
+            .tmr-bar-label { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--td); margin-bottom: 5px; }
+            .tmr-bar-track { height: 4px; border-radius: 2px; background: var(--glass-light); position: relative; overflow: hidden; }
+            .tmr-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, #60a5fa, #f97316); transition: left .9s ease, right .9s ease; }
+
+            /* 工服卡 */
+            .weather-uniform {
+                background: var(--glass-mid); border: 1px solid var(--glass-border-light);
+                border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 12px 15px;
+            }
+            .uniform-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .uniform-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .uniform-date { font-size: 10.5px; color: var(--td); }
+            .uniform-body { display: flex; align-items: center; gap: 14px; }
+            .uniform-swatch {
+                flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%;
+                border: 2px solid rgba(255,255,255,0.35);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+                transition: background .6s ease;
+            }
+            .uniform-info { flex: 1; }
+            .uniform-color-name { font-size: 15px; font-weight: 700; color: var(--tw); margin-bottom: 3px; }
+            .uniform-hint { font-size: 11px; color: var(--tm); line-height: 1.5; }
+            .uniform-week { display: flex; gap: 5px; align-items: center; }
+            .uniform-day-dot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+            .uniform-day-label { font-size: 9px; color: var(--td); }
+            .uniform-dot {
+                width: 10px; height: 10px; border-radius: 50%;
+                border: 1.5px solid rgba(255,255,255,0.15);
+                transition: transform .2s;
+            }
+            .uniform-day-dot.today .uniform-dot {
+                border-color: rgba(255,255,255,0.7);
+                box-shadow: 0 0 6px rgba(255,255,255,0.4);
+                transform: scale(1.25);
+            }
+            .uniform-day-dot.tomorrow .uniform-dot {
+                border-color: rgba(255,255,255,0.5);
+                transform: scale(1.1);
+            }
+
+            /* 城市+更新 */
+            .wt-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 3px; }
+            .wt-location { display: flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--tm); }
+            .wt-location svg { width: 11px; height: 11px; opacity: 0.65; }
+            .wt-update { font-size: 10.5px; color: var(--td); }
+
+            /* 骨架 */
+            @keyframes shimmer { 0%, 100% { opacity: .3; } 50% { opacity: .65; } }
+            .skeleton { animation: shimmer 1.6s ease-in-out infinite; background: var(--glass-mid); border-radius: 8px; }
+
+            /* ===== 原有 Header 按钮及其他样式 ===== */
             .save-buttons {
                 position: absolute;
                 top: 16px;
@@ -137,18 +308,9 @@ def render_html_content(
                 border-right: none;
             }
 
-            .save-btn:hover {
-                background: rgba(255, 255, 255, 0.3);
-            }
-
-            .save-btn:active {
-                transform: translateY(0);
-            }
-
-            .save-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
+            .save-btn:hover { background: rgba(255, 255, 255, 0.3); }
+            .save-btn:active { transform: translateY(0); }
+            .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
             .save-dropdown-trigger {
                 background: rgba(255, 255, 255, 0.2);
@@ -165,9 +327,7 @@ def render_html_content(
                 align-items: center;
             }
 
-            .save-dropdown-trigger:hover {
-                background: rgba(255, 255, 255, 0.35);
-            }
+            .save-dropdown-trigger:hover { background: rgba(255, 255, 255, 0.35); }
 
             .save-dropdown-menu {
                 position: absolute;
@@ -195,1056 +355,230 @@ def render_html_content(
             }
 
             .save-dropdown-item {
-                display: block;
-                width: 100%;
-                padding: 9px 14px;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 13px;
-                cursor: pointer;
-                border-radius: 5px;
-                text-align: left;
-                transition: background 0.15s;
-                white-space: nowrap;
+                display: block; width: 100%; padding: 9px 14px; background: none; border: none;
+                color: white; font-size: 13px; cursor: pointer; border-radius: 5px;
+                text-align: left; transition: background 0.15s; white-space: nowrap;
             }
-
-            .save-dropdown-item:hover {
-                background: rgba(255, 255, 255, 0.15);
-            }
+            .save-dropdown-item:hover { background: rgba(255, 255, 255, 0.15); }
 
             .dropdown-icon {
-                width: 14px;
-                height: 14px;
-                margin-right: 8px;
-                vertical-align: -2px;
-                flex-shrink: 0;
+                width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; flex-shrink: 0;
             }
 
-            .header-title {
-                font-size: 22px;
-                font-weight: 700;
-                margin: 0 0 20px 0;
-                position: relative;
-                z-index: 2;
-            }
-
-            .header-info {
-                position: relative;
-                z-index: 2;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-                font-size: 14px;
-                opacity: 0.95;
-            }
-
-            .info-item {
-                text-align: center;
-            }
-
-            .info-label {
-                display: block;
-                font-size: 12px;
-                opacity: 0.8;
-                margin-bottom: 4px;
-            }
-
-            .info-value {
-                font-weight: 600;
-                font-size: 16px;
-            }
-
-            .content {
-                padding: 24px;
-            }
-
-            .word-group {
-                margin-bottom: 40px;
-            }
-
-            .word-group:first-child {
-                margin-top: 0;
-            }
+            .content { padding: 24px; }
+            .word-group { margin-bottom: 40px; }
+            .word-group:first-child { margin-top: 0; }
 
             .word-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 20px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #f0f0f0;
+                display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
             }
-
-            .word-info {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .word-name {
-                font-size: 17px;
-                font-weight: 600;
-                color: #1a1a1a;
-            }
-
-            .word-count {
-                color: #666;
-                font-size: 13px;
-                font-weight: 500;
-            }
-
+            .word-info { display: flex; align-items: center; gap: 12px; }
+            .word-name { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+            .word-count { color: #666; font-size: 13px; font-weight: 500; }
             .word-count.hot { color: #dc2626; font-weight: 600; }
             .word-count.warm { color: #ea580c; font-weight: 600; }
-
-            .word-index {
-                color: #999;
-                font-size: 12px;
-            }
+            .word-index { color: #999; font-size: 12px; }
 
             .news-item {
-                margin-bottom: 20px;
-                padding: 16px 0;
-                border-bottom: 1px solid #f5f5f5;
-                position: relative;
-                display: flex;
-                gap: 12px;
-                align-items: center;
+                margin-bottom: 20px; padding: 16px 0; border-bottom: 1px solid #f5f5f5;
+                position: relative; display: flex; gap: 12px; align-items: center;
             }
-
-            .news-item:last-child {
-                border-bottom: none;
-            }
-
+            .news-item:last-child { border-bottom: none; }
             .news-item.new::after {
-                content: "NEW";
-                position: absolute;
-                top: 12px;
-                right: 0;
-                background: #fbbf24;
-                color: #92400e;
-                font-size: 9px;
-                font-weight: 700;
-                padding: 3px 6px;
-                border-radius: 4px;
-                letter-spacing: 0.5px;
+                content: "NEW"; position: absolute; top: 12px; right: 0;
+                background: #fbbf24; color: #92400e; font-size: 9px; font-weight: 700;
+                padding: 3px 6px; border-radius: 4px; letter-spacing: 0.5px;
             }
 
             .news-number {
-                color: #999;
-                font-size: 13px;
-                font-weight: 600;
-                min-width: 20px;
-                text-align: center;
-                flex-shrink: 0;
-                background: #f8f9fa;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                align-self: flex-start;
-                margin-top: 8px;
-                position: relative;
-                cursor: pointer;
+                color: #999; font-size: 13px; font-weight: 600; min-width: 20px;
+                text-align: center; flex-shrink: 0; background: #f8f9fa; border-radius: 50%;
+                width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+                align-self: flex-start; margin-top: 8px; position: relative; cursor: pointer;
                 transition: background 0.15s, color 0.15s;
             }
             .news-number .num-text { transition: opacity 0.15s; }
-            .news-number .copy-icon {
-                position: absolute;
-                opacity: 0;
-                transition: opacity 0.15s;
-            }
+            .news-number .copy-icon { position: absolute; opacity: 0; transition: opacity 0.15s; }
             .news-item:hover .news-number .num-text { opacity: 0; }
             .news-item:hover .news-number .copy-icon { opacity: 1; }
-            .news-item:hover .news-number {
-                background: #eef2ff;
-                color: #4f46e5;
-            }
-            .news-number.copied {
-                background: #dcfce7 !important;
-            }
+            .news-item:hover .news-number { background: #eef2ff; color: #4f46e5; }
+            .news-number.copied { background: #dcfce7 !important; }
             .news-number.copied .num-text { opacity: 0 !important; }
             .news-number.copied .copy-icon { opacity: 1 !important; }
-            body.dark-mode .news-item:hover .news-number {
-                background: #2a2a5a;
-                color: #8ab4f8;
-            }
-            body.dark-mode .news-number.copied {
-                background: #14532d !important;
-            }
 
-            .news-content {
-                flex: 1;
-                min-width: 0;
-                padding-right: 40px;
-            }
+            .news-content { flex: 1; min-width: 0; padding-right: 40px; }
+            .news-item.new .news-content { padding-right: 50px; }
 
-            .news-item.new .news-content {
-                padding-right: 50px;
-            }
-
-            .news-header {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 8px;
-                flex-wrap: wrap;
-            }
-
-            .source-name {
-                color: #666;
-                font-size: 12px;
-                font-weight: 500;
-            }
-
-            .keyword-tag {
-                color: #2563eb;
-                font-size: 12px;
-                font-weight: 500;
-                background: #eff6ff;
-                padding: 2px 6px;
-                border-radius: 4px;
-            }
-
-            .rank-num {
-                color: #fff;
-                background: #6b7280;
-                font-size: 10px;
-                font-weight: 700;
-                padding: 2px 6px;
-                border-radius: 10px;
-                min-width: 18px;
-                text-align: center;
-            }
-
+            .news-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+            .source-name { color: #666; font-size: 12px; font-weight: 500; }
+            .keyword-tag { color: #2563eb; font-size: 12px; font-weight: 500; background: #eff6ff; padding: 2px 6px; border-radius: 4px; }
+            .rank-num { color: #fff; background: #6b7280; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
             .rank-num.top { background: #dc2626; }
             .rank-num.high { background: #ea580c; }
+            .time-info { color: #999; font-size: 11px; }
+            .count-info { color: #059669; font-size: 11px; font-weight: 500; }
+            .news-title { font-size: 15px; line-height: 1.4; color: #1a1a1a; margin: 0; }
+            .news-link { color: #2563eb; text-decoration: none; }
+            .news-link:hover { text-decoration: underline; }
+            .news-link:visited { color: #7c3aed; }
 
-            .time-info {
-                color: #999;
-                font-size: 11px;
-            }
-
-            .count-info {
-                color: #059669;
-                font-size: 11px;
-                font-weight: 500;
-            }
-
-            .news-title {
-                font-size: 15px;
-                line-height: 1.4;
-                color: #1a1a1a;
-                margin: 0;
-            }
-
-            .news-link {
-                color: #2563eb;
-                text-decoration: none;
-            }
-
-            .news-link:hover {
-                text-decoration: underline;
-            }
-
-            .news-link:visited {
-                color: #7c3aed;
-            }
-
-            /* 通用区域分割线样式 */
-            .section-divider {
-                margin-top: 32px;
-                padding-top: 24px;
-                border-top: 2px solid #e5e7eb;
-            }
-
-            /* 热榜统计区样式 */
-            .hotlist-section {
-                /* 默认无边框，由 section-divider 动态添加 */
-            }
-
-            .new-section {
-                margin-top: 40px;
-                padding-top: 24px;
-            }
-
-            .new-section-title {
-                color: #1a1a1a;
-                font-size: 16px;
-                font-weight: 600;
-                margin: 0 0 20px 0;
-            }
-
-            .new-source-group {
-                margin-bottom: 24px;
-            }
-
-            .new-source-title {
-                color: #666;
-                font-size: 13px;
-                font-weight: 500;
-                margin: 0 0 12px 0;
-                padding-bottom: 6px;
-                border-bottom: 1px solid #f5f5f5;
-            }
-
-            .new-item {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 8px 0;
-                border-bottom: 1px solid #f9f9f9;
-            }
-
-            .new-item:last-child {
-                border-bottom: none;
-            }
-
-            .new-item-number {
-                color: #999;
-                font-size: 12px;
-                font-weight: 600;
-                min-width: 18px;
-                text-align: center;
-                flex-shrink: 0;
-                background: #f8f9fa;
-                border-radius: 50%;
-                width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .new-item-rank {
-                color: #fff;
-                background: #6b7280;
-                font-size: 10px;
-                font-weight: 700;
-                padding: 3px 6px;
-                border-radius: 8px;
-                min-width: 20px;
-                text-align: center;
-                flex-shrink: 0;
-            }
-
+            .section-divider { margin-top: 32px; padding-top: 24px; border-top: 2px solid #e5e7eb; }
+            .new-section { margin-top: 40px; padding-top: 24px; }
+            .new-section-title { color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0 0 20px 0; }
+            .new-source-group { margin-bottom: 24px; }
+            .new-source-title { color: #666; font-size: 13px; font-weight: 500; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid #f5f5f5; }
+            .new-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+            .new-item:last-child { border-bottom: none; }
+            .new-item-number { color: #999; font-size: 12px; font-weight: 600; min-width: 18px; text-align: center; flex-shrink: 0; background: #f8f9fa; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+            .new-item-rank { color: #fff; background: #6b7280; font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 8px; min-width: 20px; text-align: center; flex-shrink: 0; }
             .new-item-rank.top { background: #dc2626; }
             .new-item-rank.high { background: #ea580c; }
+            .new-item-content { flex: 1; min-width: 0; }
+            .new-item-title { font-size: 14px; line-height: 1.4; color: #1a1a1a; margin: 0; }
 
-            .new-item-content {
-                flex: 1;
-                min-width: 0;
-            }
+            .error-section { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+            .error-title { color: #dc2626; font-size: 14px; font-weight: 600; margin: 0 0 8px 0; }
+            .error-list { list-style: none; padding: 0; margin: 0; }
+            .error-item { color: #991b1b; font-size: 13px; padding: 2px 0; font-family: 'SF Mono', Consolas, monospace; }
 
-            .new-item-title {
-                font-size: 14px;
-                line-height: 1.4;
-                color: #1a1a1a;
-                margin: 0;
-            }
+            .footer { margin-top: 32px; padding: 20px 24px; background: #f8f9fa; border-top: 1px solid #e5e7eb; text-align: center; }
+            .footer-content { font-size: 13px; color: #6b7280; line-height: 1.6; }
+            .footer-link { color: #4f46e5; text-decoration: none; font-weight: 500; transition: color 0.2s ease; }
+            .footer-link:hover { color: #7c3aed; text-decoration: underline; }
+            .project-name { font-weight: 600; color: #374151; }
 
-            .error-section {
-                background: #fef2f2;
-                border: 1px solid #fecaca;
-                border-radius: 8px;
-                padding: 16px;
-                margin-bottom: 24px;
-            }
+            /* 其他组件样式 (RSS, Standalone, AI) */
+            .rss-section { margin-top: 32px; padding-top: 24px; }
+            .rss-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+            .rss-section-title { font-size: 18px; font-weight: 600; color: #059669; }
+            .rss-section-count { color: #6b7280; font-size: 14px; }
+            .feed-group { margin-bottom: 24px; }
+            .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #10b981; }
+            .feed-name { font-size: 15px; font-weight: 600; color: #059669; }
+            .feed-count { color: #666; font-size: 13px; font-weight: 500; }
+            .rss-item { margin-bottom: 12px; padding: 14px; background: #f0fdf4; border-radius: 8px; border-left: 3px solid #10b981; }
+            .rss-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+            .rss-time { color: #6b7280; font-size: 12px; }
+            .rss-author { color: #059669; font-size: 12px; font-weight: 500; }
+            .rss-title { font-size: 14px; line-height: 1.5; margin-bottom: 6px; }
+            .rss-link { color: #1f2937; text-decoration: none; font-weight: 500; }
+            .rss-link:hover { color: #059669; text-decoration: underline; }
 
-            .error-title {
-                color: #dc2626;
-                font-size: 14px;
-                font-weight: 600;
-                margin: 0 0 8px 0;
-            }
+            .standalone-section { margin-top: 32px; padding-top: 24px; }
+            .standalone-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+            .standalone-section-title { font-size: 18px; font-weight: 600; color: #059669; }
+            .standalone-section-count { color: #6b7280; font-size: 14px; }
+            .standalone-group { margin-bottom: 40px; }
+            .standalone-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+            .standalone-name { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+            .standalone-count { color: #666; font-size: 13px; font-weight: 500; }
 
-            .error-list {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
+            .ai-section { margin-top: 32px; padding: 24px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 1px solid #bae6fd; }
+            .ai-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+            .ai-section-title { font-size: 18px; font-weight: 600; color: #0369a1; }
+            .ai-block { margin-bottom: 16px; padding: 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+            .ai-block-title { font-size: 14px; font-weight: 600; color: #0369a1; margin-bottom: 8px; }
+            .ai-block-content { font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; }
 
-            .error-item {
-                color: #991b1b;
-                font-size: 13px;
-                padding: 2px 0;
-                font-family: 'SF Mono', Consolas, monospace;
-            }
+            /* ===== 浏览器增强样式 ===== */
+            body.wide-mode .container { max-width: 1200px; }
+            body.wide-mode .content { padding: 32px 40px; }
+            body.wide-mode .rss-feeds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+            body.wide-mode .feed-group { margin-bottom: 0; }
+            body.wide-mode .ai-section .ai-blocks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            body.wide-mode .new-section .new-sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+            body.wide-mode .standalone-section .standalone-groups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 
-            .footer {
-                margin-top: 32px;
-                padding: 20px 24px;
-                background: #f8f9fa;
-                border-top: 1px solid #e5e7eb;
-                text-align: center;
-            }
+            .tab-bar { display: none; overflow-x: auto; white-space: nowrap; padding: 8px 0 12px 0; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; background: white; z-index: 10; gap: 4px; }
+            body.wide-mode .tab-bar { display: flex; }
+            body.wide-mode .tab-bar.tab-hidden { display: none; }
+            .tab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; background: #f3f4f6; color: #6b7280; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; flex-shrink: 0; }
+            .tab-btn:hover { background: #e5e7eb; color: #374151; }
+            .tab-btn.active { background: #4f46e5; color: white; }
+            .tab-count { font-size: 11px; background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 10px; }
+            .tab-btn.active .tab-count { background: rgba(255,255,255,0.3); }
 
-            .footer-content {
-                font-size: 13px;
-                color: #6b7280;
-                line-height: 1.6;
-            }
+            .search-bar { display: none; padding: 0 0 16px 0; }
+            .search-input { width: 100%; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+            .search-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
 
-            .footer-link {
-                color: #4f46e5;
-                text-decoration: none;
-                font-weight: 500;
-                transition: color 0.2s ease;
-            }
+            .fab-bar { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 100; opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; }
+            .fab-bar.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+            .fab-btn { width: 40px; height: 40px; border-radius: 50%; background: #4f46e5; color: white; border: none; cursor: pointer; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s, background 0.2s; display: flex; align-items: center; justify-content: center; position: relative; }
+            .fab-btn:hover { transform: scale(1.1); background: #4338ca; }
 
-            .footer-link:hover {
-                color: #7c3aed;
-                text-decoration: underline;
-            }
+            .fab-tooltip { position: absolute; bottom: 0; right: 52px; background: rgba(30, 30, 50, 0.92); backdrop-filter: blur(12px); color: white; border-radius: 10px; padding: 12px 16px; white-space: nowrap; font-size: 12px; line-height: 1.8; box-shadow: 0 8px 24px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); opacity: 0; visibility: hidden; transform: translateY(6px); transition: all 0.2s ease; pointer-events: none; }
+            .fab-btn:hover .fab-tooltip, .fab-btn.show-tip .fab-tooltip { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+            .fab-tooltip .tip-row { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+            .fab-tooltip .tip-key { background: rgba(255,255,255,0.15); border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; margin-left: 8px; }
 
-            .project-name {
-                font-weight: 600;
-                color: #374151;
-            }
+            .collapse-icon { display: none; margin-right: 6px; font-size: 12px; color: #9ca3af; transition: transform 0.2s; user-select: none; }
+            .word-header.collapsible { cursor: pointer; }
+            .word-header.collapsible .collapse-icon { display: inline; }
+            .word-header.collapsible:hover { background: #f9fafb; border-radius: 6px; margin: 0 -8px 20px -8px; padding: 8px; }
+            .word-group.collapsed .news-item { display: none; }
+            .word-group.collapsed .collapse-icon { transform: rotate(-90deg); }
+
+            .toggle-wide-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 15px; transition: all 0.2s ease; backdrop-filter: blur(10px); line-height: 1; min-height: 38px; }
+            .toggle-wide-btn:hover { background: rgba(255, 255, 255, 0.3); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-1px); }
+
+            /* 暗色模式 */
+            body.dark-mode { background: #1a1a2e; color: #e0e0e0; }
+            body.dark-mode .container { background: #16213e; box-shadow: 0 2px 16px rgba(0,0,0,0.3); }
+            body.dark-mode .content { background: #16213e; }
+            body.dark-mode .word-header { border-bottom-color: #2a2a4a; }
+            body.dark-mode .word-header.collapsible:hover { background: #1a1a3e; }
+            body.dark-mode .news-item { border-bottom-color: #2a2a4a; }
+            body.dark-mode .news-title a { color: #8ab4f8; }
+            body.dark-mode .news-title a:visited { color: #c58af9; }
+            body.dark-mode .tab-bar { background: #16213e; border-bottom-color: #2a2a4a; }
+            body.dark-mode .tab-btn { color: #aaa; }
+            body.dark-mode .tab-btn.active { color: #8ab4f8; border-bottom-color: #8ab4f8; }
+            body.dark-mode .tab-btn:hover { color: #ccc; background: rgba(255,255,255,0.05); }
+            body.dark-mode .search-input { background: #1a1a3e; border-color: #2a2a4a; color: #e0e0e0; }
+            body.dark-mode .search-input:focus { border-color: #8ab4f8; }
+            body.dark-mode .fab-btn { background: #533483; }
+            body.dark-mode .fab-btn:hover { background: #6d28d9; }
+            body.dark-mode .footer { background: #0f3460; color: rgba(255,255,255,0.7); }
+            body.dark-mode .rss-item, body.dark-mode .new-item, body.dark-mode .standalone-item { border-bottom-color: #2a2a4a; }
+            body.dark-mode .rss-title a, body.dark-mode .new-item a, body.dark-mode .standalone-item a { color: #8ab4f8; }
+            body.dark-mode .ai-block { background: #1a1a3e; border-color: #2a2a4a; }
+
+            .toggle-dark-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 15px; transition: all 0.2s ease; backdrop-filter: blur(10px); line-height: 1; min-height: 38px; }
+            .toggle-dark-btn:hover { background: rgba(255, 255, 255, 0.3); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-1px); }
+
+            .reading-progress { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: linear-gradient(90deg, #4f46e5, #7c3aed); z-index: 9999; transition: width 0.1s linear; }
+            body.dark-mode .reading-progress { background: linear-gradient(90deg, #8ab4f8, #c58af9); }
 
             @media (max-width: 480px) {
                 body { padding: 12px; }
-                .header { padding: 24px 20px; }
                 .content { padding: 20px; }
                 .footer { padding: 16px 20px; }
-                .header-info { grid-template-columns: 1fr; gap: 12px; }
                 .news-header { gap: 6px; }
                 .news-content { padding-right: 45px; }
                 .news-item { gap: 8px; }
                 .new-item { gap: 8px; }
                 .news-number { width: 20px; height: 20px; font-size: 12px; }
-                .save-buttons {
-                    position: static;
-                    margin-bottom: 16px;
-                    display: flex;
-                    gap: 8px;
-                    justify-content: center;
-                    width: 100%;
-                }
-                .save-btn-group {
-                    flex: 1;
-                }
-                .save-btn {
-                    width: 100%;
-                    border-radius: 6px 0 0 6px;
-                }
-            }
-
-            /* RSS 订阅内容样式 */
-            .rss-section {
-                margin-top: 32px;
-                padding-top: 24px;
-            }
-
-            .rss-section-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 20px;
-            }
-
-            .rss-section-title {
-                font-size: 18px;
-                font-weight: 600;
-                color: #059669;
-            }
-
-            .rss-section-count {
-                color: #6b7280;
-                font-size: 14px;
-            }
-
-            .feed-group {
-                margin-bottom: 24px;
-            }
-
-            .feed-group:last-child {
-                margin-bottom: 0;
-            }
-
-            .feed-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 12px;
-                padding-bottom: 8px;
-                border-bottom: 2px solid #10b981;
-            }
-
-            .feed-name {
-                font-size: 15px;
-                font-weight: 600;
-                color: #059669;
-            }
-
-            .feed-count {
-                color: #666;
-                font-size: 13px;
-                font-weight: 500;
-            }
-
-            .rss-item {
-                margin-bottom: 12px;
-                padding: 14px;
-                background: #f0fdf4;
-                border-radius: 8px;
-                border-left: 3px solid #10b981;
-            }
-
-            .rss-item:last-child {
-                margin-bottom: 0;
-            }
-
-            .rss-meta {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                margin-bottom: 6px;
-                flex-wrap: wrap;
-            }
-
-            .rss-time {
-                color: #6b7280;
-                font-size: 12px;
-            }
-
-            .rss-author {
-                color: #059669;
-                font-size: 12px;
-                font-weight: 500;
-            }
-
-            .rss-title {
-                font-size: 14px;
-                line-height: 1.5;
-                margin-bottom: 6px;
-            }
-
-            .rss-link {
-                color: #1f2937;
-                text-decoration: none;
-                font-weight: 500;
-            }
-
-            .rss-link:hover {
-                color: #059669;
-                text-decoration: underline;
-            }
-
-            .rss-summary {
-                font-size: 13px;
-                color: #6b7280;
-                line-height: 1.5;
-                margin: 0;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-
-            /* 独立展示区样式 - 复用热点词汇统计区样式 */
-            .standalone-section {
-                margin-top: 32px;
-                padding-top: 24px;
-            }
-
-            .standalone-section-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 20px;
-            }
-
-            .standalone-section-title {
-                font-size: 18px;
-                font-weight: 600;
-                color: #059669;
-            }
-
-            .standalone-section-count {
-                color: #6b7280;
-                font-size: 14px;
-            }
-
-            .standalone-group {
-                margin-bottom: 40px;
-            }
-
-            .standalone-group:last-child {
-                margin-bottom: 0;
-            }
-
-            .standalone-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 20px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #f0f0f0;
-            }
-
-            .standalone-name {
-                font-size: 17px;
-                font-weight: 600;
-                color: #1a1a1a;
-            }
-
-            .standalone-count {
-                color: #666;
-                font-size: 13px;
-                font-weight: 500;
-            }
-
-            /* AI 分析区块样式 */
-            .ai-section {
-                margin-top: 32px;
-                padding: 24px;
-                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-                border-radius: 12px;
-                border: 1px solid #bae6fd;
-            }
-
-            .ai-section-header {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-
-            .ai-section-title {
-                font-size: 18px;
-                font-weight: 600;
-                color: #0369a1;
-            }
-
-            .ai-section-badge {
-                background: #0ea5e9;
-                color: white;
-                font-size: 11px;
-                font-weight: 600;
-                padding: 3px 8px;
-                border-radius: 4px;
-            }
-
-            .ai-block {
-                margin-bottom: 16px;
-                padding: 16px;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            }
-
-            .ai-block:last-child {
-                margin-bottom: 0;
-            }
-
-            .ai-block-title {
-                font-size: 14px;
-                font-weight: 600;
-                color: #0369a1;
-                margin-bottom: 8px;
-            }
-
-            .ai-block-content {
-                font-size: 14px;
-                line-height: 1.6;
-                color: #334155;
-                white-space: pre-wrap;
-            }
-
-            .ai-error {
-                padding: 16px;
-                background: #fef2f2;
-                border: 1px solid #fecaca;
-                border-radius: 8px;
-                color: #991b1b;
-                font-size: 14px;
-            }
-
-            .ai-info {
-                padding: 16px;
-                background: #f0f9ff;
-                border: 1px solid #bae6fd;
-                border-radius: 8px;
-                color: #0369a1;
-                font-size: 14px;
-            }
-
-            /* ===== 浏览器增强样式（渐进增强，邮件客户端无影响） ===== */
-
-            /* 宽屏模式 - 基础 */
-            body.wide-mode .container { max-width: 1200px; }
-            body.wide-mode .header-info { grid-template-columns: repeat(4, 1fr); }
-            body.wide-mode .content { padding: 32px 40px; }
-
-            /* 宽屏模式 - RSS feed-group 两列 */
-            body.wide-mode .rss-feeds-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-            }
-            body.wide-mode .feed-group { margin-bottom: 0; }
-
-            /* 宽屏模式 - AI 分析区两列网格 */
-            body.wide-mode .ai-section .ai-blocks-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            body.wide-mode .ai-block { margin-bottom: 0; }
-
-            /* 宽屏模式 - 新增热点多列 */
-            body.wide-mode .new-section .new-sources-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-            }
-            body.wide-mode .new-source-group { margin-bottom: 0; }
-
-            /* 宽屏模式 - 独立展示区多列 */
-            body.wide-mode .standalone-section .standalone-groups-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-            }
-            body.wide-mode .standalone-group { margin-bottom: 0; }
-
-            /* Tab 栏 */
-            .tab-bar {
-                display: none;
-                overflow-x: auto;
-                white-space: nowrap;
-                padding: 8px 0 12px 0;
-                margin-bottom: 20px;
-                border-bottom: 2px solid #e5e7eb;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                position: sticky;
-                top: 0;
-                background: white;
-                z-index: 10;
-                gap: 4px;
-            }
-            body.wide-mode .tab-bar { display: flex; }
-            body.wide-mode .tab-bar.tab-hidden { display: none; }
-
-            .tab-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 8px 16px;
-                border: none;
-                background: #f3f4f6;
-                color: #6b7280;
-                border-radius: 8px 8px 0 0;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 500;
-                white-space: nowrap;
-                transition: all 0.2s ease;
-                flex-shrink: 0;
-            }
-            .tab-btn:hover { background: #e5e7eb; color: #374151; }
-            .tab-btn.active { background: #4f46e5; color: white; }
-            .tab-count {
-                font-size: 11px;
-                background: rgba(0,0,0,0.1);
-                padding: 1px 6px;
-                border-radius: 10px;
-            }
-            .tab-btn.active .tab-count { background: rgba(255,255,255,0.3); }
-            .tab-bar::-webkit-scrollbar { height: 4px; }
-            .tab-bar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 2px; }
-            .tab-bar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
-
-            /* 搜索栏 */
-            .search-bar { display: none; padding: 0 0 16px 0; }
-            .search-input {
-                width: 100%;
-                padding: 10px 16px;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                font-size: 14px;
-                outline: none;
-                transition: border-color 0.2s;
-                box-sizing: border-box;
-            }
-            .search-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
-            .search-input::placeholder { color: #9ca3af; }
-
-            /* 右下角悬浮工具栏 */
-            .fab-bar {
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                z-index: 100;
-                opacity: 0;
-                transform: translateY(10px);
-                transition: opacity 0.3s, transform 0.3s;
-                pointer-events: none;
-            }
-            .fab-bar.visible {
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-            .fab-btn {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background: #4f46e5;
-                color: white;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                transition: transform 0.2s, background 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-            }
-            .fab-btn:hover { transform: scale(1.1); background: #4338ca; }
-            body.dark-mode .fab-btn { background: #533483; }
-            body.dark-mode .fab-btn:hover { background: #6d28d9; }
-
-            /* 快捷键 tooltip */
-            .fab-tooltip {
-                position: absolute;
-                bottom: 0;
-                right: 52px;
-                background: rgba(30, 30, 50, 0.92);
-                backdrop-filter: blur(12px);
-                color: white;
-                border-radius: 10px;
-                padding: 12px 16px;
-                white-space: nowrap;
-                font-size: 12px;
-                line-height: 1.8;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-                border: 1px solid rgba(255,255,255,0.1);
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(6px);
-                transition: all 0.2s ease;
-                pointer-events: none;
-            }
-            .fab-btn:hover .fab-tooltip,
-            .fab-btn.show-tip .fab-tooltip {
-                opacity: 1;
-                visibility: visible;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-            .fab-tooltip .tip-row {
-                display: flex;
-                justify-content: space-between;
-                gap: 16px;
-                align-items: center;
-            }
-            .fab-tooltip .tip-key {
-                background: rgba(255,255,255,0.15);
-                border-radius: 3px;
-                padding: 1px 6px;
-                font-family: monospace;
-                font-size: 11px;
-                margin-left: 8px;
-            }
-
-            /* 折叠/展开 */
-            .collapse-icon {
-                display: none;
-                margin-right: 6px;
-                font-size: 12px;
-                color: #9ca3af;
-                transition: transform 0.2s;
-                user-select: none;
-            }
-            .word-header.collapsible { cursor: pointer; }
-            .word-header.collapsible .collapse-icon { display: inline; }
-            .word-header.collapsible:hover {
-                background: #f9fafb;
-                border-radius: 6px;
-                margin: 0 -8px 20px -8px;
-                padding: 8px;
-            }
-            .word-group.collapsed .news-item { display: none; }
-            .word-group.collapsed .collapse-icon { transform: rotate(-90deg); }
-
-            /* Tab 切换动画 */
-            body.wide-mode .word-group[data-tab-index] { animation: tabFadeIn 0.2s ease; }
-            @keyframes tabFadeIn {
-                from { opacity: 0; transform: translateY(8px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            /* 宽屏切换按钮 */
-            .toggle-wide-btn {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-                padding: 10px 14px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 15px;
-                transition: all 0.2s ease;
-                backdrop-filter: blur(10px);
-                line-height: 1;
-                min-height: 38px;
-            }
-            .toggle-wide-btn:hover {
-                background: rgba(255, 255, 255, 0.3);
-                border-color: rgba(255, 255, 255, 0.5);
-                transform: translateY(-1px);
-            }
-
-            /* 暗色模式 */
-            body.dark-mode {
-                background: #1a1a2e;
-                color: #e0e0e0;
-            }
-            body.dark-mode .container {
-                background: #16213e;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.3);
-            }
-            body.dark-mode .header {
-                background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
-            }
-            body.dark-mode .content {
-                background: #16213e;
-            }
-            body.dark-mode .word-header {
-                border-bottom-color: #2a2a4a;
-            }
-            body.dark-mode .word-header.collapsible:hover {
-                background: #1a1a3e;
-            }
-            body.dark-mode .news-item {
-                border-bottom-color: #2a2a4a;
-            }
-            body.dark-mode .news-title a {
-                color: #8ab4f8;
-            }
-            body.dark-mode .news-title a:visited {
-                color: #c58af9;
-            }
-            body.dark-mode .news-meta {
-                color: #888;
-            }
-            body.dark-mode .tab-bar {
-                background: #16213e;
-                border-bottom-color: #2a2a4a;
-            }
-            body.dark-mode .tab-btn {
-                color: #aaa;
-            }
-            body.dark-mode .tab-btn.active {
-                color: #8ab4f8;
-                border-bottom-color: #8ab4f8;
-            }
-            body.dark-mode .tab-btn:hover {
-                color: #ccc;
-                background: rgba(255,255,255,0.05);
-            }
-            body.dark-mode .search-input {
-                background: #1a1a3e;
-                border-color: #2a2a4a;
-                color: #e0e0e0;
-            }
-            body.dark-mode .search-input:focus {
-                border-color: #8ab4f8;
-            }
-            /* dark fab-btn 已在 .fab-btn 中处理 */
-            body.dark-mode .footer {
-                background: #0f3460;
-                color: rgba(255,255,255,0.7);
-            }
-            body.dark-mode .rss-item,
-            body.dark-mode .new-item,
-            body.dark-mode .standalone-item {
-                border-bottom-color: #2a2a4a;
-            }
-            body.dark-mode .rss-title a,
-            body.dark-mode .new-item a,
-            body.dark-mode .standalone-item a {
-                color: #8ab4f8;
-            }
-            body.dark-mode .ai-block {
-                background: #1a1a3e;
-                border-color: #2a2a4a;
-            }
-            body.dark-mode .info-value {
-                color: white;
-            }
-
-            /* 暗色模式切换按钮 */
-            .toggle-dark-btn {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-                padding: 10px 14px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 15px;
-                transition: all 0.2s ease;
-                backdrop-filter: blur(10px);
-                line-height: 1;
-                min-height: 38px;
-            }
-            .toggle-dark-btn:hover {
-                background: rgba(255, 255, 255, 0.3);
-                border-color: rgba(255, 255, 255, 0.5);
-                transform: translateY(-1px);
-            }
-
-            /* 快捷键面板已集成到 fab-tooltip */
-
-            /* 阅读进度条 */
-            .reading-progress {
-                position: fixed;
-                top: 0; left: 0;
-                width: 0;
-                height: 3px;
-                background: linear-gradient(90deg, #4f46e5, #7c3aed);
-                z-index: 9999;
-                transition: width 0.1s linear;
-            }
-            body.dark-mode .reading-progress {
-                background: linear-gradient(90deg, #8ab4f8, #c58af9);
-            }
-
-            /* 复制按钮样式已集成到 .news-number */
-
-
-
-            /* 新上榜标记 */
-            .badge-new {
-                display: inline-block;
-                background: linear-gradient(135deg, #f43f5e, #ec4899);
-                color: white;
-                font-size: 10px;
-                font-weight: 600;
-                padding: 1px 6px;
-                border-radius: 3px;
-                margin-left: 6px;
-                vertical-align: middle;
-                letter-spacing: 0.5px;
-            }
-            body.dark-mode .badge-new {
-                background: linear-gradient(135deg, #be185d, #9333ea);
+                .save-buttons { position: static; margin-bottom: 16px; display: flex; gap: 8px; justify-content: center; width: 100%; }
+                .save-btn-group { flex: 1; }
+                .save-btn { width: 100%; border-radius: 6px 0 0 6px; }
+                .wt-temp { font-size: 40px; }
+                .wt-lottie-wrap { width: 56px; height: 56px; }
+                .wt-lottie-wrap > div { width: 56px !important; height: 56px !important; }
+                .wt-right { display: none; }
+                .wt-center { border-right: none; }
+                .uniform-week { display: none; }
             }
         </style>
     </head>
     <body>
         <div class="reading-progress"></div>
         <div class="container">
-            <div class="header">
-                <div class="header-watermark">TrendRadar</div>
+            <div class="header" id="mainHeader">
+                <div class="header-glow"></div>
+                <div class="header-watermark" id="watermark">TrendRadar</div>
+
                 <div class="save-buttons">
                     <button class="toggle-wide-btn" onclick="toggleWideMode()" title="切换宽屏/窄屏">⛶</button>
                     <button class="toggle-dark-btn" onclick="toggleDarkMode()" title="切换暗色/亮色">☽</button>
@@ -1258,46 +592,13 @@ def render_html_content(
                         </div>
                     </div>
                 </div>
-                <div class="header-title">热点新闻分析</div>
-                <div class="header-info">
-                    <div class="info-item">
-                        <span class="info-label">报告类型</span>
-                        <span class="info-value">"""
 
-    # 处理报告类型显示（根据 mode 直接显示）
-    if mode == "current":
-        html += "当前榜单"
-    elif mode == "incremental":
-        html += "增量分析"
-    else:
-        html += "全天汇总"
+                <div class="header-top">
+                    <div class="header-title">雷达简报</div>
+                    <div class="gen-time-pill">
+                        <div class="gen-dot"></div>
+                        <span id="genTime">"""
 
-    html += """</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">新闻总数</span>
-                        <span class="info-value">"""
-
-    html += f"{total_titles} 条"
-
-    # 计算筛选后的热点新闻数量
-    hot_news_count = sum(len(stat["titles"]) for stat in report_data["stats"])
-
-    html += """</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">热点新闻</span>
-                        <span class="info-value">"""
-
-    html += f"{hot_news_count} 条"
-
-    html += """</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">生成时间</span>
-                        <span class="info-value">"""
-
-    # 使用提供的时间函数或默认 datetime.now
     if get_time_func:
         now = get_time_func()
     else:
@@ -1305,6 +606,78 @@ def render_html_content(
     html += now.strftime("%m-%d %H:%M")
 
     html += """</span>
+                    </div>
+                </div>
+
+                <!-- 天气面板 -->
+                <div class="weather-panel" id="weatherPanel">
+                    <!-- 今日主卡 -->
+                    <div class="weather-today loading" id="wtToday">
+                        <div class="skeleton" style="width:62px;height:62px;border-radius:50%;margin-right:16px;flex-shrink:0;"></div>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:9px;">
+                            <div class="skeleton" style="width:110px;height:34px;border-radius:8px;"></div>
+                            <div class="skeleton" style="width:75px;height:13px;border-radius:6px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 逐小时 -->
+                    <div class="weather-hourly" id="wtHourly" style="display:none;">
+                        <div class="hourly-label">逐小时预报</div>
+                        <div class="hourly-scroll" id="hourlyScroll"></div>
+                    </div>
+
+                    <!-- 明日预报 -->
+                    <div class="weather-tomorrow" id="wtTomorrow" style="display:none;">
+                        <div class="tmr-header">
+                            <div class="tmr-label">明日天气</div>
+                            <div class="tmr-date" id="tmrDate"></div>
+                        </div>
+                        <div class="tmr-body">
+                            <div class="tmr-lottie" id="tmrLottie"></div>
+                            <div class="tmr-info">
+                                <div class="tmr-desc" id="tmrDesc">—</div>
+                                <div class="tmr-range" id="tmrRange">—</div>
+                            </div>
+                            <div class="tmr-stats" id="tmrStats"></div>
+                        </div>
+                        <div class="tmr-bar-wrap">
+                            <div class="tmr-bar-label">
+                                <span id="tmrBarMin">—</span>
+                                <span style="color:var(--td);font-size:9px;">温度区间</span>
+                                <span id="tmrBarMax">—</span>
+                            </div>
+                            <div class="tmr-bar-track">
+                                <div class="tmr-bar-fill" id="tmrBarFill" style="left:0%;right:0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 工服卡 -->
+                    <div class="weather-uniform" id="wtUniform" style="display:none;">
+                        <div class="uniform-header">
+                            <div class="uniform-label">明日工服</div>
+                            <div class="uniform-date" id="uniformDate"></div>
+                        </div>
+                        <div class="uniform-body">
+                            <div class="uniform-swatch" id="uniformSwatch"></div>
+                            <div class="uniform-info">
+                                <div class="uniform-color-name" id="uniformColorName">—</div>
+                                <div class="uniform-hint" id="uniformHint">—</div>
+                            </div>
+                            <div class="uniform-week" id="uniformWeek"></div>
+                        </div>
+                    </div>
+
+                    <!-- 城市+更新 -->
+                    <div class="wt-footer" id="wtFooter" style="display:none;">
+                        <div class="wt-location">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <span id="wtCity">—</span>
+                        </div>
+                        <div class="wt-update" id="wtUpdate">—</div>
                     </div>
                 </div>
             </div>
@@ -1520,34 +893,8 @@ def render_html_content(
 
     # 生成 RSS 统计内容
     def render_rss_stats_html(stats: List[Dict], title: str = "RSS 订阅更新") -> str:
-        """渲染 RSS 统计区块 HTML
-
-        Args:
-            stats: RSS 分组统计列表，格式与热榜一致：
-                [
-                    {
-                        "word": "关键词",
-                        "count": 5,
-                        "titles": [
-                            {
-                                "title": "标题",
-                                "source_name": "Feed 名称",
-                                "time_display": "12-29 08:20",
-                                "url": "...",
-                                "is_new": True/False
-                            }
-                        ]
-                    }
-                ]
-            title: 区块标题
-
-        Returns:
-            渲染后的 HTML 字符串
-        """
         if not stats:
             return ""
-
-        # 计算总条目数
         total_count = sum(stat.get("count", 0) for stat in stats)
         if total_count == 0:
             return ""
@@ -1560,15 +907,12 @@ def render_html_content(
                     </div>
                     <div class="rss-feeds-grid">"""
 
-        # 按关键词分组渲染（与热榜格式一致）
         for stat in stats:
             keyword = stat.get("word", "")
             titles = stat.get("titles", [])
             if not titles:
                 continue
-
             keyword_count = len(titles)
-
             rss_html += f"""
                     <div class="feed-group">
                         <div class="feed-header">
@@ -1589,10 +933,8 @@ def render_html_content(
 
                 if time_display:
                     rss_html += f'<span class="rss-time">{html_escape(time_display)}</span>'
-
                 if source_name:
                     rss_html += f'<span class="rss-author">{html_escape(source_name)}</span>'
-
                 if is_new:
                     rss_html += '<span class="rss-author" style="color: #dc2626;">NEW</span>'
 
@@ -1610,10 +952,8 @@ def render_html_content(
                 rss_html += """
                             </div>
                         </div>"""
-
             rss_html += """
                     </div>"""
-
         rss_html += """
                     </div>
                 </div>"""
@@ -1621,65 +961,19 @@ def render_html_content(
 
     # 生成独立展示区内容
     def render_standalone_html(data: Optional[Dict]) -> str:
-        """渲染独立展示区 HTML（复用热点词汇统计区样式）
-
-        Args:
-            data: 独立展示数据，格式：
-                {
-                    "platforms": [
-                        {
-                            "id": "zhihu",
-                            "name": "知乎热榜",
-                            "items": [
-                                {
-                                    "title": "标题",
-                                    "url": "链接",
-                                    "rank": 1,
-                                    "ranks": [1, 2, 1],
-                                    "first_time": "08:00",
-                                    "last_time": "12:30",
-                                    "count": 3,
-                                }
-                            ]
-                        }
-                    ],
-                    "rss_feeds": [
-                        {
-                            "id": "hacker-news",
-                            "name": "Hacker News",
-                            "items": [
-                                {
-                                    "title": "标题",
-                                    "url": "链接",
-                                    "published_at": "2025-01-07T08:00:00",
-                                    "author": "作者",
-                                }
-                            ]
-                        }
-                    ]
-                }
-
-        Returns:
-            渲染后的 HTML 字符串
-        """
         if not data:
             return ""
-
         platforms = data.get("platforms", [])
         rss_feeds = data.get("rss_feeds", [])
-
         if not platforms and not rss_feeds:
             return ""
 
-        # 计算总条目数
         total_platform_items = sum(len(p.get("items", [])) for p in platforms)
         total_rss_items = sum(len(f.get("items", [])) for f in rss_feeds)
         total_count = total_platform_items + total_rss_items
-
         if total_count == 0:
             return ""
 
-        # 收集所有分组信息用于生成 tab
         all_groups = []
         for p in platforms:
             items = p.get("items", [])
@@ -1697,7 +991,6 @@ def render_html_content(
                         <div class="standalone-section-count">{total_count} 条</div>
                     </div>"""
 
-        # 生成 tab 栏（2+ 分组时）
         if len(all_groups) >= 2:
             standalone_html += """
                     <div class="tab-bar standalone-tab-bar">"""
@@ -1713,7 +1006,6 @@ def render_html_content(
                     <div class="standalone-groups-grid">"""
 
         group_idx = 0
-        # 渲染热榜平台（复用 word-group 结构）
         for platform in platforms:
             platform_name = platform.get("name", platform.get("id", ""))
             items = platform.get("items", [])
@@ -1727,7 +1019,6 @@ def render_html_content(
                             <div class="standalone-count">{len(items)} 条</div>
                         </div>"""
 
-            # 渲染每个条目（复用 news-item 结构）
             for j, item in enumerate(items, 1):
                 title = item.get("title", "")
                 url = item.get("url", "") or item.get("mobileUrl", "")
@@ -1743,24 +1034,19 @@ def render_html_content(
                             <div class="news-content">
                                 <div class="news-header">"""
 
-                # 排名显示（复用 rank-num 样式，无 # 前缀）
                 if ranks:
                     min_rank = min(ranks)
                     max_rank = max(ranks)
-
-                    # 确定排名等级
                     if min_rank <= 3:
                         rank_class = "top"
                     elif min_rank <= 10:
                         rank_class = "high"
                     else:
                         rank_class = ""
-
                     if min_rank == max_rank:
                         rank_text = str(min_rank)
                     else:
                         rank_text = f"{min_rank}-{max_rank}"
-
                     standalone_html += f'<span class="rank-num {rank_class}">{rank_text}</span>'
                 elif rank > 0:
                     if rank <= 3:
@@ -1771,7 +1057,6 @@ def render_html_content(
                         rank_class = ""
                     standalone_html += f'<span class="rank-num {rank_class}">{rank}</span>'
 
-                # 时间显示（复用 time-info 样式，将 HH-MM 转换为 HH:MM）
                 if first_time and last_time and first_time != last_time:
                     first_time_display = convert_time_for_display(first_time)
                     last_time_display = convert_time_for_display(last_time)
@@ -1780,7 +1065,6 @@ def render_html_content(
                     first_time_display = convert_time_for_display(first_time)
                     standalone_html += f'<span class="time-info">{html_escape(first_time_display)}</span>'
 
-                # 出现次数（复用 count-info 样式）
                 if count > 1:
                     standalone_html += f'<span class="count-info">{count}次</span>'
 
@@ -1788,7 +1072,6 @@ def render_html_content(
                                 </div>
                                 <div class="news-title">"""
 
-                # 标题和链接（复用 news-link 样式）
                 escaped_title = html_escape(title)
                 if url:
                     escaped_url = html_escape(url)
@@ -1805,7 +1088,6 @@ def render_html_content(
                     </div>"""
             group_idx += 1
 
-        # 渲染 RSS 源（复用相同结构）
         for feed in rss_feeds:
             feed_name = feed.get("name", feed.get("id", ""))
             items = feed.get("items", [])
@@ -1831,7 +1113,6 @@ def render_html_content(
                             <div class="news-content">
                                 <div class="news-header">"""
 
-                # 时间显示（格式化 ISO 时间）
                 if published_at:
                     try:
                         from datetime import datetime as dt
@@ -1842,10 +1123,8 @@ def render_html_content(
                             time_display = published_at
                     except:
                         time_display = published_at
-
                     standalone_html += f'<span class="time-info">{html_escape(time_display)}</span>'
 
-                # 作者显示
                 if author:
                     standalone_html += f'<span class="source-name">{html_escape(author)}</span>'
 
@@ -1874,27 +1153,20 @@ def render_html_content(
                 </div>"""
         return standalone_html
 
-    # 生成 RSS 统计和新增 HTML
     rss_stats_html = render_rss_stats_html(rss_items, "RSS 订阅更新") if rss_items else ""
     rss_new_html = render_rss_stats_html(rss_new_items, "RSS 新增更新") if rss_new_items else ""
-
-    # 生成独立展示区 HTML
     standalone_html = render_standalone_html(standalone_data)
-
-    # 生成 AI 分析 HTML
     ai_html = render_ai_analysis_html_rich(ai_analysis) if ai_analysis else ""
 
-    # 准备各区域内容映射
     region_contents = {
         "hotlist": stats_html,
         "rss": rss_stats_html,
-        "new_items": (new_titles_html, rss_new_html),  # 元组，分别处理
+        "new_items": (new_titles_html, rss_new_html),
         "standalone": standalone_html,
         "ai_analysis": ai_html,
     }
 
     def add_section_divider(content: str) -> str:
-        """为内容的外层 div 添加 section-divider 类"""
         if not content or 'class="' not in content:
             return content
         first_class_pos = content.find('class="')
@@ -1903,12 +1175,10 @@ def render_html_content(
             return content[:insert_pos] + "section-divider " + content[insert_pos:]
         return content
 
-    # 按 region_order 顺序组装内容，动态添加分割线
     has_previous_content = False
     for region in region_order:
         content = region_contents.get(region, "")
         if region == "new_items":
-            # 特殊处理 new_items 区域（包含热榜新增和 RSS 新增两部分）
             new_html, rss_new = content
             if new_html:
                 if has_previous_content:
@@ -2128,7 +1398,6 @@ def render_html_content(
                     });
                 });
 
-                // 初始状态
                 initStandaloneTabVisibility();
             }
 
@@ -2202,7 +1471,6 @@ def render_html_content(
                     el.style.display = el.dataset.prevDisplay || ''; delete el.dataset.prevDisplay;
                 });
                 document.querySelectorAll('.reading-progress').forEach(function(el) { el.style.display = ''; });
-                document.querySelectorAll('.reading-progress').forEach(function(el) { el.style.display = ''; });
                 document.querySelectorAll('.header-watermark').forEach(function(el) { el.style.display = ''; });
                 initTabVisibility();
                 initCollapseVisibility();
@@ -2210,8 +1478,6 @@ def render_html_content(
                 var fabBar = document.querySelector('.fab-bar');
                 if (fabBar && window.scrollY > 300) fabBar.classList.add('visible');
             }
-
-            // ===== 截图功能 =====
 
             async function saveAsImage() {
                 const button = event.target;
@@ -2221,22 +1487,14 @@ def render_html_content(
                     button.textContent = '生成中...';
                     button.disabled = true;
                     window.scrollTo(0, 0);
-
-                    // 等待页面稳定
                     await new Promise(resolve => setTimeout(resolve, 200));
 
-                    // 截图前准备：切回窄屏布局
                     var screenshotState = prepareForScreenshot();
-
-                    // 截图前隐藏按钮
                     const buttons = document.querySelector('.save-buttons');
                     buttons.style.visibility = 'hidden';
-
-                    // 再次等待确保按钮完全隐藏
                     await new Promise(resolve => setTimeout(resolve, 100));
 
                     const container = document.querySelector('.container');
-
                     const canvas = await html2canvas(container, {
                         backgroundColor: '#ffffff',
                         scale: 1.5,
@@ -2248,10 +1506,7 @@ def render_html_content(
                         logging: false,
                         width: container.offsetWidth,
                         height: container.offsetHeight,
-                        x: 0,
-                        y: 0,
-                        scrollX: 0,
-                        scrollY: 0,
+                        x: 0, y: 0, scrollX: 0, scrollY: 0,
                         windowWidth: window.innerWidth,
                         windowHeight: window.innerHeight
                     });
@@ -2261,12 +1516,11 @@ def render_html_content(
 
                     const link = document.createElement('a');
                     const now = new Date();
-                    const filename = `TrendRadar_热点新闻分析_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.png`;
+                    const filename = `TrendRadar_雷达简报_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}$${String(now.getDate()).padStart(2, '0')}_$${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.png`;
 
                     link.download = filename;
                     link.href = canvas.toDataURL('image/png', 1.0);
 
-                    // 触发下载
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -2301,7 +1555,6 @@ def render_html_content(
                     button.textContent = '分析中...';
                     button.disabled = true;
 
-                    // 获取所有可能的分割元素
                     const newsItems = Array.from(container.querySelectorAll('.news-item'));
                     const wordGroups = Array.from(container.querySelectorAll('.word-group'));
                     const newSection = container.querySelector('.new-section');
@@ -2309,11 +1562,9 @@ def render_html_content(
                     const header = container.querySelector('.header');
                     const footer = container.querySelector('.footer');
 
-                    // 计算元素位置和高度
                     const containerRect = container.getBoundingClientRect();
                     const elements = [];
 
-                    // 添加header作为必须包含的元素
                     elements.push({
                         type: 'header',
                         element: header,
@@ -2322,7 +1573,6 @@ def render_html_content(
                         height: header.offsetHeight
                     });
 
-                    // 添加错误信息（如果存在）
                     if (errorSection) {
                         const rect = errorSection.getBoundingClientRect();
                         elements.push({
@@ -2334,12 +1584,10 @@ def render_html_content(
                         });
                     }
 
-                    // 按word-group分组处理news-item
                     wordGroups.forEach(group => {
                         const groupRect = group.getBoundingClientRect();
                         const groupNewsItems = group.querySelectorAll('.news-item');
 
-                        // 添加word-group的header部分
                         const wordHeader = group.querySelector('.word-header');
                         if (wordHeader) {
                             const headerRect = wordHeader.getBoundingClientRect();
@@ -2353,7 +1601,6 @@ def render_html_content(
                             });
                         }
 
-                        // 添加每个news-item
                         groupNewsItems.forEach(item => {
                             const rect = item.getBoundingClientRect();
                             elements.push({
@@ -2367,7 +1614,6 @@ def render_html_content(
                         });
                     });
 
-                    // 添加新增新闻部分
                     if (newSection) {
                         const rect = newSection.getBoundingClientRect();
                         elements.push({
@@ -2379,7 +1625,6 @@ def render_html_content(
                         });
                     }
 
-                    // 添加footer
                     const footerRect = footer.getBoundingClientRect();
                     elements.push({
                         type: 'footer',
@@ -2389,7 +1634,6 @@ def render_html_content(
                         height: footer.offsetHeight
                     });
 
-                    // 计算分割点
                     const segments = [];
                     let currentSegment = { start: 0, end: 0, height: 0, includeHeader: true };
                     let headerHeight = header.offsetHeight;
@@ -2399,13 +1643,9 @@ def render_html_content(
                         const element = elements[i];
                         const potentialHeight = element.bottom - currentSegment.start;
 
-                        // 检查是否需要创建新分段
                         if (potentialHeight > maxHeight && currentSegment.height > headerHeight) {
-                            // 在前一个元素结束处分割
                             currentSegment.end = elements[i - 1].bottom;
                             segments.push(currentSegment);
-
-                            // 开始新分段
                             currentSegment = {
                                 start: currentSegment.end,
                                 end: 0,
@@ -2418,51 +1658,36 @@ def render_html_content(
                         }
                     }
 
-                    // 添加最后一个分段
                     if (currentSegment.height > 0) {
                         currentSegment.end = container.offsetHeight;
                         segments.push(currentSegment);
                     }
 
                     button.textContent = `生成中 (0/${segments.length})...`;
-
-                    // 隐藏保存按钮
                     const buttons = document.querySelector('.save-buttons');
                     buttons.style.visibility = 'hidden';
 
-                    // 为每个分段生成图片
                     const images = [];
                     for (let i = 0; i < segments.length; i++) {
                         const segment = segments[i];
-                        button.textContent = `生成中 (${i + 1}/${segments.length})...`;
+                        button.textContent = `生成中 ($${i + 1}/$${segments.length})...`;
 
-                        // 创建临时容器用于截图
                         const tempContainer = document.createElement('div');
                         tempContainer.style.cssText = `
-                            position: absolute;
-                            left: -9999px;
-                            top: 0;
-                            width: ${container.offsetWidth}px;
-                            background: white;
+                            position: absolute; left: -9999px; top: 0;
+                            width: ${container.offsetWidth}px; background: white;
                         `;
                         tempContainer.className = 'container';
 
-                        // 克隆容器内容
                         const clonedContainer = container.cloneNode(true);
-
-                        // 移除克隆内容中的保存按钮
                         const clonedButtons = clonedContainer.querySelector('.save-buttons');
-                        if (clonedButtons) {
-                            clonedButtons.style.display = 'none';
-                        }
+                        if (clonedButtons) { clonedButtons.style.display = 'none'; }
 
                         tempContainer.appendChild(clonedContainer);
                         document.body.appendChild(tempContainer);
 
-                        // 等待DOM更新
                         await new Promise(resolve => setTimeout(resolve, 100));
 
-                        // 使用html2canvas截取特定区域
                         const canvas = await html2canvas(clonedContainer, {
                             backgroundColor: '#ffffff',
                             scale: scale,
@@ -2472,34 +1697,27 @@ def render_html_content(
                             logging: false,
                             width: container.offsetWidth,
                             height: segment.end - segment.start,
-                            x: 0,
-                            y: segment.start,
+                            x: 0, y: segment.start,
                             windowWidth: window.innerWidth,
                             windowHeight: window.innerHeight
                         });
 
                         images.push(canvas.toDataURL('image/png', 1.0));
-
-                        // 清理临时容器
                         document.body.removeChild(tempContainer);
                     }
 
-                    // 恢复按钮显示
                     buttons.style.visibility = 'visible';
 
-                    // 下载所有图片
                     const now = new Date();
-                    const baseFilename = `TrendRadar_热点新闻分析_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+                    const baseFilename = `TrendRadar_雷达简报_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}$${String(now.getDate()).padStart(2, '0')}_$${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
                     for (let i = 0; i < images.length; i++) {
                         const link = document.createElement('a');
-                        link.download = `${baseFilename}_part${i + 1}.png`;
+                        link.download = `$${baseFilename}_part$${i + 1}.png`;
                         link.href = images[i];
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-
-                        // 延迟一下避免浏览器阻止多个下载
                         await new Promise(resolve => setTimeout(resolve, 100));
                     }
 
@@ -2511,7 +1729,6 @@ def render_html_content(
                     }, 2000);
 
                 } catch (error) {
-                    console.error('分段保存失败:', error);
                     const buttons = document.querySelector('.save-buttons');
                     buttons.style.visibility = 'visible';
                     restoreAfterScreenshot(screenshotState2);
@@ -2529,25 +1746,10 @@ def render_html_content(
                 var dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
                 var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
-                // 标题
                 var headerTitle = document.querySelector('.header-title');
-                lines.push('# ' + (headerTitle ? headerTitle.textContent.trim() : 'TrendRadar'));
+                lines.push('# ' + (headerTitle ? headerTitle.textContent.trim() : '雷达简报'));
                 lines.push('');
 
-                // 报告元信息
-                var infoItems = document.querySelectorAll('.header-info .info-item');
-                if (infoItems.length) {
-                    infoItems.forEach(function(item) {
-                        var label = item.querySelector('.info-label');
-                        var value = item.querySelector('.info-value');
-                        if (label && value) {
-                            lines.push('- **' + label.textContent.trim() + '**: ' + value.textContent.trim());
-                        }
-                    });
-                    lines.push('');
-                }
-
-                // 提取 news-item 通用函数
                 function extractItem(item, idx) {
                     var titleEl = item.querySelector('.news-title a');
                     var titleText = '';
@@ -2583,7 +1785,6 @@ def render_html_content(
                     return line;
                 }
 
-                // 热点关键词区
                 var wordGroups = document.querySelectorAll('.hotlist-section > .word-group');
                 if (wordGroups.length) {
                     lines.push('## 热点新闻');
@@ -2604,7 +1805,6 @@ def render_html_content(
                     });
                 }
 
-                // 新增热点区
                 var newSection = document.querySelector('.new-section');
                 if (newSection) {
                     var newTitle = newSection.querySelector('.new-section-title');
@@ -2626,7 +1826,6 @@ def render_html_content(
                     });
                 }
 
-                // 独立展示区（热榜平台 + RSS）
                 var standaloneSection = document.querySelector('.standalone-section');
                 if (standaloneSection) {
                     var standaloneTitle = standaloneSection.querySelector('.standalone-section-title');
@@ -2649,7 +1848,6 @@ def render_html_content(
                     });
                 }
 
-                // 错误区
                 var errorSection = document.querySelector('.error-section');
                 if (errorSection) {
                     var errorItems = errorSection.querySelectorAll('.error-item');
@@ -2663,12 +1861,10 @@ def render_html_content(
                     }
                 }
 
-                // 页脚
                 lines.push('---');
                 lines.push('*Generated by TrendRadar*');
 
-                // 下载
-                var md = lines.join('\n');
+                var md = lines.join('\\n');
                 var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
                 var link = document.createElement('a');
                 var filename = 'TrendRadar_' + dateStr + '_' + timeStr.replace(':', '') + '.md';
@@ -2683,7 +1879,6 @@ def render_html_content(
             document.addEventListener('DOMContentLoaded', function() {
                 window.scrollTo(0, 0);
 
-                // 自动检测宽屏模式
                 var savedMode = null;
                 try { savedMode = localStorage.getItem('trendradar-wide-mode'); } catch(e) {}
                 if (savedMode === '1' || (savedMode === null && window.innerWidth > 768)) {
@@ -2692,7 +1887,6 @@ def render_html_content(
                     if (btn) btn.textContent = '⊡';
                 }
 
-                // 暗色模式恢复
                 var savedDark = null;
                 try { savedDark = localStorage.getItem('trendradar-dark-mode'); } catch(e) {}
                 if (savedDark === '1') {
@@ -2701,17 +1895,14 @@ def render_html_content(
                     if (darkBtn) darkBtn.textContent = '☀';
                 }
 
-                // 启用搜索栏
                 var searchBar = document.querySelector('.search-bar');
                 if (searchBar) searchBar.style.display = 'block';
 
-                // 初始化增强功能
                 initTabs();
                 initBackToTop();
                 initCollapse();
                 initStandaloneTabs();
 
-                // 键盘快捷键
                 document.addEventListener('keydown', function(e) {
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                     var helpBtn = document.querySelector('.fab-help');
@@ -2732,7 +1923,6 @@ def render_html_content(
                     }
                 });
 
-                // 阅读进度条
                 var progressBar = document.querySelector('.reading-progress');
                 if (progressBar) {
                     window.addEventListener('scroll', function() {
@@ -2741,7 +1931,6 @@ def render_html_content(
                     });
                 }
 
-                // 一键复制：hover 时数字变复制图标
                 var copySvg = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-7A1.5 1.5 0 013.5 1h7A1.5 1.5 0 0112 2.5V5"/></svg>';
                 var checkSvg = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#22c55e" stroke-width="2"><path d="M3 8.5l3.5 3.5 7-7"/></svg>';
                 document.querySelectorAll('.news-item .news-number').forEach(function(numEl) {
@@ -2765,33 +1954,317 @@ def render_html_content(
                     });
                 });
 
-
-
-                // Header watermark 鼠标跟随揭示
                 (function() {
                     var header = document.querySelector('.header');
                     var watermark = document.querySelector('.header-watermark');
                     if (!header || !watermark) return;
 
-                    var radius = 100;
-
+                    var radius = 120;
                     header.addEventListener('mousemove', function(e) {
                         var rect = watermark.getBoundingClientRect();
                         var x = e.clientX - rect.left;
                         var y = e.clientY - rect.top;
-                        var maskVal = 'radial-gradient(circle ' + radius + 'px at ' + x + 'px ' + y + 'px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%)';
+                        var maskVal = 'radial-gradient(circle ' + radius + 'px at ' + x + 'px ' + y + 'px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.12) 55%, transparent 100%)';
                         watermark.style.webkitMaskImage = maskVal;
                         watermark.style.maskImage = maskVal;
-                        watermark.style.color = 'rgba(255, 255, 255, 0.25)';
+                        watermark.style.color = 'rgba(255, 255, 255, 0.18)';
                     });
 
                     header.addEventListener('mouseleave', function() {
-                        watermark.style.webkitMaskImage = 'radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)';
-                        watermark.style.maskImage = 'radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)';
-                        watermark.style.color = 'rgba(255, 255, 255, 0.15)';
+                        watermark.style.webkitMaskImage = 'radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, transparent 100%)';
+                        watermark.style.maskImage = 'radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, transparent 100%)';
+                        watermark.style.color = 'rgba(255, 255, 255, 0.055)';
                     });
                 })();
+
             });
+
+            // ===== 天气套件初始化逻辑 =====
+            (function initWeatherSuite() {
+                var pad = function(n) { return String(n).padStart(2, '0'); };
+                var now = new Date();
+                var tmr = new Date(now); tmr.setDate(tmr.getDate() + 1);
+                var weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
+
+                document.getElementById('tmrDate').textContent = (tmr.getMonth() + 1) + '月' + tmr.getDate() + '日 · ' + weekNames[tmr.getDay()];
+
+                var CDN = 'https://cdn.jsdelivr.net/npm/@basmilius/weather-icons@2.0.1/production/line/lottie/';
+
+                // WMO → Meteocons line lottie 文件名 (已修复毛毛雨问题)
+                var WMO = {
+                    0:  {d:'clear-day',              n:'clear-night',              t:'晴'},
+                    1:  {d:'mostly-clear-day',       n:'mostly-clear-night',       t:'大部晴'},
+                    2:  {d:'partly-cloudy-day',      n:'partly-cloudy-night',      t:'多云'},
+                    3:  {d:'overcast',               n:'overcast',                 t:'阴'},
+                    45: {d:'fog',                    n:'fog',                      t:'雾'},
+                    48: {d:'fog',                    n:'fog',                      t:'雾凇'},
+                    51: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'毛毛雨'},
+                    53: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'毛毛雨'},
+                    55: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'大毛毛雨'},
+                    61: {d:'partly-cloudy-day-rain', n:'partly-cloudy-night-rain', t:'小雨'},
+                    63: {d:'rain',                   n:'rain',                     t:'中雨'},
+                    65: {d:'extreme-rain',           n:'extreme-rain',             t:'大雨'},
+                    71: {d:'partly-cloudy-day-snow', n:'partly-cloudy-night-snow', t:'小雪'},
+                    73: {d:'snow',                   n:'snow',                     t:'中雪'},
+                    75: {d:'extreme-snow',           n:'extreme-snow',             t:'大雪'},
+                    77: {d:'sleet',                  n:'sleet',                    t:'冰粒'},
+                    80: {d:'partly-cloudy-day-rain', n:'partly-cloudy-night-rain', t:'阵雨'},
+                    81: {d:'rain',                   n:'rain',                     t:'中阵雨'},
+                    82: {d:'extreme-rain',           n:'extreme-rain',             t:'强阵雨'},
+                    85: {d:'snow',                   n:'snow',                     t:'阵雪'},
+                    86: {d:'extreme-snow',           n:'extreme-snow',             t:'强阵雪'},
+                    95: {d:'thunderstorms-day',      n:'thunderstorms-night',      t:'雷暴'},
+                    96: {d:'thunderstorms-day-overcast-rain', n:'thunderstorms-night-overcast-rain', t:'雷暴冰雹'},
+                    99: {d:'thunderstorms-day-overcast-rain', n:'thunderstorms-night-overcast-rain', t:'强雷暴'},
+                };
+
+                function wmoGet(c) { return WMO[c] || WMO[3]; }
+                function lottieFile(c, isDay) { var e = wmoGet(c); return CDN + (isDay ? e.d : e.n) + '.json'; }
+                function wmoDesc(c) { return wmoGet(c).t; }
+
+                function loadLottie(container, url) {
+                    if (!container) return;
+                    container.innerHTML = '';
+                    var wrap = document.createElement('div');
+                    container.appendChild(wrap);
+                    try {
+                        lottie.loadAnimation({
+                            container: wrap,
+                            renderer: 'svg',
+                            loop: true,
+                            autoplay: true,
+                            path: url
+                        });
+                    } catch(e) {}
+                }
+
+                var SKY = {
+                    0:  {d:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
+                         n:'linear-gradient(160deg,#050d1f 0%,#0a1628 40%,#0d2040 100%)'},
+                    1:  {d:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
+                         n:'linear-gradient(160deg,#050d1f 0%,#0a1628 40%,#0d2040 100%)'},
+                    2:  {d:'linear-gradient(160deg,#546e7a 0%,#78909c 50%,#90a4ae 100%)',
+                         n:'linear-gradient(160deg,#1a2535 0%,#263040 50%,#2e3d50 100%)'},
+                    3:  {d:'linear-gradient(160deg,#546e7a 0%,#607d8b 50%,#78909c 100%)',
+                         n:'linear-gradient(160deg,#1a2535 0%,#263040 50%,#2e3d50 100%)'},
+                };
+                function getSky(code, isDay) {
+                    var s = SKY[code] || (code <= 3 ? SKY[code] : null);
+                    if (!s) {
+                        if (code >= 45 && code <= 48) return isDay ? 'linear-gradient(160deg,#6b7280 0%,#9ca3af 100%)' : 'linear-gradient(160deg,#1f2937 0%,#374151 100%)';
+                        if (code >= 51 && code <= 67 || code >= 80 && code <= 82) return 'linear-gradient(160deg,#263238 0%,#37474f 50%,#455a64 100%)';
+                        if (code >= 71 && code <= 77 || code >= 85 && code <= 86) return 'linear-gradient(160deg,#4a5568 0%,#718096 50%,#a0aec0 100%)';
+                        if (code >= 95) return 'linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)';
+                        return isDay ? 'linear-gradient(160deg,#1565c0 0%,#42a5f5 100%)' : 'linear-gradient(160deg,#050d1f 0%,#0d2040 100%)';
+                    }
+                    return isDay ? s.d : s.n;
+                }
+
+                var svgDrop = '<svg class="wt-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0C19 10 12 2 12 2z"/></svg>';
+                var svgTherm = '<svg class="wt-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>';
+                var svgWind = '<svg class="wt-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>';
+
+                var UNIFORMS = [
+                    null,
+                    {name:'黑色工服', color:'#1a1a1a'},
+                    {name:'金色工服', color:'#c9a227'},
+                    {name:'红色工服', color:'#c0392b'},
+                    {name:'黑色工服', color:'#1a1a1a'},
+                    {name:'金色工服', color:'#c9a227'},
+                    {name:'红色工服', color:'#c0392b'},
+                    {name:'红色工服', color:'#c0392b'},
+                ];
+                function dayToIdx(d) { return d === 0 ? 7 : d; }
+
+                function genClothingHint(tmax, tmin, pop, windKmh, wmoCode) {
+                    var hints = [];
+                    if (tmax <= 5) hints.push('气温较低，建议厚外套加保暖内搭');
+                    else if (tmax <= 12) hints.push('天气偏凉，外套不可少');
+                    else if (tmax <= 20) hints.push('温度适中，薄外套或卫衣即可');
+                    else if (tmax <= 28) hints.push('气温舒适，轻薄穿搭为主');
+                    else hints.push('天气较热，透气轻薄为主');
+
+                    if (tmax - tmin >= 10) hints.push('早晚温差大，备一件外套');
+
+                    if (wmoCode >= 71 && wmoCode <= 77 || wmoCode >= 85 && wmoCode <= 86) hints.push('有降雪，注意防滑保暖');
+                    else if (pop >= 50) hints.push('降水概率高，记得带伞');
+                    else if (pop >= 30) hints.push('可能有雨，备好雨具');
+
+                    if (windKmh >= 40) hints.push('注意防风');
+                    return hints.slice(0, 2).join('，');
+                }
+
+                function renderUniform(tmrWeatherData) {
+                    var tmrDow = tmr.getDay();
+                    var todayDow = now.getDay();
+                    var u = UNIFORMS[dayToIdx(tmrDow)];
+
+                    document.getElementById('uniformSwatch').style.background = u.color;
+                    document.getElementById('uniformColorName').textContent = u.name;
+                    document.getElementById('uniformDate').textContent = weekNames[tmrDow];
+
+                    var hint = '';
+                    if (tmrWeatherData) {
+                        var daily = tmrWeatherData.daily;
+                        var tmax = daily ? Math.round(daily.temperature_2m_max[1]) : 20;
+                        var tmin = daily ? Math.round(daily.temperature_2m_min[1]) : 10;
+                        var pop = daily && daily.precipitation_probability_max ? daily.precipitation_probability_max[1] : 0;
+                        var wind = daily && daily.wind_speed_10m_max ? Math.round(daily.wind_speed_10m_max[1]) : 0;
+                        var code = daily ? daily.weather_code[1] : 0;
+                        hint = genClothingHint(tmax, tmin, pop, wind, code);
+                    }
+                    document.getElementById('uniformHint').textContent = hint || '—';
+
+                    var weekEl = document.getElementById('uniformWeek');
+                    weekEl.innerHTML = '';
+                    var dayLabels = ['日','一','二','三','四','五','六'];
+                    var order = [1,2,3,4,5,6,0];
+                    order.forEach(function(d) {
+                        var uu = UNIFORMS[dayToIdx(d)];
+                        var isToday = (d === todayDow), isTmr = (d === tmrDow);
+                        var dot = document.createElement('div');
+                        dot.className = 'uniform-day-dot' + (isToday ? ' today' : '') + (isTmr ? ' tomorrow' : '');
+                        dot.innerHTML =
+                            '<div class="uniform-dot" style="background:' + uu.color + ';"></div>' +
+                            '<div class="uniform-day-label">' + dayLabels[d] + '</div>';
+                        weekEl.appendChild(dot);
+                    });
+
+                    document.getElementById('wtUniform').style.display = 'block';
+                }
+
+                function renderToday(data, city) {
+                    var c = data.current, code = c.weather_code, isDay = !!c.is_day;
+                    var temp = Math.round(c.temperature_2m), feel = Math.round(c.apparent_temperature);
+                    var hum = c.relative_humidity_2m, wind = Math.round(c.wind_speed_10m);
+                    var tmax = data.daily ? Math.round(data.daily.temperature_2m_max[0]) : null;
+                    var tmin = data.daily ? Math.round(data.daily.temperature_2m_min[0]) : null;
+
+                    document.getElementById('mainHeader').style.background = getSky(code, isDay);
+
+                    var el = document.getElementById('wtToday');
+                    el.classList.remove('loading');
+                    el.innerHTML =
+                        '<div class="wt-lottie-wrap" id="todayLottieWrap"></div>' +
+                        '<div class="wt-center">' +
+                            '<div class="wt-temp-row"><span class="wt-temp">' + temp + '</span><span class="wt-unit">°C</span></div>' +
+                            '<div class="wt-desc">' + wmoDesc(code) + '</div>' +
+                            (tmax !== null ? '<div class="wt-range">最高 ' + tmax + '° · 最低 ' + tmin + '°</div>' : '') +
+                        '</div>' +
+                        '<div class="wt-right">' +
+                            '<div class="wt-detail">' + svgDrop + '<span>湿度</span><span class="wt-detail-val">' + hum + '%</span></div>' +
+                            '<div class="wt-detail">' + svgTherm + '<span>体感</span><span class="wt-detail-val">' + feel + '°</span></div>' +
+                            '<div class="wt-detail">' + svgWind + '<span>风速</span><span class="wt-detail-val">' + wind + ' km/h</span></div>' +
+                            '<div class="wt-detail">' + svgWind + '<span>风况</span><span class="wt-detail-val">' + windLabel(wind) + '</span></div>' +
+                        '</div>';
+
+                    // 绑定 Lottie (在今日卡片内部)
+                    loadLottie(document.getElementById('todayLottieWrap'), lottieFile(code, isDay));
+
+                    document.getElementById('wtCity').textContent = city;
+                    var t = new Date();
+                    document.getElementById('wtUpdate').textContent = '更新于 ' + pad(t.getHours()) + ':' + pad(t.getMinutes());
+                    document.getElementById('wtFooter').style.display = 'flex';
+                }
+
+                function windLabel(k) {
+                    if(k < 1) return '静风'; if(k < 6) return '软风'; if(k < 12) return '轻风';
+                    if(k < 20) return '微风'; if(k < 29) return '和风'; if(k < 39) return '清风';
+                    if(k < 50) return '强风'; return '大风';
+                }
+
+                function renderHourly(data) {
+                    var hourly = data.hourly; if (!hourly) return;
+                    var times = hourly.time, temps = hourly.temperature_2m;
+                    var codes = hourly.weather_code, pops = hourly.precipitation_probability;
+                    var nowH = new Date(); nowH.setMinutes(0, 0, 0);
+                    var nowTs = nowH.toISOString().slice(0, 13);
+                    var startIdx = 0;
+                    for (var i = 0; i < times.length; i++) { if (times[i].slice(0, 13) === nowTs) { startIdx = i; break; } }
+                    var scroll = document.getElementById('hourlyScroll'); scroll.innerHTML = '';
+                    for (var j = startIdx; j < Math.min(startIdx + 13, times.length); j++) {
+                        var dt = new Date(times[j]), isNow = (j === startIdx);
+                        var isD = dt.getHours() >= 6 && dt.getHours() < 19;
+                        var pop = pops ? pops[j] : 0;
+                        var item = document.createElement('div');
+                        item.className = 'hourly-item' + (isNow ? ' now' : '');
+                        var lottieId = 'hlottie-' + j;
+                        item.innerHTML =
+                            '<div class="hourly-time">' + (isNow ? '现在' : pad(dt.getHours()) + ':00') + '</div>' +
+                            '<div class="hourly-lottie" id="' + lottieId + '"></div>' +
+                            '<div class="hourly-temp">' + Math.round(temps[j]) + '°</div>' +
+                            (pop > 20 ? '<div class="hourly-pop">' + pop + '%</div>' : '<div class="hourly-pop" style="opacity:0">·</div>');
+                        scroll.appendChild(item);
+                        (function(id, code, day) {
+                            setTimeout(function() {
+                                loadLottie(document.getElementById(id), lottieFile(code, day));
+                            }, (j - startIdx) * 60);
+                        })(lottieId, codes[j], isD);
+                    }
+                    document.getElementById('wtHourly').style.display = 'block';
+                }
+
+                function renderTomorrow(data) {
+                    var daily = data.daily; if (!daily || daily.time.length < 2) return;
+                    var code = daily.weather_code[1];
+                    var tmax = Math.round(daily.temperature_2m_max[1]);
+                    var tmin = Math.round(daily.temperature_2m_min[1]);
+                    var pop = daily.precipitation_probability_max ? daily.precipitation_probability_max[1] : null;
+                    var wind = daily.wind_speed_10m_max ? Math.round(daily.wind_speed_10m_max[1]) : null;
+
+                    document.getElementById('tmrDesc').textContent = wmoDesc(code);
+                    document.getElementById('tmrRange').textContent = '最高 ' + tmax + '°  /  最低 ' + tmin + '°';
+
+                    loadLottie(document.getElementById('tmrLottie'), lottieFile(code, true));
+
+                    var statsHtml = '';
+                    if (pop !== null) statsHtml += '<div class="tmr-stat">' + svgDrop.replace('class="wt-detail-icon"', 'style="width:11px;height:11px;opacity:.7;"') + '<span class="tmr-stat-val">' + pop + '%</span><span>降水</span></div>';
+                    if (wind !== null) statsHtml += '<div class="tmr-stat">' + svgWind.replace('class="wt-detail-icon"', 'style="width:11px;height:11px;opacity:.7;"') + '<span class="tmr-stat-val">' + wind + '</span><span>km/h</span></div>';
+                    document.getElementById('tmrStats').innerHTML = statsHtml;
+
+                    var refMin = Math.min(daily.temperature_2m_min[0], tmin) - 2;
+                    var refMax = Math.max(daily.temperature_2m_max[0], tmax) + 2;
+                    var range = refMax - refMin || 1;
+                    document.getElementById('tmrBarMin').textContent = tmin + '°';
+                    document.getElementById('tmrBarMax').textContent = tmax + '°';
+                    document.getElementById('tmrBarFill').style.left = ((tmin - refMin) / range * 100).toFixed(1) + '%';
+                    document.getElementById('tmrBarFill').style.right = (100 - (tmax - refMin) / range * 100).toFixed(1) + '%';
+                    document.getElementById('wtTomorrow').style.display = 'block';
+                }
+
+                function fetchWeather(lat, lon, city) {
+                    var url = 'https://api.open-meteo.com/v1/forecast' +
+                        '?latitude=' + lat + '&longitude=' + lon +
+                        '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day' +
+                        '&hourly=temperature_2m,weather_code,precipitation_probability' +
+                        '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max' +
+                        '&wind_speed_unit=kmh&timezone=auto&forecast_days=2';
+                    fetch(url)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            renderToday(d, city);
+                            renderHourly(d);
+                            renderTomorrow(d);
+                            renderUniform(d);
+                        })
+                        .catch(function() {
+                            var el = document.getElementById('wtToday');
+                            el.classList.remove('loading');
+                            el.innerHTML = '<span style="font-size:12px;color:var(--tm);">天气数据暂时不可用</span>';
+                            renderUniform(null);
+                        });
+                }
+
+                // IP 定位
+                fetch('https://ipapi.co/json/')
+                    .then(function(r) { return r.json(); })
+                    .then(function(g) {
+                        fetchWeather(g.latitude || 39.9042, g.longitude || 116.4074, g.city || g.region || '当前位置');
+                    })
+                    .catch(function() {
+                        fetchWeather(39.9042, 116.4074, '北京');
+                    });
+            })();
         </script>
     </body>
     </html>
