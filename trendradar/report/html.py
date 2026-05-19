@@ -63,420 +63,406 @@ def render_html_content(
         <style>
             * { box-sizing: border-box; }
             :root {
-                --glass-heavy: rgba(255,255,255,0.18);
-                --glass-mid: rgba(255,255,255,0.12);
-                --glass-light: rgba(255,255,255,0.07);
-                --glass-border: rgba(255,255,255,0.26);
-                --glass-border-light: rgba(255,255,255,0.14);
-                --tw: rgba(255,255,255,0.97);
-                --tm: rgba(255,255,255,0.70);
-                --td: rgba(255,255,255,0.45);
+                --gm: rgba(255,255,255,0.13);
+                --gb: rgba(255,255,255,0.10);
+                --gl: rgba(255,255,255,0.07);
+                --bd: rgba(255,255,255,0.20);
+                --bdl: rgba(255,255,255,0.12);
+                --tw: rgba(255,255,255,0.96);
+                --tm: rgba(255,255,255,0.65);
+                --td: rgba(255,255,255,0.40);
             }
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-                margin: 0;
-                padding: 16px;
-                background: #fafafa;
-                color: #333;
+                margin: 0; padding: 16px;
+                background: #e8edf2;
+                color: rgba(255,255,255,0.9);
                 line-height: 1.5;
             }
-
             .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background: white;
-                border-radius: 12px;
-                overflow: hidden;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+                max-width: 600px; margin: 0 auto;
+                background: transparent;
+                border-radius: 20px; overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.14);
             }
 
-            /* ===== 新版 Header ===== */
+            /* ── Header ── */
             .header {
-                position: relative;
-                overflow: hidden;
-                padding: 24px 22px 22px;
-                background: linear-gradient(160deg, #1a6fba 0%, #3b8fd4 40%, #6fb3e8 100%);
-                transition: background 1.4s ease;
-            }
-            .header-glow {
-                position: absolute; inset: 0; pointer-events: none; z-index: 0;
-                background:
-                    radial-gradient(ellipse 55% 45% at 85% 5%, rgba(255,255,255,0.10) 0%, transparent 65%),
-                    radial-gradient(ellipse 35% 35% at 5% 95%, rgba(0,0,0,0.12) 0%, transparent 60%);
+                position: relative; overflow: hidden;
+                padding: 18px 18px 16px;
+                background: linear-gradient(160deg, #546e7a 0%, #607d8b 50%, #78909c 100%);
+                transition: background 1.2s ease;
             }
             .header-watermark {
                 position: absolute; top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                font-size: clamp(38px, 8vw, 76px); font-weight: 900; letter-spacing: 0.06em;
-                color: rgba(255,255,255,0.055); pointer-events: none; white-space: nowrap;
-                user-select: none; z-index: 1;
-                transition: color .3s, -webkit-mask-image .3s, mask-image .3s;
-                -webkit-mask-image: radial-gradient(circle 0px at 50% 50%, black 0%, transparent 100%);
-                mask-image: radial-gradient(circle 0px at 50% 50%, black 0%, transparent 100%);
+                font-size: clamp(36px, 7vw, 68px); font-weight: 900; letter-spacing: 0.06em;
+                color: rgba(255,255,255,0.045); pointer-events: none; white-space: nowrap;
+                user-select: none; z-index: 0;
             }
 
             .header-top {
                 position: relative; z-index: 2;
                 display: flex; align-items: center; justify-content: space-between;
-                margin-top: 40px; 
-                margin-bottom: 16px;
+                margin-top: 36px; margin-bottom: 12px;
             }
-            .header-title {
-                font-size: 20px; font-weight: 700;
-                color: var(--tw); letter-spacing: 0.3px;
-            }
+            .header-title { font-size: 18px; font-weight: 700; color: var(--tw); }
             .gen-time-pill {
-                display: flex; align-items: center; gap: 6px;
-                background: var(--glass-heavy);
-                border: 1px solid var(--glass-border);
-                border-radius: 20px; padding: 5px 12px;
-                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                display: flex; align-items: center; gap: 5px;
+                background: var(--gm); border: 1px solid var(--bd);
+                border-radius: 20px; padding: 4px 11px;
                 font-size: 12px; font-weight: 600; color: var(--tw);
             }
             .gen-dot {
-                width: 6px; height: 6px; border-radius: 50%;
-                background: #4ade80; flex-shrink: 0;
+                width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0;
                 animation: pulse-dot 2.2s ease-in-out infinite;
             }
-            @keyframes pulse-dot {
-                0%, 100% { opacity: 1; transform: scale(1); }
-                50% { opacity: 0.5; transform: scale(0.75); }
-            }
+            @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.75);} }
 
-            /* ===== 天气面板 ===== */
-            .weather-panel {
-                position: relative; z-index: 2;
-                display: flex; flex-direction: column; gap: 12px;
-            }
+            /* ── 挂件面板 ── */
+            .panel { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; }
 
-            /* 今日主卡 */
-            .weather-today {
-                background: var(--glass-heavy);
-                border: 1px solid var(--glass-border);
-                border-radius: 20px;
-                backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
-                padding: 16px 18px 14px;
-                display: flex; align-items: center;
-                min-height: 86px; position: relative; overflow: hidden;
-                transition: opacity .4s;
+            /* 今日+明日 双列 */
+            .weather-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+            /* 今日卡 */
+            .today-card {
+                background: var(--gm); border: 1px solid var(--bd);
+                border-radius: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                padding: 14px 14px 12px; position: relative; overflow: hidden;
             }
-            .weather-today::before {
+            .today-card::before {
                 content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.38), transparent);
             }
-            .weather-today.loading { justify-content: center; opacity: 0.55; }
+            .today-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+            .today-icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; }
+            .today-icon img { width: 44px; height: 44px; object-fit: contain; filter: brightness(1.05) drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
+            .today-emoji-fb { font-size: 38px; line-height: 1; display: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+            
+            .today-temp { font-size: 32px; font-weight: 200; color: var(--tw); letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+            .today-unit { font-size: 14px; font-weight: 300; color: var(--tm); }
+            .today-desc { font-size: 12px; font-weight: 500; color: var(--tw); margin-top: 2px; }
+            .today-range { font-size: 10.5px; color: var(--tm); margin-top: 2px; font-variant-numeric: tabular-nums; }
+            
+            .today-details { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; border-top: 1px solid var(--bdl); }
+            .detail-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--tm); }
+            .detail-row svg { width: 11px; height: 11px; opacity: 0.7; flex-shrink: 0; }
+            .detail-val { color: var(--tw); font-weight: 500; }
 
-            .wt-icon-wrap {
-                flex-shrink: 0; width: 72px; height: 72px;
-                position: relative; display: flex; align-items: center; justify-content: center;
+            /* 明日卡 */
+            .tomorrow-card {
+                background: var(--gb); border: 1px solid var(--bdl);
+                border-radius: 16px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 14px 14px 12px; display: flex; flex-direction: column;
             }
-            .wt-icon {
-                width: 72px; height: 72px; object-fit: contain;
-                filter: brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.25));
-            }
-
-            .wt-center { flex: 1; padding: 0 12px; border-right: 1px solid var(--glass-border-light); }
-            .wt-temp-row { display: flex; align-items: flex-start; gap: 2px; line-height: 1; margin-bottom: 3px; }
-            .wt-temp { font-size: 50px; font-weight: 200; color: var(--tw); letter-spacing: -3px; font-variant-numeric: tabular-nums; line-height: 1; }
-            .wt-unit { font-size: 21px; font-weight: 300; color: var(--tm); margin-top: 6px; }
-            .wt-desc { font-size: 13px; font-weight: 500; color: var(--tw); margin-bottom: 5px; }
-            .wt-range { font-size: 11px; color: var(--tm); font-variant-numeric: tabular-nums; }
-
-            .wt-right { flex-shrink: 0; padding-left: 15px; display: flex; flex-direction: column; gap: 6px; }
-            .wt-detail { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--tm); white-space: nowrap; }
-            .wt-detail-icon { width: 13px; height: 13px; opacity: 0.75; flex-shrink: 0; }
-            .wt-detail-val { color: var(--tw); font-weight: 500; font-variant-numeric: tabular-nums; }
-
-            /* 逐小时 */
-            .weather-hourly {
-                background: var(--glass-mid); border: 1px solid var(--glass-border-light);
-                border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 12px 4px 10px; overflow: hidden;
-            }
-            .hourly-label { font-size: 9.5px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; padding: 0 13px; margin-bottom: 9px; }
-            .hourly-scroll { display: flex; gap: 4px; overflow-x: auto; padding: 0 9px 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-            .hourly-scroll::-webkit-scrollbar { display: none; }
-            .hourly-item { 
-                flex-shrink: 0; display: flex; flex-direction: column; align-items: center; 
-                justify-content: flex-start; gap: 6px; padding: 8px 6px; 
-                border-radius: 12px; min-width: 56px; height: 86px; cursor: default; 
-            }
-            .hourly-item.now { background: var(--glass-heavy); border: 1px solid var(--glass-border); }
-            .hourly-time { font-size: 11px; color: var(--tm); font-variant-numeric: tabular-nums; font-weight: 500; line-height: 1; }
-            .hourly-item.now .hourly-time { color: var(--tw); font-weight: 700; }
-            .hourly-icon { width: 28px; height: 28px; object-fit: contain; filter: brightness(0) invert(1); flex-shrink: 0; }
-            .hourly-temp { font-size: 13px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; line-height: 1; margin-top: auto; }
-
-            /* 明日预报 */
-            .weather-tomorrow {
-                background: var(--glass-mid); border: 1px solid var(--glass-border-light);
-                border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 14px 16px;
-            }
-            .tmr-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-            .tmr-label { font-size: 10px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
-            .tmr-date { font-size: 11px; color: var(--td); }
-            .tmr-body { display: flex; align-items: center; gap: 14px; }
-            .tmr-icon { width: 44px; height: 44px; object-fit: contain; filter: brightness(0) invert(1); flex-shrink: 0; }
-            .tmr-info { flex: 1; }
-            .tmr-desc { font-size: 14px; font-weight: 600; color: var(--tw); margin-bottom: 4px; }
-            .tmr-range { font-size: 12px; color: var(--tm); font-variant-numeric: tabular-nums; }
-            .tmr-stats { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-            .tmr-stat { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--tm); }
-            .tmr-stat svg { width: 12px; height: 12px; opacity: 0.7; }
+            .tmr-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .tmr-label { font-size: 9px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .tmr-date { font-size: 9.5px; color: var(--td); }
+            
+            .tmr-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: auto; }
+            .tmr-icon { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; }
+            .tmr-icon img { width: 34px; height: 34px; object-fit: contain; filter: brightness(1.05) drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+            .tmr-emoji-fb { font-size: 30px; line-height: 1; display: none; }
+            
+            .tmr-desc { font-size: 13px; font-weight: 600; color: var(--tw); margin-bottom: 2px; }
+            .tmr-range { font-size: 10.5px; color: var(--tm); font-variant-numeric: tabular-nums; }
+            
+            .tmr-stats { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+            .tmr-stat { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--tm); }
+            .tmr-stat svg { width: 10px; height: 10px; opacity: 0.7; }
             .tmr-stat-val { color: var(--tw); font-weight: 600; }
-            .tmr-bar-wrap { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border-light); }
-            .tmr-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--td); margin-bottom: 6px; }
-            .tmr-bar-track { height: 4px; border-radius: 2px; background: var(--glass-light); position: relative; overflow: hidden; }
+            
+            .tmr-bar-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--bdl); }
+            .tmr-bar-label { display: flex; justify-content: space-between; font-size: 9px; color: var(--td); margin-bottom: 4px; }
+            .tmr-bar-track { height: 3px; border-radius: 2px; background: var(--gl); position: relative; overflow: hidden; }
             .tmr-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, #60a5fa, #f97316); transition: left .9s ease, right .9s ease; }
 
+            /* TSLA 股票卡 */
+            .tsla-card {
+                background: var(--gb); border: 1px solid var(--bdl);
+                border-radius: 14px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 12px 14px;
+            }
+            .tsla-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+            .tsla-left { display: flex; flex-direction: column; gap: 2px; }
+            .tsla-ticker { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--tw); }
+            .tsla-logo { width: 20px; height: 20px; background: #e82127; border-radius: 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(232,33,39,0.35); flex-shrink: 0; }
+            .tsla-logo svg { width: 12px; height: 12px; }
+            .tsla-name { font-size: 9.5px; color: var(--td); }
+            .tsla-right { text-align: right; }
+            .tsla-price { font-size: 20px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; line-height: 1.1; }
+            .tsla-chg { font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 3px; display: inline-block; font-variant-numeric: tabular-nums; }
+            .tsla-chg.up { background: rgba(74,222,128,0.15); color: #4ade80; }
+            .tsla-chg.down { background: rgba(248,113,113,0.15); color: #f87171; }
+            .tsla-chg.flat { background: rgba(255,255,255,0.10); color: var(--tm); }
+            .tsla-chart { width: 100%; height: 38px; margin-bottom: 8px; }
+            #tslaCanvas { width: 100%; height: 100%; display: block; }
+            .tsla-grid { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid var(--bdl); padding-top: 8px; }
+            .tsla-cell { display: flex; flex-direction: column; gap: 2px; }
+            .tsla-cell-label { font-size: 9px; color: var(--td); }
+            .tsla-cell-val { font-size: 11px; color: var(--tw); font-weight: 600; font-variant-numeric: tabular-nums; }
+            .tsla-status { font-size: 9.5px; color: var(--td); text-align: right; margin-top: 5px; }
+
             /* 工服卡 */
-            .weather-uniform {
-                background: var(--glass-mid); border: 1px solid var(--glass-border-light);
-                border-radius: 15px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-                padding: 14px 16px;
+            .uniform-card {
+                background: var(--gb); border: 1px solid var(--bdl);
+                border-radius: 14px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 12px 14px;
             }
-            .uniform-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-            .uniform-label { font-size: 10px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
-            .uniform-date { font-size: 11px; color: var(--td); }
-            .uniform-body { display: flex; align-items: center; gap: 14px; }
-            .uniform-swatch {
-                flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%;
-                border: 2px solid rgba(255,255,255,0.35);
-                box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-                transition: background .6s ease;
-            }
+            .uniform-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .uniform-label { font-size: 9px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .uniform-date { font-size: 9.5px; color: var(--td); }
+            .uniform-body { display: flex; align-items: center; gap: 12px; }
+            .uniform-swatch { flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.28); box-shadow: 0 3px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.18); transition: background .6s ease; }
             .uniform-info { flex: 1; }
-            .uniform-color-name { font-size: 15px; font-weight: 700; color: var(--tw); margin-bottom: 4px; }
-            .uniform-hint { font-size: 12px; color: var(--tm); line-height: 1.5; }
-            .uniform-week { display: flex; gap: 5px; align-items: center; }
-            .uniform-day-dot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-            .uniform-day-label { font-size: 9px; color: var(--td); }
-            .uniform-dot {
-                width: 10px; height: 10px; border-radius: 50%;
-                border: 1.5px solid rgba(255,255,255,0.15);
-                transition: transform .2s;
-            }
-            .uniform-day-dot.today .uniform-dot {
-                border-color: rgba(255,255,255,0.7);
-                box-shadow: 0 0 6px rgba(255,255,255,0.4);
-                transform: scale(1.25);
-            }
-            .uniform-day-dot.tomorrow .uniform-dot {
-                border-color: rgba(255,255,255,0.5);
-                transform: scale(1.1);
-            }
+            .uniform-color-name { font-size: 14px; font-weight: 700; color: var(--tw); margin-bottom: 3px; }
+            .uniform-hint { font-size: 11px; color: var(--tm); line-height: 1.45; }
+            .uniform-week { display: flex; gap: 4px; align-items: center; }
+            .uniform-day-dot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+            .uniform-day-label { font-size: 8.5px; color: var(--td); }
+            .uniform-dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.13); transition: transform .2s; }
+            .uniform-day-dot.today .uniform-dot { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 5px rgba(255,255,255,0.35); transform: scale(1.25); }
+            .uniform-day-dot.tomorrow .uniform-dot { border-color: rgba(255,255,255,0.45); transform: scale(1.1); }
 
             /* 城市+更新 */
-            .wt-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; margin-top: 2px; }
-            .wt-location { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--tm); }
-            .wt-location svg { width: 12px; height: 12px; opacity: 0.65; }
-            .wt-update { font-size: 11px; color: var(--td); }
+            .wt-footer { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; margin-top: 2px; }
+            .wt-location { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--tm); }
+            .wt-location svg { width: 10px; height: 10px; opacity: 0.6; }
+            .wt-update { font-size: 10px; color: var(--td); }
 
             /* 骨架 */
-            @keyframes shimmer { 0%, 100% { opacity: .3; } 50% { opacity: .65; } }
-            .skeleton { animation: shimmer 1.6s ease-in-out infinite; background: var(--glass-mid); border-radius: 8px; }
+            @keyframes shimmer { 0%,100%{opacity:.3;}50%{opacity:.6;} }
+            .skeleton { animation: shimmer 1.6s ease-in-out infinite; background: var(--gb); border-radius: 8px; }
 
-            /* ===== 原有 Header 按钮及其他样式 ===== */
-            .save-buttons { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 10; }
-            .save-btn-group { position: relative; display: flex; }
-            .save-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 18px; border-radius: 6px 0 0 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s ease; backdrop-filter: blur(10px); white-space: nowrap; min-height: 38px; border-right: none; }
-            .save-btn:hover { background: rgba(255, 255, 255, 0.3); }
-            .save-dropdown-trigger { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 10px; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 11px; transition: all 0.2s ease; backdrop-filter: blur(10px); min-height: 38px; display: flex; align-items: center; }
-            .save-dropdown-trigger:hover { background: rgba(255, 255, 255, 0.35); }
-            .save-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 4px; background: rgba(30, 30, 50, 0.92); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 4px; min-width: 140px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-            .save-btn-group:hover .save-dropdown-menu, .save-dropdown-menu:hover { opacity: 1; visibility: visible; transform: translateY(0); }
-            .save-dropdown-item { display: block; width: 100%; padding: 9px 14px; background: none; border: none; color: white; font-size: 13px; cursor: pointer; border-radius: 5px; text-align: left; transition: background 0.15s; white-space: nowrap; }
-            .save-dropdown-item:hover { background: rgba(255, 255, 255, 0.15); }
-            .dropdown-icon { width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px; flex-shrink: 0; }
+            /* ══ 内容区 — 深色统一风格 ══ */
+            .content {
+                padding: 18px;
+                background: linear-gradient(180deg, #4a5e6a 0%, #3d5060 100%);
+            }
+            .search-bar { display: none; padding: 0 0 12px 0; }
+            .search-input {
+                width: 100%; padding: 9px 14px;
+                background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16);
+                border-radius: 10px; font-size: 13px; outline: none; color: rgba(255,255,255,0.9);
+                transition: border-color 0.2s, background 0.2s; box-sizing: border-box;
+            }
+            .search-input:focus { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.13); }
+            .search-input::placeholder { color: rgba(255,255,255,0.35); }
 
-            .content { padding: 24px; }
-            .word-group { margin-bottom: 40px; }
+            .error-section { background: rgba(220,38,38,0.14); border: 1px solid rgba(220,38,38,0.30); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+            .error-title { color: #fca5a5; font-size: 13px; font-weight: 600; margin: 0 0 6px 0; }
+            .error-list { list-style: none; padding: 0; margin: 0; }
+            .error-item { color: #fecaca; font-size: 12px; padding: 2px 0; font-family: 'SF Mono', Consolas, monospace; }
+
+            .section-divider { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+
+            .word-group { margin-bottom: 22px; }
             .word-group:first-child { margin-top: 0; }
-            .word-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-            .word-info { display: flex; align-items: center; gap: 12px; }
-            .word-name { font-size: 17px; font-weight: 600; color: #1a1a1a; }
-            .word-count { color: #666; font-size: 13px; font-weight: 500; }
-            .word-count.hot { color: #dc2626; font-weight: 600; }
-            .word-count.warm { color: #ea580c; font-weight: 600; }
-            .word-index { color: #999; font-size: 12px; }
+            .word-header {
+                display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 10px; padding: 9px 12px;
+                background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.11);
+                border-radius: 11px;
+            }
+            .word-info { display: flex; align-items: center; gap: 9px; }
+            .word-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.95); }
+            .word-count { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.50); background: rgba(255,255,255,0.09); padding: 1px 7px; border-radius: 9px; }
+            .word-count.hot { color: #fca5a5; background: rgba(220,38,38,0.18); }
+            .word-count.warm { color: #fdba74; background: rgba(234,88,12,0.18); }
+            .word-index { color: rgba(255,255,255,0.32); font-size: 11px; }
 
-            .news-item { margin-bottom: 20px; padding: 16px 0; border-bottom: 1px solid #f5f5f5; position: relative; display: flex; gap: 12px; align-items: center; }
-            .news-item:last-child { border-bottom: none; }
-            .news-item.new::after { content: "NEW"; position: absolute; top: 12px; right: 0; background: #fbbf24; color: #92400e; font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 4px; letter-spacing: 0.5px; }
-            .news-number { color: #999; font-size: 13px; font-weight: 600; min-width: 20px; text-align: center; flex-shrink: 0; background: #f8f9fa; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; align-self: flex-start; margin-top: 8px; position: relative; cursor: pointer; transition: background 0.15s, color 0.15s; }
+            .news-item {
+                display: flex; gap: 9px; align-items: flex-start;
+                padding: 11px 12px; margin-bottom: 6px;
+                background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+                border-radius: 12px; position: relative;
+                transition: background 0.15s, border-color 0.15s;
+            }
+            .news-item:last-child { margin-bottom: 0; }
+            .news-item:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.16); }
+            .news-item.new::after {
+                content: "NEW"; position: absolute; top: 9px; right: 9px;
+                background: rgba(251,191,36,0.88); color: #1a1a1a;
+                font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px;
+            }
+            .news-number {
+                color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700;
+                flex-shrink: 0; background: rgba(255,255,255,0.12); border-radius: 50%;
+                width: 21px; height: 21px; display: flex; align-items: center; justify-content: center;
+                margin-top: 1px; position: relative; cursor: pointer;
+                transition: background 0.15s, color 0.15s;
+            }
             .news-number .num-text { transition: opacity 0.15s; }
             .news-number .copy-icon { position: absolute; opacity: 0; transition: opacity 0.15s; }
             .news-item:hover .news-number .num-text { opacity: 0; }
             .news-item:hover .news-number .copy-icon { opacity: 1; }
-            .news-item:hover .news-number { background: #eef2ff; color: #4f46e5; }
-            .news-number.copied { background: #dcfce7 !important; }
+            .news-item:hover .news-number { background: rgba(255,255,255,0.20); color: rgba(255,255,255,0.9); }
+            .news-number.copied { background: rgba(34,197,94,0.25) !important; }
             .news-number.copied .num-text { opacity: 0 !important; }
             .news-number.copied .copy-icon { opacity: 1 !important; }
 
-            .news-content { flex: 1; min-width: 0; padding-right: 40px; }
-            .news-item.new .news-content { padding-right: 50px; }
-            .news-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-            .source-name { color: #666; font-size: 12px; font-weight: 500; }
-            .keyword-tag { color: #2563eb; font-size: 12px; font-weight: 500; background: #eff6ff; padding: 2px 6px; border-radius: 4px; }
-            .rank-num { color: #fff; background: #6b7280; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
-            .rank-num.top { background: #dc2626; }
-            .rank-num.high { background: #ea580c; }
-            .time-info { color: #999; font-size: 11px; }
-            .count-info { color: #059669; font-size: 11px; font-weight: 500; }
-            .news-title { font-size: 15px; line-height: 1.4; color: #1a1a1a; margin: 0; }
-            .news-link { color: #2563eb; text-decoration: none; }
-            .news-link:hover { text-decoration: underline; }
-            .news-link:visited { color: #7c3aed; }
+            .news-content { flex: 1; min-width: 0; padding-right: 34px; }
+            .news-item.new .news-content { padding-right: 44px; }
+            .news-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; flex-wrap: wrap; }
+            .source-name { color: rgba(255,255,255,0.50); font-size: 11px; font-weight: 500; }
+            .keyword-tag { color: #93c5fd; font-size: 11px; font-weight: 600; background: rgba(59,130,246,0.18); padding: 1px 5px; border-radius: 4px; }
+            .rank-num { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.18); font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 7px; min-width: 16px; text-align: center; }
+            .rank-num.top { background: rgba(220,38,38,0.55); color: #fecaca; }
+            .rank-num.high { background: rgba(234,88,12,0.50); color: #fdba74; }
+            .time-info { color: rgba(255,255,255,0.38); font-size: 10.5px; }
+            .count-info { color: #6ee7b7; font-size: 10.5px; font-weight: 500; }
+            .news-title { font-size: 13.5px; line-height: 1.5; color: rgba(255,255,255,0.88); margin: 0; }
+            .news-title a { color: #93c5fd; text-decoration: none; }
+            .news-title a:hover { color: #bfdbfe; text-decoration: underline; }
 
-            .section-divider { margin-top: 32px; padding-top: 24px; border-top: 2px solid #e5e7eb; }
-            .new-section { margin-top: 40px; padding-top: 24px; }
-            .new-section-title { color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0 0 20px 0; }
-            .new-source-group { margin-bottom: 24px; }
-            .new-source-title { color: #666; font-size: 13px; font-weight: 500; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid #f5f5f5; }
-            .new-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
-            .new-item:last-child { border-bottom: none; }
-            .new-item-number { color: #999; font-size: 12px; font-weight: 600; min-width: 18px; text-align: center; flex-shrink: 0; background: #f8f9fa; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
-            .new-item-rank { color: #fff; background: #6b7280; font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 8px; min-width: 20px; text-align: center; flex-shrink: 0; }
-            .new-item-rank.top { background: #dc2626; }
-            .new-item-rank.high { background: #ea580c; }
+            .new-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+            .new-section-title { color: rgba(255,255,255,0.80); font-size: 13px; font-weight: 700; margin: 0 0 12px 0; }
+            .new-source-group { margin-bottom: 16px; }
+            .new-source-title { color: rgba(255,255,255,0.45); font-size: 11.5px; font-weight: 600; margin: 0 0 7px 0; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.09); }
+            .new-item { display: flex; align-items: center; gap: 9px; padding: 8px 11px; margin-bottom: 4px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; transition: background 0.15s; }
+            .new-item:hover { background: rgba(255,255,255,0.10); }
+            .new-item-number { color: rgba(255,255,255,0.40); font-size: 10.5px; font-weight: 700; flex-shrink: 0; background: rgba(255,255,255,0.10); border-radius: 50%; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; }
+            .new-item-rank { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.15); font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 6px; min-width: 18px; text-align: center; flex-shrink: 0; }
+            .new-item-rank.top { background: rgba(220,38,38,0.50); color: #fecaca; }
+            .new-item-rank.high { background: rgba(234,88,12,0.45); color: #fdba74; }
             .new-item-content { flex: 1; min-width: 0; }
-            .new-item-title { font-size: 14px; line-height: 1.4; color: #1a1a1a; margin: 0; }
+            .new-item-title { font-size: 13px; line-height: 1.45; color: rgba(255,255,255,0.85); margin: 0; }
 
-            .error-section { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
-            .error-title { color: #dc2626; font-size: 14px; font-weight: 600; margin: 0 0 8px 0; }
-            .error-list { list-style: none; padding: 0; margin: 0; }
-            .error-item { color: #991b1b; font-size: 13px; padding: 2px 0; font-family: 'SF Mono', Consolas, monospace; }
+            .rss-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+            .rss-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .rss-section-title { font-size: 13px; font-weight: 700; color: #6ee7b7; }
+            .rss-section-count { color: rgba(255,255,255,0.40); font-size: 11.5px; }
+            .feed-group { margin-bottom: 16px; }
+            .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; padding-bottom: 5px; border-bottom: 1px solid rgba(110,231,183,0.30); }
+            .feed-name { font-size: 12.5px; font-weight: 700; color: #6ee7b7; }
+            .feed-count { color: rgba(255,255,255,0.40); font-size: 11px; }
+            .rss-item { margin-bottom: 5px; padding: 9px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); border-left: 2px solid rgba(110,231,183,0.50); border-radius: 9px; transition: background 0.15s; }
+            .rss-item:hover { background: rgba(255,255,255,0.10); }
+            .rss-meta { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; flex-wrap: wrap; }
+            .rss-time { color: rgba(255,255,255,0.38); font-size: 10.5px; }
+            .rss-author { color: #6ee7b7; font-size: 10.5px; font-weight: 500; }
+            .rss-title { font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85); }
+            .rss-link { color: #93c5fd; text-decoration: none; font-weight: 500; }
+            .rss-link:hover { color: #bfdbfe; text-decoration: underline; }
 
-            .footer { margin-top: 32px; padding: 20px 24px; background: #f8f9fa; border-top: 1px solid #e5e7eb; text-align: center; }
-            .footer-content { font-size: 13px; color: #6b7280; line-height: 1.6; }
-            .footer-link { color: #4f46e5; text-decoration: none; font-weight: 500; transition: color 0.2s ease; }
-            .footer-link:hover { color: #7c3aed; text-decoration: underline; }
-            .project-name { font-weight: 600; color: #374151; }
+            .standalone-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+            .standalone-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .standalone-section-title { font-size: 13px; font-weight: 700; color: #6ee7b7; }
+            .standalone-section-count { color: rgba(255,255,255,0.40); font-size: 11.5px; }
+            .standalone-group { margin-bottom: 20px; }
+            .standalone-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding: 7px 11px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.11); border-radius: 9px; }
+            .standalone-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.90); }
+            .standalone-count { color: rgba(255,255,255,0.40); font-size: 11px; }
 
-            /* 其他组件样式 (RSS, Standalone, AI) */
-            .rss-section { margin-top: 32px; padding-top: 24px; }
-            .rss-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-            .rss-section-title { font-size: 18px; font-weight: 600; color: #059669; }
-            .rss-section-count { color: #6b7280; font-size: 14px; }
-            .feed-group { margin-bottom: 24px; }
-            .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #10b981; }
-            .feed-name { font-size: 15px; font-weight: 600; color: #059669; }
-            .feed-count { color: #666; font-size: 13px; font-weight: 500; }
-            .rss-item { margin-bottom: 12px; padding: 14px; background: #f0fdf4; border-radius: 8px; border-left: 3px solid #10b981; }
-            .rss-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
-            .rss-time { color: #6b7280; font-size: 12px; }
-            .rss-author { color: #059669; font-size: 12px; font-weight: 500; }
-            .rss-title { font-size: 14px; line-height: 1.5; margin-bottom: 6px; }
-            .rss-link { color: #1f2937; text-decoration: none; font-weight: 500; }
-            .rss-link:hover { color: #059669; text-decoration: underline; }
+            .ai-section { margin-top: 20px; padding: 14px; background: rgba(3,105,161,0.18); border-radius: 12px; border: 1px solid rgba(186,230,253,0.20); }
+            .ai-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+            .ai-section-title { font-size: 13px; font-weight: 700; color: #7dd3fc; }
+            .ai-section-badge { background: rgba(14,165,233,0.35); color: #bae6fd; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+            .ai-block { margin-bottom: 8px; padding: 11px; background: rgba(255,255,255,0.07); border-radius: 9px; border: 1px solid rgba(255,255,255,0.10); }
+            .ai-block-title { font-size: 12px; font-weight: 700; color: #7dd3fc; margin-bottom: 5px; }
+            .ai-block-content { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.78); white-space: pre-wrap; }
 
-            .standalone-section { margin-top: 32px; padding-top: 24px; }
-            .standalone-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-            .standalone-section-title { font-size: 18px; font-weight: 600; color: #059669; }
-            .standalone-section-count { color: #6b7280; font-size: 14px; }
-            .standalone-group { margin-bottom: 40px; }
-            .standalone-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-            .standalone-name { font-size: 17px; font-weight: 600; color: #1a1a1a; }
-            .standalone-count { color: #666; font-size: 13px; font-weight: 500; }
+            .footer { padding: 16px 20px; background: rgba(30,42,50,0.95); border-top: 1px solid rgba(255,255,255,0.10); text-align: center; }
+            .footer-content { font-size: 12px; color: rgba(255,255,255,0.40); line-height: 1.6; }
+            .footer-link { color: rgba(147,197,253,0.80); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+            .footer-link:hover { color: #93c5fd; text-decoration: underline; }
+            .project-name { font-weight: 600; color: rgba(255,255,255,0.60); }
 
-            .ai-section { margin-top: 32px; padding: 24px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 1px solid #bae6fd; }
-            .ai-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-            .ai-section-title { font-size: 18px; font-weight: 600; color: #0369a1; }
-            .ai-block { margin-bottom: 16px; padding: 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-            .ai-block-title { font-size: 14px; font-weight: 600; color: #0369a1; margin-bottom: 8px; }
-            .ai-block-content { font-size: 14px; line-height: 1.6; color: #334155; white-space: pre-wrap; }
+            /* 其他组件样式 */
+            .save-buttons { position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 10; }
+            .save-btn-group { position: relative; display: flex; }
+            .save-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28); color: white; padding: 8px 14px; border-radius: 6px 0 0 6px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s ease; backdrop-filter: blur(10px); white-space: nowrap; min-height: 34px; border-right: none; }
+            .save-btn:hover { background: rgba(255,255,255,0.28); }
+            .save-dropdown-trigger { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28); color: white; padding: 8px 9px; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 11px; transition: all 0.2s ease; backdrop-filter: blur(10px); min-height: 34px; display: flex; align-items: center; }
+            .save-dropdown-trigger:hover { background: rgba(255,255,255,0.30); }
+            .save-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 4px; background: rgba(25,25,40,0.94); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 4px; min-width: 130px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+            .save-btn-group:hover .save-dropdown-menu, .save-dropdown-menu:hover { opacity: 1; visibility: visible; transform: translateY(0); }
+            .save-dropdown-item { display: block; width: 100%; padding: 8px 12px; background: none; border: none; color: white; font-size: 12px; cursor: pointer; border-radius: 5px; text-align: left; transition: background 0.15s; white-space: nowrap; }
+            .save-dropdown-item:hover { background: rgba(255,255,255,0.14); }
+            .dropdown-icon { width: 13px; height: 13px; margin-right: 7px; vertical-align: -2px; flex-shrink: 0; }
 
-            /* ===== 浏览器增强样式 ===== */
             body.wide-mode .container { max-width: 1200px; }
-            body.wide-mode .content { padding: 32px 40px; }
-            body.wide-mode .rss-feeds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+            body.wide-mode .content { padding: 28px 36px; }
+            body.wide-mode .rss-feeds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
             body.wide-mode .feed-group { margin-bottom: 0; }
-            body.wide-mode .ai-section .ai-blocks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-            body.wide-mode .new-section .new-sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-            body.wide-mode .standalone-section .standalone-groups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+            body.wide-mode .ai-section .ai-blocks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            body.wide-mode .ai-block { margin-bottom: 0; }
+            body.wide-mode .new-section .new-sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            body.wide-mode .new-source-group { margin-bottom: 0; }
+            body.wide-mode .standalone-section .standalone-groups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            body.wide-mode .standalone-group { margin-bottom: 0; }
 
-            .tab-bar { display: none; overflow-x: auto; white-space: nowrap; padding: 8px 0 12px 0; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; -webkit-overflow-scrolling: touch; scrollbar-width: thin; position: sticky; top: 0; background: white; z-index: 10; gap: 4px; }
+            .tab-bar {
+                display: none; overflow-x: auto; white-space: nowrap;
+                padding: 0 0 12px 0; margin-bottom: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.12);
+                -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+                position: sticky; top: 0;
+                background: linear-gradient(180deg, #4a5e6a 0%, #4a5e6a 100%);
+                z-index: 10; gap: 6px;
+            }
             body.wide-mode .tab-bar { display: flex; }
             body.wide-mode .tab-bar.tab-hidden { display: none; }
-            .tab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; background: #f3f4f6; color: #6b7280; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; flex-shrink: 0; }
-            .tab-btn:hover { background: #e5e7eb; color: #374151; }
-            .tab-btn.active { background: #4f46e5; color: white; }
-            .tab-count { font-size: 11px; background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 10px; }
-            .tab-btn.active .tab-count { background: rgba(255,255,255,0.3); }
+            .tab-btn {
+                display: inline-flex; align-items: center; gap: 6px;
+                padding: 7px 14px; border: 1px solid rgba(255,255,255,0.14);
+                background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.60);
+                border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 500;
+                white-space: nowrap; transition: all 0.2s ease; flex-shrink: 0;
+            }
+            .tab-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.90); }
+            .tab-btn.active { background: rgba(255,255,255,0.20); color: white; border-color: rgba(255,255,255,0.30); }
+            .tab-count { font-size: 10.5px; background: rgba(255,255,255,0.12); padding: 1px 5px; border-radius: 8px; }
+            .tab-btn.active .tab-count { background: rgba(255,255,255,0.25); }
+            .tab-bar::-webkit-scrollbar { height: 3px; }
+            .tab-bar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 2px; }
+            .tab-bar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.20); border-radius: 2px; }
 
-            .search-bar { display: none; padding: 0 0 16px 0; }
-            .search-input { width: 100%; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
-            .search-input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+            .collapse-icon { display: none; margin-right: 5px; font-size: 11px; color: rgba(255,255,255,0.35); transition: transform 0.2s; user-select: none; }
+            .word-header.collapsible { cursor: pointer; }
+            .word-header.collapsible .collapse-icon { display: inline; }
+            .word-header.collapsible:hover { background: rgba(255,255,255,0.12); }
+            .word-group.collapsed .news-item { display: none; }
+            .word-group.collapsed .collapse-icon { transform: rotate(-90deg); }
+            body.wide-mode .word-group[data-tab-index] { animation: tabFadeIn 0.2s ease; }
+            @keyframes tabFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
             .fab-bar { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 100; opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; }
             .fab-bar.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-            .fab-btn { width: 40px; height: 40px; border-radius: 50%; background: #4f46e5; color: white; border: none; cursor: pointer; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s, background 0.2s; display: flex; align-items: center; justify-content: center; position: relative; }
-            .fab-btn:hover { transform: scale(1.1); background: #4338ca; }
-
-            .fab-tooltip { position: absolute; bottom: 0; right: 52px; background: rgba(30, 30, 50, 0.92); backdrop-filter: blur(12px); color: white; border-radius: 10px; padding: 12px 16px; white-space: nowrap; font-size: 12px; line-height: 1.8; box-shadow: 0 8px 24px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); opacity: 0; visibility: hidden; transform: translateY(6px); transition: all 0.2s ease; pointer-events: none; }
+            .fab-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(79,70,229,0.85); color: white; border: none; cursor: pointer; font-size: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.25); transition: transform 0.2s, background 0.2s; display: flex; align-items: center; justify-content: center; position: relative; backdrop-filter: blur(8px); }
+            .fab-btn:hover { transform: scale(1.1); background: rgba(79,70,229,1); }
+            .fab-tooltip { position: absolute; bottom: 0; right: 52px; background: rgba(20,20,35,0.95); backdrop-filter: blur(12px); color: white; border-radius: 10px; padding: 12px 16px; white-space: nowrap; font-size: 12px; line-height: 1.8; box-shadow: 0 8px 24px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.10); opacity: 0; visibility: hidden; transform: translateY(6px); transition: all 0.2s ease; pointer-events: none; }
             .fab-btn:hover .fab-tooltip, .fab-btn.show-tip .fab-tooltip { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
             .fab-tooltip .tip-row { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-            .fab-tooltip .tip-key { background: rgba(255,255,255,0.15); border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; margin-left: 8px; }
-
-            .collapse-icon { display: none; margin-right: 6px; font-size: 12px; color: #9ca3af; transition: transform 0.2s; user-select: none; }
-            .word-header.collapsible { cursor: pointer; }
-            .word-header.collapsible .collapse-icon { display: inline; }
-            .word-header.collapsible:hover { background: #f9fafb; border-radius: 6px; margin: 0 -8px 20px -8px; padding: 8px; }
-            .word-group.collapsed .news-item { display: none; }
-            .word-group.collapsed .collapse-icon { transform: rotate(-90deg); }
-
-            .toggle-wide-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 15px; transition: all 0.2s ease; backdrop-filter: blur(10px); line-height: 1; min-height: 38px; }
-            .toggle-wide-btn:hover { background: rgba(255, 255, 255, 0.3); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-1px); }
-
-            /* 暗色模式 */
-            body.dark-mode { background: #1a1a2e; color: #e0e0e0; }
-            body.dark-mode .container { background: #16213e; box-shadow: 0 2px 16px rgba(0,0,0,0.3); }
-            body.dark-mode .content { background: #16213e; }
-            body.dark-mode .word-header { border-bottom-color: #2a2a4a; }
-            body.dark-mode .word-header.collapsible:hover { background: #1a1a3e; }
-            body.dark-mode .news-item { border-bottom-color: #2a2a4a; }
-            body.dark-mode .news-title a { color: #8ab4f8; }
-            body.dark-mode .news-title a:visited { color: #c58af9; }
-            body.dark-mode .tab-bar { background: #16213e; border-bottom-color: #2a2a4a; }
-            body.dark-mode .tab-btn { color: #aaa; }
-            body.dark-mode .tab-btn.active { color: #8ab4f8; border-bottom-color: #8ab4f8; }
-            body.dark-mode .tab-btn:hover { color: #ccc; background: rgba(255,255,255,0.05); }
-            body.dark-mode .search-input { background: #1a1a3e; border-color: #2a2a4a; color: #e0e0e0; }
-            body.dark-mode .search-input:focus { border-color: #8ab4f8; }
-            body.dark-mode .fab-btn { background: #533483; }
-            body.dark-mode .fab-btn:hover { background: #6d28d9; }
-            body.dark-mode .footer { background: #0f3460; color: rgba(255,255,255,0.7); }
-            body.dark-mode .rss-item, body.dark-mode .new-item, body.dark-mode .standalone-item { border-bottom-color: #2a2a4a; }
-            body.dark-mode .rss-title a, body.dark-mode .new-item a, body.dark-mode .standalone-item a { color: #8ab4f8; }
-            body.dark-mode .ai-block { background: #1a1a3e; border-color: #2a2a4a; }
-
-            .toggle-dark-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-size: 15px; transition: all 0.2s ease; backdrop-filter: blur(10px); line-height: 1; min-height: 38px; }
-            .toggle-dark-btn:hover { background: rgba(255, 255, 255, 0.3); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-1px); }
+            .fab-tooltip .tip-key { background: rgba(255,255,255,0.12); border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; margin-left: 8px; }
 
             .reading-progress { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: linear-gradient(90deg, #4f46e5, #7c3aed); z-index: 9999; transition: width 0.1s linear; }
+
+            body.dark-mode { background: #1a2530; }
+            body.dark-mode .container { box-shadow: 0 8px 32px rgba(0,0,0,0.45); }
+            body.dark-mode .content { background: linear-gradient(180deg, #2a3a44 0%, #1e2e38 100%); }
+            body.dark-mode .tab-bar { background: linear-gradient(180deg, #2a3a44 0%, #2a3a44 100%); }
+            body.dark-mode .header { background: linear-gradient(135deg, #0f3460 0%, #533483 100%); }
+            body.dark-mode .footer { background: rgba(15,25,32,0.98); }
             body.dark-mode .reading-progress { background: linear-gradient(90deg, #8ab4f8, #c58af9); }
+            body.dark-mode .fab-btn { background: rgba(83,52,131,0.85); }
+            body.dark-mode .fab-btn:hover { background: rgba(109,40,217,1); }
 
             @media (max-width: 480px) {
-                body { padding: 12px; }
-                .content { padding: 20px; }
-                .footer { padding: 16px 20px; }
-                .news-header { gap: 6px; }
-                .news-content { padding-right: 45px; }
-                .news-item { gap: 8px; }
-                .new-item { gap: 8px; }
-                .news-number { width: 20px; height: 20px; font-size: 12px; }
-                .save-buttons { position: static; margin-bottom: 16px; display: flex; gap: 8px; justify-content: center; width: 100%; }
+                body { padding: 10px; }
+                .header { padding: 24px 18px; }
+                .content { padding: 16px; }
+                .footer { padding: 14px 18px; }
+                .today-temp { font-size: 28px; }
+                .today-icon-img { width: 36px; height: 36px; }
+                .today-emoji-fb { font-size: 32px; }
+                .today-details { display: none; }
+                .uniform-week { display: none; }
+                .tsla-grid { grid-template-columns: repeat(2,1fr); gap: 6px; }
+                .save-buttons { position: static; margin-bottom: 14px; display: flex; gap: 8px; justify-content: center; width: 100%; }
                 .save-btn-group { flex: 1; }
                 .save-btn { width: 100%; border-radius: 6px 0 0 6px; }
-                .wt-temp { font-size: 44px; }
-                .wt-icon-wrap { width: 64px; height: 64px; }
-                .wt-icon { width: 64px; height: 64px; }
-                .wt-right { display: none; }
-                .wt-center { border-right: none; }
-                .hourly-item { min-width: 52px; padding: 6px 4px; }
-                .hourly-icon { width: 24px; height: 24px; }
-                .uniform-week { display: none; }
             }
         </style>
     </head>
@@ -484,7 +470,6 @@ def render_html_content(
         <div class="reading-progress"></div>
         <div class="container">
             <div class="header" id="mainHeader">
-                <div class="header-glow"></div>
                 <div class="header-watermark" id="watermark">TrendRadar</div>
 
                 <div class="save-buttons">
@@ -517,52 +502,71 @@ def render_html_content(
                     </div>
                 </div>
 
-                <!-- 天气面板 -->
-                <div class="weather-panel" id="weatherPanel">
-                    
-                    <!-- 今日主卡 -->
-                    <div class="weather-today loading" id="wtToday">
-                        <div class="skeleton" style="width:62px;height:62px;border-radius:50%;margin-right:16px;flex-shrink:0;"></div>
-                        <div style="flex:1;display:flex;flex-direction:column;gap:9px;">
-                            <div class="skeleton" style="width:110px;height:34px;border-radius:8px;"></div>
-                            <div class="skeleton" style="width:75px;height:13px;border-radius:6px;"></div>
+                <div class="panel">
+                    <!-- 今日+明日 两列 -->
+                    <div class="weather-dual">
+                        <!-- 今日（左） -->
+                        <div class="today-card" id="todayCard">
+                            <div class="skeleton" style="width:100%;height:90px;border-radius:10px;"></div>
                         </div>
-                    </div>
-
-                    <!-- 逐小时 -->
-                    <div class="weather-hourly" id="wtHourly" style="display:none;">
-                        <div class="hourly-label">逐小时预报</div>
-                        <div class="hourly-scroll" id="hourlyScroll"></div>
-                    </div>
-
-                    <!-- 明日预报 -->
-                    <div class="weather-tomorrow" id="wtTomorrow" style="display:none;">
-                        <div class="tmr-header">
-                            <div class="tmr-label">明日天气</div>
-                            <div class="tmr-date" id="tmrDate"></div>
-                        </div>
-                        <div class="tmr-body">
-                            <img class="tmr-icon" id="tmrIcon" src="" alt="">
-                            <div class="tmr-info">
-                                <div class="tmr-desc" id="tmrDesc">—</div>
-                                <div class="tmr-range" id="tmrRange">—</div>
+                        <!-- 明日（右） -->
+                        <div class="tomorrow-card" id="tmrCard" style="opacity:0.5;">
+                            <div class="tmr-label-row">
+                                <div class="tmr-label">明日天气</div>
+                                <div class="tmr-date" id="tmrDate">—</div>
+                            </div>
+                            <div class="tmr-top">
+                                <div class="tmr-icon-wrap" id="tmrIconWrap">
+                                    <div class="skeleton" style="width:34px;height:34px;border-radius:50%;"></div>
+                                </div>
+                                <div class="tmr-main">
+                                    <div class="tmr-desc" id="tmrDesc">—</div>
+                                    <div class="tmr-range" id="tmrRange">—</div>
+                                </div>
                             </div>
                             <div class="tmr-stats" id="tmrStats"></div>
-                        </div>
-                        <div class="tmr-bar-wrap">
-                            <div class="tmr-bar-label">
-                                <span id="tmrBarMin">—</span>
-                                <span style="color:var(--td);font-size:9px;">温度区间</span>
-                                <span id="tmrBarMax">—</span>
+                            <div class="tmr-bar-wrap">
+                                <div class="tmr-bar-label">
+                                    <span id="tmrBarMin">—</span>
+                                    <span style="color:var(--td);font-size:8.5px;">温度区间</span>
+                                    <span id="tmrBarMax">—</span>
+                                </div>
+                                <div class="tmr-bar-track">
+                                    <div class="tmr-bar-fill" id="tmrBarFill" style="left:0%;right:0%;"></div>
+                                </div>
                             </div>
-                            <div class="tmr-bar-track">
-                                <div class="tmr-bar-fill" id="tmrBarFill" style="left:0%;right:0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TSLA 股票 -->
+                    <div class="tsla-card" id="tslaCard" style="display:none;">
+                        <div class="tsla-top">
+                            <div class="tsla-left">
+                                <div class="tsla-ticker">
+                                    <div class="tsla-logo">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                                    </div>
+                                    TSLA
+                                </div>
+                                <div class="tsla-name">Tesla, Inc. · NASDAQ</div>
+                            </div>
+                            <div class="tsla-right">
+                                <div class="tsla-price" id="tslaPrice">--</div>
+                                <div class="tsla-chg flat" id="tslaChg">--</div>
                             </div>
                         </div>
+                        <div class="tsla-chart"><canvas id="tslaCanvas"></canvas></div>
+                        <div class="tsla-grid">
+                            <div class="tsla-cell"><span class="tsla-cell-label">今开</span><span class="tsla-cell-val" id="tslaOpen">--</span></div>
+                            <div class="tsla-cell"><span class="tsla-cell-label">最高</span><span class="tsla-cell-val" id="tslaHigh">--</span></div>
+                            <div class="tsla-cell"><span class="tsla-cell-label">最低</span><span class="tsla-cell-val" id="tslaLow">--</span></div>
+                            <div class="tsla-cell"><span class="tsla-cell-label">昨收</span><span class="tsla-cell-val" id="tslaPrev">--</span></div>
+                        </div>
+                        <div class="tsla-status" id="tslaStatus"></div>
                     </div>
 
                     <!-- 工服卡 -->
-                    <div class="weather-uniform" id="wtUniform" style="display:none;">
+                    <div class="uniform-card" id="uniformCard" style="display:none;">
                         <div class="uniform-header">
                             <div class="uniform-label">明日工服</div>
                             <div class="uniform-date" id="uniformDate"></div>
@@ -588,7 +592,6 @@ def render_html_content(
                         </div>
                         <div class="wt-update" id="wtUpdate">—</div>
                     </div>
-
                 </div>
             </div>
 
@@ -597,7 +600,6 @@ def render_html_content(
                     <input type="text" class="search-input" placeholder="搜索新闻标题..." oninput="handleSearch(this.value)">
                 </div>"""
 
-    # 处理失败ID错误信息
     if report_data["failed_ids"]:
         html += """
                 <div class="error-section">
@@ -609,7 +611,6 @@ def render_html_content(
                     </ul>
                 </div>"""
 
-    # 生成热点词汇统计部分的HTML
     stats_html = ""
     tab_bar_html = ""
     if report_data["stats"]:
@@ -625,12 +626,9 @@ def render_html_content(
 
         for i, stat in enumerate(report_data["stats"], 1):
             count = stat["count"]
-            if count >= 10:
-                count_class = "hot"
-            elif count >= 5:
-                count_class = "warm"
-            else:
-                count_class = ""
+            if count >= 10: count_class = "hot"
+            elif count >= 5: count_class = "warm"
+            else: count_class = ""
 
             escaped_word = html_escape(stat["word"])
 
@@ -666,16 +664,11 @@ def render_html_content(
                     min_rank = min(ranks)
                     max_rank = max(ranks)
                     rank_threshold = title_data.get("rank_threshold", 10)
-                    if min_rank <= 3:
-                        rank_class = "top"
-                    elif min_rank <= rank_threshold:
-                        rank_class = "high"
-                    else:
-                        rank_class = ""
-                    if min_rank == max_rank:
-                        rank_text = str(min_rank)
-                    else:
-                        rank_text = f"{min_rank}-{max_rank}"
+                    if min_rank <= 3: rank_class = "top"
+                    elif min_rank <= rank_threshold: rank_class = "high"
+                    else: rank_class = ""
+                    if min_rank == max_rank: rank_text = str(min_rank)
+                    else: rank_text = f"{min_rank}-{max_rank}"
                     stats_html += f'<span class="rank-num {rank_class}">{rank_text}</span>'
 
                 time_display = title_data.get("time_display", "")
@@ -733,14 +726,10 @@ def render_html_content(
                 rank_class = ""
                 if ranks:
                     min_rank = min(ranks)
-                    if min_rank <= 3:
-                        rank_class = "top"
-                    elif min_rank <= title_data.get("rank_threshold", 10):
-                        rank_class = "high"
-                    if len(ranks) == 1:
-                        rank_text = str(ranks[0])
-                    else:
-                        rank_text = f"{min(ranks)}-{max(ranks)}"
+                    if min_rank <= 3: rank_class = "top"
+                    elif min_rank <= title_data.get("rank_threshold", 10): rank_class = "high"
+                    if len(ranks) == 1: rank_text = str(ranks[0])
+                    else: rank_text = f"{min(ranks)}-{max(ranks)}"
                 else:
                     rank_text = "?"
 
@@ -808,7 +797,7 @@ def render_html_content(
 
                 if time_display: rss_html += f'<span class="rss-time">{html_escape(time_display)}</span>'
                 if source_name: rss_html += f'<span class="rss-author">{html_escape(source_name)}</span>'
-                if is_new: rss_html += '<span class="rss-author" style="color: #dc2626;">NEW</span>'
+                if is_new: rss_html += '<span class="rss-author" style="color:#fca5a5;">NEW</span>'
 
                 rss_html += """
                             </div>
@@ -1059,7 +1048,7 @@ def render_html_content(
     if update_info:
         html += f"""
                     <br>
-                    <span style="color: #ea580c; font-weight: 500;">
+                    <span style="color: #fdba74; font-weight: 500;">
                         发现新版本 {update_info['remote_version']}，当前版本 {update_info['current_version']}
                     </span>"""
 
@@ -1604,299 +1593,275 @@ def render_html_content(
                         });
                     });
                 });
-
-                (function() {
-                    var header = document.querySelector('.header');
-                    var watermark = document.querySelector('.header-watermark');
-                    if (!header || !watermark) return;
-
-                    var radius = 120;
-                    header.addEventListener('mousemove', function(e) {
-                        var rect = watermark.getBoundingClientRect();
-                        var x = e.clientX - rect.left; var y = e.clientY - rect.top;
-                        var maskVal = 'radial-gradient(circle ' + radius + 'px at ' + x + 'px ' + y + 'px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.12) 55%, transparent 100%)';
-                        watermark.style.webkitMaskImage = maskVal; watermark.style.maskImage = maskVal;
-                        watermark.style.color = 'rgba(255, 255, 255, 0.18)';
-                    });
-
-                    header.addEventListener('mouseleave', function() {
-                        watermark.style.webkitMaskImage = 'radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, transparent 100%)';
-                        watermark.style.maskImage = 'radial-gradient(circle 0px at 50% 50%, rgba(0,0,0,1) 0%, transparent 100%)';
-                        watermark.style.color = 'rgba(255, 255, 255, 0.055)';
-                    });
-                })();
             });
 
-            // ===== 天气套件初始化逻辑 =====
-            (function initWeatherSuite() {
+            // ===== 挂件面板初始化逻辑 (天气 + 股票 + 工服) =====
+            (function initWidgets() {
                 var pad = function(n) { return String(n).padStart(2, '0'); };
                 var now = new Date();
                 var tmr = new Date(now); tmr.setDate(tmr.getDate() + 1);
                 var weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
 
-                document.getElementById('tmrDate').textContent = (tmr.getMonth() + 1) + '月' + tmr.getDate() + '日 · ' + weekNames[tmr.getDay()];
+                document.getElementById('tmrDate').textContent = (tmr.getMonth() + 1) + '月' + tmr.getDate() + '日·' + weekNames[tmr.getDay()];
+                document.getElementById('uniformDate').textContent = weekNames[tmr.getDay()];
 
-                // 使用 Meteocons 原生 Animated SVGs 代替 Lottie JS，100% 兼容性
-                var CDN = 'https://cdn.jsdelivr.net/npm/@basmilius/weather-icons@2.0.1/production/line/all/';
-
-                // WMO 映射表 (精确映射到已存在的 SVG)
+                // ── 1. 天气与图标配置 ──
+                // 彻底解决 OWM 图片加载失败问题：使用大号 Emoji 作为图标，100% 兼容无破图
                 var WMO = {
-                    0:  {d:'clear-day', n:'clear-night', t:'晴'},
-                    1:  {d:'partly-cloudy-day', n:'partly-cloudy-night', t:'大部晴'},
-                    2:  {d:'partly-cloudy-day', n:'partly-cloudy-night', t:'多云'},
-                    3:  {d:'overcast-day', n:'overcast-night', t:'阴'},
-                    45: {d:'fog-day', n:'fog-night', t:'雾'},
-                    48: {d:'fog-day', n:'fog-night', t:'雾凇'},
-                    51: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'毛毛雨'},
-                    53: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'毛毛雨'},
-                    55: {d:'partly-cloudy-day-drizzle', n:'partly-cloudy-night-drizzle', t:'大毛毛雨'},
-                    61: {d:'partly-cloudy-day-rain', n:'partly-cloudy-night-rain', t:'小雨'},
-                    63: {d:'rain', n:'rain', t:'中雨'},
-                    65: {d:'extreme-rain', n:'extreme-rain', t:'大雨'},
-                    71: {d:'partly-cloudy-day-snow', n:'partly-cloudy-night-snow', t:'小雪'},
-                    73: {d:'snow', n:'snow', t:'中雪'},
-                    75: {d:'extreme-snow', n:'extreme-snow', t:'大雪'},
-                    77: {d:'sleet', n:'sleet', t:'冰粒'},
-                    80: {d:'partly-cloudy-day-rain', n:'partly-cloudy-night-rain', t:'阵雨'},
-                    81: {d:'rain', n:'rain', t:'中阵雨'},
-                    82: {d:'extreme-rain', n:'extreme-rain', t:'强阵雨'},
-                    85: {d:'snow', n:'snow', t:'阵雪'},
-                    86: {d:'extreme-snow', n:'extreme-snow', t:'强阵雪'},
-                    95: {d:'thunderstorms-day', n:'thunderstorms-night', t:'雷暴'},
-                    96: {d:'thunderstorms-day-overcast-rain', n:'thunderstorms-night-overcast-rain', t:'雷暴冰雹'},
-                    99: {d:'thunderstorms-day-overcast-rain', n:'thunderstorms-night-overcast-rain', t:'强雷暴'},
+                    0: {t:'晴', e:'☀️'},
+                    1: {t:'大部晴', e:'🌤️'},
+                    2: {t:'多云', e:'⛅'},
+                    3: {t:'阴', e:'☁️'},
+                    45:{t:'雾', e:'🌫️'},
+                    48:{t:'雾凇', e:'🌫️'},
+                    51:{t:'毛毛雨', e:'🌦️'},
+                    53:{t:'毛毛雨', e:'🌦️'},
+                    55:{t:'大毛毛雨', e:'🌧️'},
+                    61:{t:'小雨', e:'🌧️'},
+                    63:{t:'中雨', e:'🌧️'},
+                    65:{t:'大雨', e:'🌧️'},
+                    71:{t:'小雪', e:'🌨️'},
+                    73:{t:'中雪', e:'🌨️'},
+                    75:{t:'大雪', e:'❄️'},
+                    77:{t:'冰粒', e:'🌨️'},
+                    80:{t:'阵雨', e:'🌦️'},
+                    81:{t:'中阵雨', e:'🌧️'},
+                    82:{t:'强阵雨', e:'⛈️'},
+                    85:{t:'阵雪', e:'🌨️'},
+                    86:{t:'强阵雪', e:'❄️'},
+                    95:{t:'雷暴', e:'⛈️'},
+                    96:{t:'雷暴冰雹', e:'⛈️'},
+                    99:{t:'强雷暴', e:'⛈️'},
                 };
+                function wdesc(c){ return (WMO[c]||WMO[3]).t; }
+                function wemoji(c){ return (WMO[c]||WMO[3]).e; }
 
-                function wmoGet(c) { return WMO[c] || WMO[3]; }
-                function iconUrl(c, isDay) { var e = wmoGet(c); return CDN + (isDay ? e.d : e.n) + '.svg'; }
-                function wmoDesc(c) { return wmoGet(c).t; }
-
-                var SKY = {
-                    0:  {d:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
-                         n:'linear-gradient(160deg,#050d1f 0%,#0a1628 40%,#0d2040 100%)'},
-                    1:  {d:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
-                         n:'linear-gradient(160deg,#050d1f 0%,#0a1628 40%,#0d2040 100%)'},
-                    2:  {d:'linear-gradient(160deg,#546e7a 0%,#78909c 50%,#90a4ae 100%)',
-                         n:'linear-gradient(160deg,#1a2535 0%,#263040 50%,#2e3d50 100%)'},
-                    3:  {d:'linear-gradient(160deg,#546e7a 0%,#607d8b 50%,#78909c 100%)',
-                         n:'linear-gradient(160deg,#1a2535 0%,#263040 50%,#2e3d50 100%)'},
+                var SKY={
+                    sd:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
+                    sn:'linear-gradient(160deg,#050d1f 0%,#0a1628 40%,#0d2040 100%)',
+                    cd:'linear-gradient(160deg,#546e7a 0%,#607d8b 50%,#78909c 100%)',
+                    cn:'linear-gradient(160deg,#1a2535 0%,#263040 50%,#2e3d50 100%)',
+                    r:'linear-gradient(160deg,#263238 0%,#37474f 50%,#455a64 100%)',
+                    s:'linear-gradient(160deg,#4a5568 0%,#718096 50%,#a0aec0 100%)',
+                    t:'linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)',
+                    f:'linear-gradient(160deg,#6b7280 0%,#9ca3af 100%)',
                 };
-                function getSky(code, isDay) {
-                    var s = SKY[code] || (code <= 3 ? SKY[code] : null);
-                    if (!s) {
-                        if (code >= 45 && code <= 48) return isDay ? 'linear-gradient(160deg,#6b7280 0%,#9ca3af 100%)' : 'linear-gradient(160deg,#1f2937 0%,#374151 100%)';
-                        if (code >= 51 && code <= 67 || code >= 80 && code <= 82) return 'linear-gradient(160deg,#263238 0%,#37474f 50%,#455a64 100%)';
-                        if (code >= 71 && code <= 77 || code >= 85 && code <= 86) return 'linear-gradient(160deg,#4a5568 0%,#718096 50%,#a0aec0 100%)';
-                        if (code >= 95) return 'linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)';
-                        return isDay ? 'linear-gradient(160deg,#1565c0 0%,#42a5f5 100%)' : 'linear-gradient(160deg,#050d1f 0%,#0d2040 100%)';
-                    }
-                    return isDay ? s.d : s.n;
+                function getSky(c,d){
+                    if(c===0||c===1)return d?SKY.sd:SKY.sn;
+                    if(c===2||c===3)return d?SKY.cd:SKY.cn;
+                    if(c>=45&&c<=48)return SKY.f;
+                    if(c>=51&&c<=82)return SKY.r;
+                    if(c>=71&&c<=77||c>=85&&c<=86)return SKY.s;
+                    if(c>=95)return SKY.t;
+                    return d?SKY.sd:SKY.sn;
                 }
 
-                var svgDrop = '<svg class="wt-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0C19 10 12 2 12 2z"/></svg>';
-                var svgTherm = '<svg class="wt-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>';
-                var svgWind = '<svg class="wt-detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>';
+                var svgDrop='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0C19 10 12 2 12 2z"/></svg>';
+                var svgWind='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>';
+                var svgTherm='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>';
 
-                var UNIFORMS = [
-                    null,
-                    {name:'黑色工服', color:'#1a1a1a'},
-                    {name:'金色工服', color:'#c9a227'},
-                    {name:'红色工服', color:'#c0392b'},
-                    {name:'黑色工服', color:'#1a1a1a'},
-                    {name:'金色工服', color:'#c9a227'},
-                    {name:'红色工服', color:'#c0392b'},
-                    {name:'红色工服', color:'#c0392b'},
+                function windLabel(k){
+                    if(k<1)return'静风';if(k<6)return'软风';if(k<12)return'轻风';
+                    if(k<20)return'微风';if(k<29)return'和风';if(k<39)return'清风';
+                    if(k<50)return'强风';return'大风';
+                }
+
+                // ── 2. 渲染今日天气 ──
+                function renderToday(data,city){
+                    var c=data.current,code=c.weather_code,isDay=!!c.is_day;
+                    var temp=Math.round(c.temperature_2m),feel=Math.round(c.apparent_temperature);
+                    var hum=c.relative_humidity_2m,wind=Math.round(c.wind_speed_10m);
+                    var tmax=data.daily?Math.round(data.daily.temperature_2m_max[0]):null;
+                    var tmin=data.daily?Math.round(data.daily.temperature_2m_min[0]):null;
+
+                    document.getElementById('mainHeader').style.background=getSky(code,isDay);
+                    var el=document.getElementById('todayCard');
+                    el.innerHTML='';
+
+                    var topDiv=document.createElement('div'); topDiv.className='today-top';
+                    var iconWrap=document.createElement('div'); iconWrap.className='today-icon-wrap';
+                    // 直接使用 Emoji，彻底解决空白破图问题
+                    iconWrap.innerHTML='<div style="font-size:42px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));">'+wemoji(code)+'</div>';
+                    topDiv.appendChild(iconWrap);
+
+                    var mainDiv=document.createElement('div'); mainDiv.className='today-main';
+                    mainDiv.innerHTML='<div class="today-temp">'+temp+'<span class="today-unit">°C</span></div>'+
+                        '<div class="today-desc">'+wdesc(code)+'</div>'+
+                        (tmax!==null?'<div class="today-range">最高 '+tmax+'° · 最低 '+tmin+'°</div>':'');
+                    topDiv.appendChild(mainDiv);
+                    el.appendChild(topDiv);
+
+                    var detDiv=document.createElement('div'); detDiv.className='today-details';
+                    detDiv.innerHTML=
+                        '<div class="detail-row">'+svgDrop+'<span>湿度</span><span class="detail-val">'+hum+'%</span></div>'+
+                        '<div class="detail-row">'+svgTherm+'<span>体感</span><span class="detail-val">'+feel+'°</span></div>'+
+                        '<div class="detail-row">'+svgWind+'<span>'+wind+' km/h</span><span class="detail-val">'+windLabel(wind)+'</span></div>';
+                    el.appendChild(detDiv);
+
+                    document.getElementById('wtCity').textContent=city;
+                    var t=new Date();
+                    document.getElementById('wtUpdate').textContent='更新于 '+pad(t.getHours())+':'+pad(t.getMinutes());
+                    document.getElementById('wtFooter').style.display='flex';
+                }
+
+                // ── 3. 渲染明日天气 ──
+                function renderTomorrow(data){
+                    var daily=data.daily; if(!daily||daily.time.length<2) return;
+                    var code=daily.weather_code[1];
+                    var tmax=Math.round(daily.temperature_2m_max[1]);
+                    var tmin=Math.round(daily.temperature_2m_min[1]);
+                    var pop=daily.precipitation_probability_max?daily.precipitation_probability_max[1]:null;
+                    var wind=daily.wind_speed_10m_max?Math.round(daily.wind_speed_10m_max[1]):null;
+
+                    document.getElementById('tmrDesc').textContent=wdesc(code);
+                    document.getElementById('tmrRange').textContent='最高 '+tmax+'° / 最低 '+tmin+'°';
+
+                    var iconWrap=document.getElementById('tmrIconWrap');
+                    // 直接使用 Emoji
+                    iconWrap.innerHTML='<div style="font-size:32px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15));">'+wemoji(code)+'</div>';
+
+                    var statsHtml='';
+                    if(pop!==null) statsHtml+='<div class="tmr-stat">'+svgDrop.replace('viewBox','style="width:10px;height:10px;opacity:.7;" viewBox')+'<span class="tmr-stat-val">'+pop+'%</span><span>降水</span></div>';
+                    if(wind!==null) statsHtml+='<div class="tmr-stat">'+svgWind.replace('viewBox','style="width:10px;height:10px;opacity:.7;" viewBox')+'<span class="tmr-stat-val">'+wind+'</span><span>km/h</span></div>';
+                    document.getElementById('tmrStats').innerHTML=statsHtml;
+
+                    var refMin=Math.min(daily.temperature_2m_min[0],tmin)-2;
+                    var refMax=Math.max(daily.temperature_2m_max[0],tmax)+2;
+                    var range=refMax-refMin||1;
+                    document.getElementById('tmrBarMin').textContent=tmin+'°';
+                    document.getElementById('tmrBarMax').textContent=tmax+'°';
+                    document.getElementById('tmrBarFill').style.left=((tmin-refMin)/range*100).toFixed(1)+'%';
+                    document.getElementById('tmrBarFill').style.right=(100-(tmax-refMin)/range*100).toFixed(1)+'%';
+                    document.getElementById('tmrCard').style.opacity='1';
+                }
+
+                // ── 4. 工服卡与穿衣建议 ──
+                var UNIFORMS=[null,
+                    {name:'黑色工服',color:'#1a1a1a'},
+                    {name:'金色工服',color:'#c9a227'},
+                    {name:'红色工服',color:'#c0392b'},
+                    {name:'黑色工服',color:'#1a1a1a'},
+                    {name:'金色工服',color:'#c9a227'},
+                    {name:'红色工服',color:'#c0392b'},
+                    {name:'红色工服',color:'#c0392b'},
                 ];
-                function dayToIdx(d) { return d === 0 ? 7 : d; }
-
-                function genClothingHint(tmax, tmin, pop, windKmh, wmoCode) {
-                    var hints = [];
-                    if (tmax <= 5) hints.push('气温较低，建议厚外套加保暖内搭');
-                    else if (tmax <= 12) hints.push('天气偏凉，外套不可少');
-                    else if (tmax <= 20) hints.push('温度适中，薄外套或卫衣即可');
-                    else if (tmax <= 28) hints.push('气温舒适，轻薄穿搭为主');
-                    else hints.push('天气较热，透气轻薄为主');
-
-                    if (tmax - tmin >= 10) hints.push('早晚温差大，备一件外套');
-
-                    if (wmoCode >= 71 && wmoCode <= 77 || wmoCode >= 85 && wmoCode <= 86) hints.push('有降雪，注意防滑保暖');
-                    else if (pop >= 50) hints.push('降水概率高，记得带伞');
-                    else if (pop >= 30) hints.push('可能有雨，备好雨具');
-
-                    if (windKmh >= 40) hints.push('注意防风');
-                    return hints.slice(0, 2).join('，');
+                function dayToIdx(d){return d===0?7:d;}
+                function genHint(tmax,tmin,pop,wind,code){
+                    var h=[];
+                    if(tmax<=5)h.push('气温较低，建议厚外套加保暖内搭');
+                    else if(tmax<=12)h.push('天气偏凉，外套不可少');
+                    else if(tmax<=20)h.push('温度适中，薄外套或卫衣即可');
+                    else if(tmax<=28)h.push('气温舒适，轻薄穿搭为主');
+                    else h.push('天气较热，透气轻薄为主');
+                    if(tmax-tmin>=10)h.push('早晚温差大，备一件外套');
+                    if(code>=71&&code<=77||code>=85&&code<=86)h.push('有降雪，注意防滑保暖');
+                    else if(pop>=50)h.push('降水概率高，记得带伞');
+                    else if(pop>=30)h.push('可能有雨，备好雨具');
+                    if(wind>=40)h.push('注意防风');
+                    return h.slice(0,2).join('，');
                 }
-
-                function renderUniform(tmrWeatherData) {
-                    var tmrDow = tmr.getDay();
-                    var todayDow = now.getDay();
-                    var u = UNIFORMS[dayToIdx(tmrDow)];
-
-                    document.getElementById('uniformSwatch').style.background = u.color;
-                    document.getElementById('uniformColorName').textContent = u.name;
-                    document.getElementById('uniformDate').textContent = weekNames[tmrDow];
-
-                    var hint = '';
-                    if (tmrWeatherData) {
-                        var daily = tmrWeatherData.daily;
-                        var tmax = daily ? Math.round(daily.temperature_2m_max[1]) : 20;
-                        var tmin = daily ? Math.round(daily.temperature_2m_min[1]) : 10;
-                        var pop = daily && daily.precipitation_probability_max ? daily.precipitation_probability_max[1] : 0;
-                        var wind = daily && daily.wind_speed_10m_max ? Math.round(daily.wind_speed_10m_max[1]) : 0;
-                        var code = daily ? daily.weather_code[1] : 0;
-                        hint = genClothingHint(tmax, tmin, pop, wind, code);
+                function renderUniform(wd){
+                    var tmrDow=tmr.getDay(),todayDow=now.getDay();
+                    var u=UNIFORMS[dayToIdx(tmrDow)];
+                    document.getElementById('uniformSwatch').style.background=u.color;
+                    document.getElementById('uniformColorName').textContent=u.name;
+                    var hint='';
+                    if(wd){
+                        var d=wd.daily;
+                        var tmax=d?Math.round(d.temperature_2m_max[1]):20;
+                        var tmin=d?Math.round(d.temperature_2m_min[1]):10;
+                        var pop=d&&d.precipitation_probability_max?d.precipitation_probability_max[1]:0;
+                        var wind=d&&d.wind_speed_10m_max?Math.round(d.wind_speed_10m_max[1]):0;
+                        var code=d?d.weather_code[1]:0;
+                        hint=genHint(tmax,tmin,pop,wind,code);
                     }
-                    document.getElementById('uniformHint').textContent = hint || '—';
-
-                    var weekEl = document.getElementById('uniformWeek');
-                    weekEl.innerHTML = '';
-                    var dayLabels = ['日','一','二','三','四','五','六'];
-                    var order = [1,2,3,4,5,6,0];
-                    order.forEach(function(d) {
-                        var uu = UNIFORMS[dayToIdx(d)];
-                        var isToday = (d === todayDow), isTmr = (d === tmrDow);
-                        var dot = document.createElement('div');
-                        dot.className = 'uniform-day-dot' + (isToday ? ' today' : '') + (isTmr ? ' tomorrow' : '');
-                        dot.innerHTML =
-                            '<div class="uniform-dot" style="background:' + uu.color + ';"></div>' +
-                            '<div class="uniform-day-label">' + dayLabels[d] + '</div>';
+                    document.getElementById('uniformHint').textContent=hint||'—';
+                    var weekEl=document.getElementById('uniformWeek');
+                    weekEl.innerHTML='';
+                    var dayLabels=['日','一','二','三','四','五','六'];
+                    [1,2,3,4,5,6,0].forEach(function(d){
+                        var uu=UNIFORMS[dayToIdx(d)];
+                        var dot=document.createElement('div');
+                        dot.className='uniform-day-dot'+(d===todayDow?' today':'')+(d===tmrDow?' tomorrow':'');
+                        dot.innerHTML='<div class="uniform-dot" style="background:'+uu.color+';"></div><div class="uniform-day-label">'+dayLabels[d]+'</div>';
                         weekEl.appendChild(dot);
                     });
-
-                    document.getElementById('wtUniform').style.display = 'block';
+                    document.getElementById('uniformCard').style.display='block';
                 }
 
-                function renderToday(data, city) {
-                    var c = data.current, code = c.weather_code, isDay = !!c.is_day;
-                    var temp = Math.round(c.temperature_2m), feel = Math.round(c.apparent_temperature);
-                    var hum = c.relative_humidity_2m, wind = Math.round(c.wind_speed_10m);
-                    var tmax = data.daily ? Math.round(data.daily.temperature_2m_max[0]) : null;
-                    var tmin = data.daily ? Math.round(data.daily.temperature_2m_min[0]) : null;
-
-                    document.getElementById('mainHeader').style.background = getSky(code, isDay);
-
-                    var el = document.getElementById('wtToday');
-                    el.classList.remove('loading');
-                    // 使用原生 img 标签加载 Animated SVG，加入 fallback
-                    var fallbackSrc = CDN + 'partly-cloudy-day.svg';
-                    var imgHtml = '<img class="wt-icon" src="' + iconUrl(code, isDay) + '" alt="' + wmoDesc(code) + '" onerror="if(this.src.indexOf(\'rain.svg\')===-1){this.src=\'' + CDN + 'rain.svg\';}else{this.style.display=\'none\';}">';
-
-                    el.innerHTML =
-                        '<div class="wt-icon-wrap">' + imgHtml + '</div>' +
-                        '<div class="wt-center">' +
-                            '<div class="wt-temp-row"><span class="wt-temp">' + temp + '</span><span class="wt-unit">°C</span></div>' +
-                            '<div class="wt-desc">' + wmoDesc(code) + '</div>' +
-                            (tmax !== null ? '<div class="wt-range">最高 ' + tmax + '° · 最低 ' + tmin + '°</div>' : '') +
-                        '</div>' +
-                        '<div class="wt-right">' +
-                            '<div class="wt-detail">' + svgDrop + '<span>湿度</span><span class="wt-detail-val">' + hum + '%</span></div>' +
-                            '<div class="wt-detail">' + svgTherm + '<span>体感</span><span class="wt-detail-val">' + feel + '°</span></div>' +
-                            '<div class="wt-detail">' + svgWind + '<span>风速</span><span class="wt-detail-val">' + wind + ' km/h</span></div>' +
-                            '<div class="wt-detail">' + svgWind + '<span>风况</span><span class="wt-detail-val">' + windLabel(wind) + '</span></div>' +
-                        '</div>';
-
-                    document.getElementById('wtCity').textContent = city;
-                    var t = new Date();
-                    document.getElementById('wtUpdate').textContent = '更新于 ' + pad(t.getHours()) + ':' + pad(t.getMinutes());
-                    document.getElementById('wtFooter').style.display = 'flex';
+                // ── 5. 特斯拉股票 ──
+                function drawChart(isUp){
+                    var canvas=document.getElementById('tslaCanvas');
+                    if(!canvas)return;
+                    var ctx=canvas.getContext('2d');
+                    var wrap=canvas.parentElement;
+                    var w=wrap.offsetWidth,h=wrap.offsetHeight;
+                    var dpr=Math.min(window.devicePixelRatio||1,2);
+                    canvas.width=w*dpr;canvas.height=h*dpr;ctx.scale(dpr,dpr);
+                    ctx.clearRect(0,0,w,h);
+                    var pts=[{x:0,y:h/2}],y=h/2;
+                    for(var i=1;i<18;i++){y+=((Math.random()-0.48)*(h*0.55));y=Math.max(4,Math.min(h-4,y));pts.push({x:i*w/17,y:y});}
+                    pts.push({x:w,y:isUp?5:h-5});
+                    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+                    for(var i=1;i<pts.length-2;i++){var xc=(pts[i].x+pts[i+1].x)/2,yc=(pts[i].y+pts[i+1].y)/2;ctx.quadraticCurveTo(pts[i].x,pts[i].y,xc,yc);}
+                    ctx.quadraticCurveTo(pts[pts.length-2].x,pts[pts.length-2].y,pts[pts.length-1].x,pts[pts.length-1].y);
+                    ctx.strokeStyle=isUp?'#4ade80':'#f87171';ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
+                    ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+                    var grad=ctx.createLinearGradient(0,0,0,h);
+                    grad.addColorStop(0,isUp?'rgba(74,222,128,0.20)':'rgba(248,113,113,0.20)');
+                    grad.addColorStop(1,'rgba(0,0,0,0)');
+                    ctx.fillStyle=grad;ctx.fill();
+                }
+                function fetchTsla(){
+                    var s=document.createElement('script');
+                    s.src='https://qt.gtimg.cn/q=usTSLA';
+                    s.onload=function(){
+                        var raw=window.v_usTSLA;
+                        if(!raw){document.getElementById('tslaCard').style.display='block';return;}
+                        var d=raw.split('~');
+                        if(d.length<35){document.getElementById('tslaCard').style.display='block';return;}
+                        var price=parseFloat(d[3]),prev=parseFloat(d[4]),open=parseFloat(d[5]);
+                        var change=parseFloat(d[31]),pct=parseFloat(d[32]),high=parseFloat(d[33]),low=parseFloat(d[34]);
+                        document.getElementById('tslaPrice').textContent=price.toFixed(2);
+                        document.getElementById('tslaOpen').textContent=open.toFixed(2);
+                        document.getElementById('tslaHigh').textContent=high.toFixed(2);
+                        document.getElementById('tslaLow').textContent=low.toFixed(2);
+                        document.getElementById('tslaPrev').textContent=prev.toFixed(2);
+                        var chgEl=document.getElementById('tslaChg');
+                        if(change>=0){chgEl.className='tsla-chg up';chgEl.textContent='+'+change.toFixed(2)+' (+'+pct.toFixed(2)+'%)';}
+                        else{chgEl.className='tsla-chg down';chgEl.textContent=change.toFixed(2)+' ('+pct.toFixed(2)+'%)';}
+                        var nowUTC=new Date(),etH=((nowUTC.getUTCHours()-4+24)%24);
+                        var isOpen=(etH>9||(etH===9&&nowUTC.getUTCMinutes()>=30))&&etH<16&&nowUTC.getUTCDay()>=1&&nowUTC.getUTCDay()<=5;
+                        document.getElementById('tslaStatus').textContent=isOpen?'● 盘中实时':'○ 盘后数据';
+                        document.getElementById('tslaCard').style.display='block';
+                        setTimeout(function(){drawChart(change>=0);},60);
+                    };
+                    s.onerror=function(){document.getElementById('tslaCard').style.display='block';};
+                    document.head.appendChild(s);
                 }
 
-                function windLabel(k) {
-                    if(k < 1) return '静风'; if(k < 6) return '软风'; if(k < 12) return '轻风';
-                    if(k < 20) return '微风'; if(k < 29) return '和风'; if(k < 39) return '清风';
-                    if(k < 50) return '强风'; return '大风';
-                }
-
-                function renderHourly(data) {
-                    var hourly = data.hourly; if (!hourly) return;
-                    var times = hourly.time, temps = hourly.temperature_2m;
-                    var codes = hourly.weather_code, pops = hourly.precipitation_probability;
-                    var nowH = new Date(); nowH.setMinutes(0, 0, 0);
-                    var nowTs = nowH.toISOString().slice(0, 13);
-                    var startIdx = 0;
-                    for (var i = 0; i < times.length; i++) { if (times[i].slice(0, 13) === nowTs) { startIdx = i; break; } }
-                    var scroll = document.getElementById('hourlyScroll'); scroll.innerHTML = '';
-                    for (var j = startIdx; j < Math.min(startIdx + 13, times.length); j++) {
-                        var dt = new Date(times[j]), isNow = (j === startIdx);
-                        var isD = dt.getHours() >= 6 && dt.getHours() < 19;
-                        var pop = pops ? pops[j] : 0;
-                        var item = document.createElement('div');
-                        item.className = 'hourly-item' + (isNow ? ' now' : '');
-                        
-                        var imgHtml = '<img class="hourly-icon" src="' + iconUrl(codes[j], isD) + '" onerror="if(this.src.indexOf(\'rain.svg\')===-1){this.src=\'' + CDN + 'rain.svg\';}else{this.style.opacity=0;}">';
-                        
-                        item.innerHTML =
-                            '<div class="hourly-time">' + (isNow ? '现在' : pad(dt.getHours()) + ':00') + '</div>' +
-                            imgHtml +
-                            '<div class="hourly-temp">' + Math.round(temps[j]) + '°</div>' +
-                            (pop > 20 ? '<div class="hourly-pop">' + pop + '%</div>' : '<div class="hourly-pop" style="opacity:0">·</div>');
-                        scroll.appendChild(item);
-                    }
-                    document.getElementById('wtHourly').style.display = 'block';
-                }
-
-                function renderTomorrow(data) {
-                    var daily = data.daily; if (!daily || daily.time.length < 2) return;
-                    var code = daily.weather_code[1];
-                    var tmax = Math.round(daily.temperature_2m_max[1]);
-                    var tmin = Math.round(daily.temperature_2m_min[1]);
-                    var pop = daily.precipitation_probability_max ? daily.precipitation_probability_max[1] : null;
-                    var wind = daily.wind_speed_10m_max ? Math.round(daily.wind_speed_10m_max[1]) : null;
-
-                    document.getElementById('tmrDesc').textContent = wmoDesc(code);
-                    document.getElementById('tmrRange').textContent = '最高 ' + tmax + '°  /  最低 ' + tmin + '°';
-
-                    var tmrIcon = document.getElementById('tmrIcon');
-                    tmrIcon.src = iconUrl(code, true);
-                    tmrIcon.onerror = function() { if(this.src.indexOf('rain.svg')===-1) this.src = CDN + 'rain.svg'; else this.style.display = 'none'; };
-
-                    var statsHtml = '';
-                    if (pop !== null) statsHtml += '<div class="tmr-stat">' + svgDrop.replace('class="wt-detail-icon"', 'style="width:11px;height:11px;opacity:.7;"') + '<span class="tmr-stat-val">' + pop + '%</span><span>降水</span></div>';
-                    if (wind !== null) statsHtml += '<div class="tmr-stat">' + svgWind.replace('class="wt-detail-icon"', 'style="width:11px;height:11px;opacity:.7;"') + '<span class="tmr-stat-val">' + wind + '</span><span>km/h</span></div>';
-                    document.getElementById('tmrStats').innerHTML = statsHtml;
-
-                    var refMin = Math.min(daily.temperature_2m_min[0], tmin) - 2;
-                    var refMax = Math.max(daily.temperature_2m_max[0], tmax) + 2;
-                    var range = refMax - refMin || 1;
-                    document.getElementById('tmrBarMin').textContent = tmin + '°';
-                    document.getElementById('tmrBarMax').textContent = tmax + '°';
-                    document.getElementById('tmrBarFill').style.left = ((tmin - refMin) / range * 100).toFixed(1) + '%';
-                    document.getElementById('tmrBarFill').style.right = (100 - (tmax - refMin) / range * 100).toFixed(1) + '%';
-                    document.getElementById('wtTomorrow').style.display = 'block';
-                }
-
-                function fetchWeather(lat, lon, city) {
-                    var url = 'https://api.open-meteo.com/v1/forecast' +
-                        '?latitude=' + lat + '&longitude=' + lon +
-                        '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day' +
-                        '&hourly=temperature_2m,weather_code,precipitation_probability' +
-                        '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max' +
+                // ── 6. 天气请求 ──
+                function fetchWeather(lat,lon,city){
+                    var url='https://api.open-meteo.com/v1/forecast'+
+                        '?latitude='+lat+'&longitude='+lon+
+                        '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day'+
+                        '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max'+
                         '&wind_speed_unit=kmh&timezone=auto&forecast_days=2';
                     fetch(url)
-                        .then(function(r) { return r.json(); })
-                        .then(function(d) {
-                            renderToday(d, city);
-                            renderHourly(d);
-                            renderTomorrow(d);
-                            renderUniform(d);
-                        })
-                        .catch(function() {
-                            var el = document.getElementById('wtToday');
-                            el.classList.remove('loading');
-                            el.innerHTML = '<span style="font-size:12px;color:var(--tm);">天气数据暂时不可用</span>';
+                        .then(function(r){return r.json();})
+                        .then(function(d){renderToday(d,city);renderTomorrow(d);renderUniform(d);})
+                        .catch(function(){
+                            document.getElementById('todayCard').innerHTML='<span style="font-size:12px;color:var(--tm);">天气数据暂时不可用</span>';
                             renderUniform(null);
                         });
                 }
 
-                // IP 定位
                 fetch('https://ipapi.co/json/')
-                    .then(function(r) { return r.json(); })
-                    .then(function(g) {
-                        fetchWeather(g.latitude || 39.9042, g.longitude || 116.4074, g.city || g.region || '当前位置');
-                    })
-                    .catch(function() {
-                        fetchWeather(39.9042, 116.4074, '北京');
-                    });
+                    .then(function(r){return r.json();})
+                    .then(function(g){fetchWeather(g.latitude||39.9042,g.longitude||116.4074,g.city||g.region||'当前位置');})
+                    .catch(function(){fetchWeather(39.9042,116.4074,'北京');});
+
+                fetchTsla();
             })();
         </script>
     </body>
