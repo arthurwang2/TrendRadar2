@@ -1,10 +1,30 @@
+# ═══════════════════════════════════════════════════════════════
+#                    TrendRadar 配置文件
+#                      Version: 2.2.0
+# ═══════════════════════════════════════════════════════════════
+
+# 可视化配置编辑器地址: https://sansan0.github.io/TrendRadar/
+
+
+# ===============================================================
+# 1. 基础设置
+# ===============================================================
 app:
   timezone: "Asia/Shanghai"
   show_version_update: true
 
+
+# ===============================================================
+# 1.5 调度系统
+# ===============================================================
 schedule:
   enabled: false
+  preset: "morning_evening"
 
+
+# ===============================================================
+# 2. 数据源 - 热榜平台
+# ===============================================================
 platforms:
   enabled: true
   sources:
@@ -27,39 +47,115 @@ platforms:
     - id: "36kr"
       name: "36氪"
 
+
+# ===============================================================
+# 3. 数据源 - RSS 订阅
+# ===============================================================
 rss:
   enabled: true
+
   freshness_filter:
     enabled: true
     max_age_days: 2
+
   feeds:
     # 央媒及主流媒体高质量源
     - id: "cctv-xwlb"
       name: "央视新闻-新闻联播"
       url: "https://rsshub.app/cctv/xwlb"
+      
     - id: "xinhua-yw"
       name: "新华网-要闻"
       url: "https://rsshub.app/xinhua/news"
-    - id: "people-yw"
-      name: "人民网-要闻"
-      url: "https://rsshub.app/people/news/yw"
+      
     - id: "thepaper-tt"
       name: "澎湃新闻-头条"
       url: "https://rsshub.app/thepaper/featured"
-    - id: "jiemian-tx"
-      name: "界面新闻-天下"
-      url: "https://rsshub.app/jiemian/lists/82"
+    
     # 上海新能源与商务政策专属监控源
     - id: "sh-sheitc"
       name: "上海市经信委-最新动态"
       url: "https://rsshub.app/gov/shanghai/sheitc/xwdt"
+      
     - id: "sh-sww"
       name: "上海市商务委-新闻动态"
       url: "https://rsshub.app/gov/shanghai/sww/xwdt"
+      
     - id: "sh-fgw-energy"
       name: "上海市发改委(新能源办)-政策文件"
       url: "https://rsshub.app/gov/shanghai/fgw/zcwj"
+      
+    # 汽车行业垂直媒体源
+    - id: "cnautonews"
+      name: "中国汽车报"
+      url: "http://www.cnautonews.com/rss.xml"
+      
+    - id: "evtimes"
+      name: "电动汽车时代"
+      url: "https://www.evtimes.cn/feed"
+      
+    - id: "miit-gov"
+      name: "工信部官网"
+      url: "https://www.miit.gov.cn/rss.xml"
 
+    # ===========================================================
+    # 新能源车企官方微信公众号（重点：车型、金融政策、公司动态）
+    # ===========================================================
+    - id: "xiaomi-auto"
+      name: "小米汽车"
+      url: "https://rsshub.app/wechat/mp/home/小米汽车"
+      max_age_days: 2
+
+    - id: "byd-auto"
+      name: "比亚迪"
+      url: "https://rsshub.app/wechat/mp/home/比亚迪"
+      max_age_days: 2
+
+    - id: "nio"
+      name: "蔚来"
+      url: "https://rsshub.app/wechat/mp/home/蔚来"
+      max_age_days: 2
+
+    - id: "lixiang-auto"
+      name: "理想汽车"
+      url: "https://rsshub.app/wechat/mp/home/理想汽车"
+      max_age_days: 2
+
+    - id: "xiaopeng-auto"
+      name: "小鹏汽车"
+      url: "https://rsshub.app/wechat/mp/home/小鹏汽车"
+      max_age_days: 2
+
+    - id: "zeekr"
+      name: "极氪"
+      url: "https://rsshub.app/wechat/mp/home/极氪"
+      max_age_days: 2
+
+    - id: "aito"
+      name: "问界"
+      url: "https://rsshub.app/wechat/mp/home/问界"
+      max_age_days: 2
+
+    - id: "leapmotor"
+      name: "零跑汽车"
+      url: "https://rsshub.app/wechat/mp/home/零跑汽车"
+      max_age_days: 2
+
+    # 可继续扩展的车企（按需取消注释）
+    # - id: "avatr"
+    #   name: "阿维塔"
+    #   url: "https://rsshub.app/wechat/mp/home/阿维塔"
+    #   max_age_days: 2
+    #
+    # - id: "deepal"
+    #   name: "深蓝汽车"
+    #   url: "https://rsshub.app/wechat/mp/home/深蓝汽车"
+    #   max_age_days: 2
+
+
+# ===============================================================
+# 4. 报告模式
+# ===============================================================
 report:
   mode: "daily"
   display_mode: "keyword"
@@ -67,14 +163,36 @@ report:
   rank_threshold: 5
   max_news_per_keyword: 10
 
+
+# ===============================================================
+# 4.5 筛选策略
+# ===============================================================
 filter:
   method: "keyword"
   priority_sort_enabled: true
 
+
+# ===============================================================
+# 4.6 AI 智能筛选配置
+# ===============================================================
+ai_filter:
+  batch_size: 200
+  batch_interval: 2
+  min_score: 0.7
+  reclassify_threshold: 0.6
+  prompt_file: "prompt.txt"
+  extract_prompt_file: "extract_prompt.txt"
+  update_tags_prompt_file: "update_tags_prompt.txt"
+
+
+# ===============================================================
+# 5. 推送内容控制
+# ===============================================================
 display:
   region_order:
     - hotlist
     - rss
+
   regions:
     new_items: false
     hotlist: true
@@ -82,12 +200,25 @@ display:
     standalone: false
     ai_analysis: false
 
+  standalone:
+    platforms: []
+    rss_feeds: []
+    max_items: 20
+
+
+# ===============================================================
+# 6. 推送通知
+# ===============================================================
 notification:
   enabled: true
   channels:
     bark:
       url: ""
 
+
+# ===============================================================
+# 7. 存储配置
+# ===============================================================
 storage:
   backend: "auto"
   formats:
@@ -98,7 +229,21 @@ storage:
   local:
     data_dir: "output"
     retention_days: 0
+  remote:
+    retention_days: 0
+    endpoint_url: ""
+    bucket_name: ""
+    access_key_id: ""
+    secret_access_key: ""
+    region: ""
+  pull:
+    enabled: false
+    days: 7
 
+
+# ===============================================================
+# 8. AI 模型配置
+# ===============================================================
 ai:
   model: "openai/Qwen/Qwen2.5-7B-Instruct"
   api_key: ""
@@ -106,28 +251,64 @@ ai:
   timeout: 120
   temperature: 1.0
   max_tokens: 5000
+  num_retries: 1
+  fallback_models: []
 
+
+# ===============================================================
+# 9. AI 分析功能
+# ===============================================================
 ai_analysis:
   enabled: false
+  language: "Chinese"
+  prompt_file: "ai_analysis_prompt.txt"
+  mode: "follow_report"
+  max_news_for_analysis: 150
+  include_rss: false
+  include_standalone: false
+  include_rank_timeline: true
 
+
+# ===============================================================
+# 10. AI 翻译功能
+# ===============================================================
 ai_translation:
   enabled: false
+  language: "中文"
+  prompt_file: "ai_translation_prompt.txt"
+  scope:
+    hotlist: false
+    rss: true
+    standalone: true
 
+
+# ===============================================================
+# 11. 高级设置
+# ===============================================================
 advanced:
   debug: false
   version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version"
+  mcp_version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version_mcp"
+  configs_version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version_configs"
+
   crawler:
     request_interval: 2000
     use_proxy: false
+    default_proxy: "http://127.0.0.1:10801"
+
   rss:
     request_interval: 1000
     timeout: 15
     use_proxy: false
+    proxy_url: ""
+
   weight:
     rank: 0.6
     frequency: 0.3
     hotness: 0.1
+
   max_accounts_per_channel: 3
+
   batch_size:
     default: 4000
     bark: 4000
