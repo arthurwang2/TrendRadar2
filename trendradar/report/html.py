@@ -1426,7 +1426,8 @@ def render_html_content(
                     var count = item.querySelector('.count-info'); if (count) meta.push(count.textContent.trim());
 
                     var line = idx + '. ';
-                    if (url) { line += '[' + titleText.replace(/[[\]]/g, '') + '](' + url + ')'; } else { line += titleText; }
+                    /* 修复了此处 Python 的 SyntaxWarning：将 \\] 替换为 \\\\] */
+                    if (url) { line += '[' + titleText.replace(/[[\\]]/g, '') + '](' + url + ')'; } else { line += titleText; }
                     if (meta.length) line += '  `' + meta.join(' | ') + '`';
                     return line;
                 }
@@ -1802,10 +1803,9 @@ def render_html_content(
                         });
                 }
 
-                fetch('https://ipapi.co/json/')
-                    .then(function(r){return r.json();})
-                    .then(function(g){fetchWeather(g.latitude||39.9042,g.longitude||116.4074,g.city||g.region||'当前位置');})
-                    .catch(function(){fetchWeather(39.9042,116.4074,'北京');});
+                // 【已修复】不再使用动态 IP 获取位置，直接固定获取上海天气（保证电脑手机双端显示一致）
+                // 如果需要北京，可改为 fetchWeather(39.9042, 116.4074, 'Beijing');
+                fetchWeather(31.2304, 121.4737, 'Shanghai');
 
                 fetchTsla();
             })();
