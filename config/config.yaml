@@ -36,85 +36,85 @@ rss:
   enabled: true
   freshness_filter:
     enabled: true
-    max_age_days: 1
+    max_age_days: 2
 
   feeds:
-    # 央媒及政务高质量源 (分摊给服务器 A, B, C)
+    # 央媒及政务高质量源 (全部换成了你的私有节点，保留最近2天)
     - id: "cctv-xwlb"
       name: "央视新闻-新闻联播"
-      url: "https://rsshub.rssforever.com/cctv/xwlb"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/cctv/xwlb"
+      max_age_days: 2
 
     - id: "xinhua-yw"
       name: "新华网-要闻"
-      url: "https://rss.shab.fun/xinhua/news"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/xinhua/news"
+      max_age_days: 2
 
     - id: "thepaper-tt"
       name: "澎湃新闻-头条"
-      url: "https://rsshub.top/thepaper/featured"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/thepaper/featured"
+      max_age_days: 2
     
     - id: "sh-sheitc"
       name: "上海市经信委-最新动态"
-      url: "https://rss.shab.fun/gov/shanghai/sheitc/xwdt"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/gov/shanghai/sheitc/xwdt"
+      max_age_days: 2
 
     - id: "sh-sww"
       name: "上海市商务委-新闻动态"
-      url: "https://rsshub.top/gov/shanghai/sww/xwdt"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/gov/shanghai/sww/xwdt"
+      max_age_days: 2
 
     - id: "sh-fgw-energy"
       name: "上海市发改委(新能源办)-政策文件"
-      url: "https://rsshub.rssforever.com/gov/shanghai/fgw/zcwj"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/gov/shanghai/fgw/zcwj"
+      max_age_days: 2
       
     - id: "miit-gov"
       name: "工信部官网"
-      url: "https://rsshub.top/gov/miit/wjfb" 
+      url: "https://taiwei-rsshub.vercel.app/gov/miit/wjfb" 
       max_age_days: 2
 
-    # 新能源车企官方动态 (已全部替换为官方微博源，100%稳定不拦截)
+    # 新能源车企官方动态 (微博源，全部换成了你的私有节点，保留最近2天)
     - id: "xiaomi-auto"
       name: "小米汽车(官方)"
-      url: "https://rsshub.rssforever.com/weibo/user/7871239944"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/7871239944"
+      max_age_days: 2
 
     - id: "byd-auto"
       name: "比亚迪(官方)"
-      url: "https://rss.shab.fun/weibo/user/2729215972"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/2729215972"
+      max_age_days: 2
 
     - id: "nio"
       name: "蔚来(官方)"
-      url: "https://rsshub.top/weibo/user/6463388040"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/6463388040"
+      max_age_days: 2
 
     - id: "lixiang-auto"
       name: "理想汽车(官方)"
-      url: "https://rsshub.rssforever.com/weibo/user/6001272153"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/6001272153"
+      max_age_days: 2
 
     - id: "xiaopeng-auto"
       name: "小鹏汽车(何小鹏)"
-      url: "https://rss.shab.fun/weibo/user/2455476364" # 采用何小鹏本人微博，爆料最快最准
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/2455476364" 
+      max_age_days: 2
 
     - id: "zeekr"
       name: "极氪(官方)"
-      url: "https://rsshub.top/weibo/user/7576049404"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/7576049404"
+      max_age_days: 2
 
     - id: "aito"
       name: "问界AITO(官方)"
-      url: "https://rsshub.rssforever.com/weibo/user/7711487956"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/7711487956"
+      max_age_days: 2
 
     - id: "leapmotor"
       name: "零跑汽车(官方)"
-      url: "https://rss.shab.fun/weibo/user/5872290888"
-      max_age_days: 1
+      url: "https://taiwei-rsshub.vercel.app/weibo/user/5872290888"
+      max_age_days: 2
 
 report:
   mode: "daily"
