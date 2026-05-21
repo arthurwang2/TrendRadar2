@@ -1741,7 +1741,7 @@ def render_html_content(
                     var tmrDow=tmr.getDay(),todayDow=now.getDay();
                     var u=UNIFORMS[dayToIdx(tmrDow)];
                     document.getElementById('uniformSwatch').style.background=u.color;
-                    document.getElementById('uniformColorName').textContent=u.name;
+                    document.getElementById('uniformColorName').textContent='明日-' +u.name;
                     var hint='';
                     if(wd){
                         var d=wd.daily;
