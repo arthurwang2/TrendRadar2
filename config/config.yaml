@@ -50,71 +50,71 @@ rss:
       url: "https://taiwei-rsshub.vercel.app/thepaper/featured"
       max_age_days: 2
     
-    # 政务与政策动态 (替换为微软 Bing 官方 RSS，免疫封杀)
+    # 政务与政策动态 (替换为谷歌新闻 Google News 官方 RSS，美国服务器直连，绝对免疫封杀)
     - id: "xinhua-yw"
       name: "新华网-要闻"
-      url: "https://cn.bing.com/news/search?q=新华网+要闻&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=新华网+要闻&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "sh-sheitc"
       name: "上海市经信委-最新动态"
-      url: "https://cn.bing.com/news/search?q=上海市经信委+最新动态&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=上海市经信委+最新动态&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "sh-sww"
       name: "上海市商务委-新闻动态"
-      url: "https://cn.bing.com/news/search?q=上海市商务委+新闻&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=上海市商务委+新闻&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "sh-fgw-energy"
       name: "上海市发改委-新能源政策"
-      url: "https://cn.bing.com/news/search?q=上海市发改委+新能源+政策&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=上海市发改委+新能源+政策&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
       
     - id: "miit-gov"
       name: "工信部-新能源公告"
-      url: "https://cn.bing.com/news/search?q=工信部+新能源汽车&mkt=zh-CN&format=rss" 
+      url: "https://news.google.com/rss/search?q=工信部+新能源汽车&hl=zh-CN&gl=CN&ceid=CN:zh-Hans" 
       max_age_days: 2
 
-    # 新能源车企官方及全网核心动态 (替换为 Bing 官方 RSS，秒级更新)
+    # 新能源车企官方及全网核心动态 (替换为谷歌新闻，秒级更新，永不报错)
     - id: "xiaomi-auto"
       name: "小米汽车(全网动态)"
-      url: "https://cn.bing.com/news/search?q=小米汽车+官方&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=小米汽车+官方&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "byd-auto"
       name: "比亚迪(全网动态)"
-      url: "https://cn.bing.com/news/search?q=比亚迪汽车+官方&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=比亚迪汽车+官方&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "nio"
       name: "蔚来(全网动态)"
-      url: "https://cn.bing.com/news/search?q=蔚来汽车+官方&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=蔚来汽车+官方&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "lixiang-auto"
       name: "理想汽车(全网动态)"
-      url: "https://cn.bing.com/news/search?q=理想汽车+官方&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=理想汽车+官方&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "xiaopeng-auto"
       name: "小鹏汽车(全网动态)"
-      url: "https://cn.bing.com/news/search?q=小鹏汽车+何小鹏&mkt=zh-CN&format=rss" 
+      url: "https://news.google.com/rss/search?q=小鹏汽车+何小鹏&hl=zh-CN&gl=CN&ceid=CN:zh-Hans" 
       max_age_days: 2
 
     - id: "zeekr"
       name: "极氪(全网动态)"
-      url: "https://cn.bing.com/news/search?q=极氪汽车+官方&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=极氪汽车+官方&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "aito"
       name: "问界AITO(全网动态)"
-      url: "https://cn.bing.com/news/search?q=问界+AITO汽车&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=问界+AITO汽车&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
     - id: "leapmotor"
       name: "零跑汽车(全网动态)"
-      url: "https://cn.bing.com/news/search?q=零跑汽车+官方&mkt=zh-CN&format=rss"
+      url: "https://news.google.com/rss/search?q=零跑汽车+官方&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
       max_age_days: 2
 
 report:
