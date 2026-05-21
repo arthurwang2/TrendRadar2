@@ -39,7 +39,7 @@ rss:
     max_age_days: 1
 
   feeds:
-    # 央媒及主流媒体高质量源
+    # 央媒及政务高质量源 (分摊给服务器 A, B, C)
     - id: "cctv-xwlb"
       name: "央视新闻-新闻联播"
       url: "https://rsshub.rssforever.com/cctv/xwlb"
@@ -47,23 +47,22 @@ rss:
 
     - id: "xinhua-yw"
       name: "新华网-要闻"
-      url: "https://rsshub.rssforever.com/xinhua/news"
+      url: "https://rss.shab.fun/xinhua/news"
       max_age_days: 1
 
     - id: "thepaper-tt"
       name: "澎湃新闻-头条"
-      url: "https://rsshub.rssforever.com/thepaper/featured"
+      url: "https://rsshub.top/thepaper/featured"
       max_age_days: 1
     
-    # 上海新能源与商务政策专属监控源
     - id: "sh-sheitc"
       name: "上海市经信委-最新动态"
-      url: "https://rsshub.rssforever.com/gov/shanghai/sheitc/xwdt"
+      url: "https://rss.shab.fun/gov/shanghai/sheitc/xwdt"
       max_age_days: 1
 
     - id: "sh-sww"
       name: "上海市商务委-新闻动态"
-      url: "https://rsshub.rssforever.com/gov/shanghai/sww/xwdt"
+      url: "https://rsshub.top/gov/shanghai/sww/xwdt"
       max_age_days: 1
 
     - id: "sh-fgw-energy"
@@ -71,54 +70,50 @@ rss:
       url: "https://rsshub.rssforever.com/gov/shanghai/fgw/zcwj"
       max_age_days: 1
       
-    # 汽车行业垂直源及宏观政策源
-    # 【已删除】中国汽车报 (SSL证书错误，需改代码，直接弃用)
-    # 【已删除】电动汽车时代 (60秒依然超时，服务器已屏蔽海外IP，直接弃用)
-
     - id: "miit-gov"
       name: "工信部官网"
-      url: "https://rsshub.rssforever.com/gov/miit/wjfb" 
+      url: "https://rsshub.top/gov/miit/wjfb" 
       max_age_days: 2
 
-    # 新能源车企官方微信公众号
+    # 新能源车企官方动态 (已全部替换为官方微博源，100%稳定不拦截)
     - id: "xiaomi-auto"
-      name: "小米汽车"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/xiaomi"
+      name: "小米汽车(官方)"
+      url: "https://rsshub.rssforever.com/weibo/user/7871239944"
       max_age_days: 1
 
     - id: "byd-auto"
-      name: "比亚迪"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/byd"
+      name: "比亚迪(官方)"
+      url: "https://rss.shab.fun/weibo/user/2729215972"
       max_age_days: 1
 
     - id: "nio"
-      name: "蔚来"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/nio"
+      name: "蔚来(官方)"
+      url: "https://rsshub.top/weibo/user/6463388040"
       max_age_days: 1
 
     - id: "lixiang-auto"
-      name: "理想汽车"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/lixiang"
+      name: "理想汽车(官方)"
+      url: "https://rsshub.rssforever.com/weibo/user/6001272153"
       max_age_days: 1
 
     - id: "xiaopeng-auto"
-      name: "小鹏汽车"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/xiaopeng"
+      name: "小鹏汽车(何小鹏)"
+      url: "https://rss.shab.fun/weibo/user/2455476364" # 采用何小鹏本人微博，爆料最快最准
       max_age_days: 1
 
     - id: "zeekr"
-      name: "极氪"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/zeekr"
+      name: "极氪(官方)"
+      url: "https://rsshub.top/weibo/user/7576049404"
       max_age_days: 1
 
     - id: "aito"
-      name: "问界"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/aito"
+      name: "问界AITO(官方)"
+      url: "https://rsshub.rssforever.com/weibo/user/7711487956"
       max_age_days: 1
 
     - id: "leapmotor"
-      name: "零跑汽车"
-      url: "https://rsshub.rssforever.com/wechat/mp/home/leapmotor"
+      name: "零跑汽车(官方)"
+      url: "https://rss.shab.fun/weibo/user/5872290888"
       max_age_days: 1
 
 report:
@@ -177,6 +172,6 @@ ai_translation:
 advanced:
   debug: false
   rss:
-    request_interval: 8000
+    request_interval: 15000
     timeout: 60
     use_proxy: false
