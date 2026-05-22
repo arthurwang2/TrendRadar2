@@ -152,6 +152,14 @@ jobs:
           path: output/
           retention-days: 7
 
+      - name: Prepare daily JSON for public GitHub Pages (Tesla Daily Briefing Skill)
+        run: |
+          mkdir -p output/html/daily-json
+          DATE=$(TZ=Asia/Shanghai date +%Y-%m-%d)
+          cp output/trendradar_full_content.json "output/html/daily-json/${DATE}.json"
+          echo "✅ Daily JSON published: /report/daily-json/${DATE}.json (accessible via GitHub Pages)"
+          ls -lh "output/html/daily-json/"
+
       - name: Deploy HTML report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
