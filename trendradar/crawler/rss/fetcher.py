@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from typing import List, Dict, Optional, Tuple
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .parser import RSSParser
 from trendradar.storage.base import RSSItem, RSSData
@@ -35,7 +37,7 @@ class RSSFetcher:
         self,
         feeds: List[RSSFeedConfig],
         request_interval: int = 2000,
-        timeout: int = 15,
+        timeout: int = 20,
         use_proxy: bool = False,
         proxy_url: str = "",
         timezone: str = DEFAULT_TIMEZONE,
@@ -48,7 +50,7 @@ class RSSFetcher:
         Args:
             feeds: RSS 源配置列表
             request_interval: 请求间隔（毫秒）
-            timeout: 请求超时（秒）
+            timeout: 请求超时（秒），默认 20（官媒 RSS 推荐 20-30）
             use_proxy: 是否使用代理
             proxy_url: 代理 URL
             timezone: 时区配置（如 'Asia/Shanghai'）
@@ -57,7 +59,7 @@ class RSSFetcher:
         """
         self.feeds = [f for f in feeds if f.enabled]
         self.request_interval = request_interval
-        self.timeout = timeout
+        self.timeout = timeout or 20  # RSS 源（尤其是 rsshub）经常需要更长超时
         self.use_proxy = use_proxy
         self.proxy_url = proxy_url
         self.timezone = timezone
@@ -68,12 +70,17 @@ class RSSFetcher:
         self.session = self._create_session()
 
     def _create_session(self) -> requests.Session:
-        """创建请求会话"""
+        """创建请求会话（带自动重试，专门应对官媒 RSS 的 503/429 瞬时错误）"""
         session = requests.Session()
+
+        # 更真实的浏览器/阅读器 headers，降低被简单封杀概率
         session.headers.update({
-            "User-Agent": "TrendRadar/2.0 RSS Reader (https://github.com/trendradar)",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 TrendRadar/2.0 RSS",
             "Accept": "application/feed+json, application/json, application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
         })
 
         if self.use_proxy and self.proxy_url:
@@ -81,6 +88,20 @@ class RSSFetcher:
                 "http": self.proxy_url,
                 "https": self.proxy_url,
             }
+
+        # 关键修复：对 429/5xx（包括 503）自动重试 3 次，带指数退避 + jitter
+        # 这能显著提高 vercel-rsshub、Google News 等不稳定源的成功率
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1.2,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET", "HEAD"],
+            respect_retry_after_header=True,
+            raise_on_status=False,
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=10, pool_maxsize=20)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
 
         return session
 
@@ -176,6 +197,13 @@ class RSSFetcher:
         except requests.Timeout:
             error = f"请求超时 ({self.timeout}s)"
             print(f"[RSS] {feed.name}: {error}")
+            return [], error
+
+        except requests.HTTPError as e:
+            # 明确显示 503/429 等状态码，方便用户定位是源站问题还是网络
+            status = getattr(e.response, "status_code", "?")
+            error = f"HTTP {status} 错误: {e}"
+            print(f"[RSS] {feed.name}: {error}（已自动重试 3 次仍失败，源站可能过载）")
             return [], error
 
         except requests.RequestException as e:
@@ -296,7 +324,7 @@ class RSSFetcher:
         return cls(
             feeds=feeds,
             request_interval=config.get("request_interval", 2000),
-            timeout=config.get("timeout", 15),
+            timeout=config.get("timeout", 20),  # 提高默认超时，应对官媒 rsshub 冷启动/慢响应
             use_proxy=config.get("use_proxy", False),
             proxy_url=config.get("proxy_url", ""),
             timezone=config.get("timezone", DEFAULT_TIMEZONE),

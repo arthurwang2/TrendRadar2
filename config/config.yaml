@@ -39,7 +39,20 @@ rss:
     max_age_days: 2
 
   feeds:
-    # 央媒高质量源 (你的私有节点测试能通，继续保留)
+    # ==================== 央媒 / 官媒源（最容易 503 的部分）====================
+    # 说明：当前使用的是你私有的 vercel-rsshub 实例，免费配额有限，经常返回 503。
+    # 推荐修复方案（按优先级）：
+    # 1. 换成稳定公共 RSSHub 镜像（推荐）：
+    #    - https://rsshub.rssforever.com/cctv/xwlb
+    #    - https://rsshub.uneasy.win/cctv/xwlb
+    #    - https://rsshub.app/cctv/xwlb （官方，但有时也慢）
+    # 2. 自建 RSSHub（最稳，推荐有 VPS 的用户）
+    # 3. 保留私有节点 + 下面代码已增强的重试机制（已自动对 503 重试 3 次 + 退避）
+    #
+    # 已同步修复：RSSFetcher 现在内置 urllib3 自动重试 + 更真实的 headers + 20s 超时
+    # 即使源站偶尔 503，也会多等几秒再试，大幅降低“抓不到数据”的概率。
+    # =====================================================================
+
     - id: "cctv-xwlb"
       name: "央视新闻-新闻联播"
       url: "https://taiwei-rsshub.vercel.app/cctv/xwlb"
