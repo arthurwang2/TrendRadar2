@@ -9,6 +9,7 @@
 
 from pathlib import Path
 from typing import Dict, List, Optional, Callable
+import re
 
 
 def prepare_report_data(
@@ -62,11 +63,27 @@ def prepare_report_data(
                 # 没有匹配函数时，使用全部
                 filtered_new_titles = new_titles
 
+            # 对新增标题也应用硬屏蔽 + 去重
+            hard_filtered_new = {}
+            for source_id, titles_data in filtered_new_titles.items():
+                kept = {}
+                for title, tdata in titles_data.items():
+                    if is_hard_blocked(title):
+                        continue
+                    norm = normalize_title(title)
+                    if norm in seen_normalized:
+                        continue
+                    seen_normalized.add(norm)
+                    kept[title] = tdata
+                if kept:
+                    hard_filtered_new[source_id] = kept
+            filtered_new_titles = hard_filtered_new
+
             # 打印过滤后的新增热点数（与推送显示一致）
             original_new_count = sum(len(titles) for titles in new_titles.values()) if new_titles else 0
             filtered_new_count = sum(len(titles) for titles in filtered_new_titles.values()) if filtered_new_titles else 0
             if original_new_count > 0:
-                print(f"频率词过滤后：{filtered_new_count} 条新增热点匹配（原始 {original_new_count} 条）")
+                print(f"频率词+硬屏蔽过滤后：{filtered_new_count} 条新增热点匹配（原始 {original_new_count} 条）")
 
         if filtered_new_titles and id_to_name:
             for source_id, titles_data in filtered_new_titles.items():
@@ -100,6 +117,34 @@ def prepare_report_data(
                         }
                     )
 
+    # ========== 全局硬性负向屏蔽（Hard Block） ==========
+    # 从 config 读取（如果调用方传入了 filter_config）
+    hard_block_config = {}
+    try:
+        # 尝试从调用上下文获取（由 main 传入）
+        import trendradar.core.config as core_config
+        cfg = core_config.load_config()
+        hard_block_config = cfg.get("filter", {}).get("hard_block", {})
+    except Exception:
+        pass
+
+    hard_block_enabled = hard_block_config.get("enabled", False)
+    hard_keywords = [k.lower() for k in hard_block_config.get("keywords", [])]
+
+    def is_hard_blocked(title: str) -> bool:
+        if not hard_block_enabled or not hard_keywords:
+            return False
+        t = title.lower()
+        return any(kw in t for kw in hard_keywords)
+
+    # 对 stats 应用硬屏蔽 + 全页面去重准备
+    seen_normalized = set()
+
+    def normalize_title(t: str) -> str:
+        # 简单归一化：去空格、去常见标点、转小写
+        t = re.sub(r'[\s\u3000【】「」""''（）()\[\]、，。！？；：]', '', t.lower())
+        return t[:80]  # 截断防超长
+
     processed_stats = []
     for stat in stats:
         if stat["count"] <= 0:
@@ -107,8 +152,16 @@ def prepare_report_data(
 
         processed_titles = []
         for title_data in stat["titles"]:
+            title = title_data["title"]
+            if is_hard_blocked(title):
+                continue
+            norm = normalize_title(title)
+            if norm in seen_normalized:
+                continue  # 全页面跨 section 去重
+            seen_normalized.add(norm)
+
             processed_title = {
-                "title": title_data["title"],
+                "title": title,
                 "source_name": title_data["source_name"],
                 "time_display": title_data["time_display"],
                 "count": title_data["count"],
@@ -120,14 +173,15 @@ def prepare_report_data(
             }
             processed_titles.append(processed_title)
 
-        processed_stats.append(
-            {
-                "word": stat["word"],
-                "count": stat["count"],
-                "percentage": stat.get("percentage", 0),
-                "titles": processed_titles,
-            }
-        )
+        if processed_titles:
+            processed_stats.append(
+                {
+                    "word": stat["word"],
+                    "count": len(processed_titles),
+                    "percentage": stat.get("percentage", 0),
+                    "titles": processed_titles,
+                }
+            )
 
     return {
         "stats": processed_stats,
