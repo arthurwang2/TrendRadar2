@@ -141,28 +141,6 @@ filter:
   method: "keyword"
   priority_sort_enabled: true
 
-  # 全局硬性负向屏蔽（Hard Block）—— 在数据进入任何分组/展示前强制过滤
-  # 目的：彻底解决“政府人事变动、电信运营商收入/用户数、油价、纯宏观非NEV新闻”等低价值内容污染公共 daily.html 的问题
-  hard_block:
-    enabled: true
-    # 这些关键词（支持子串匹配，不区分大小写）一旦命中，一律从所有报告中移除
-    keywords:
-      - 人事变动
-      - 市委书记
-      - 市长
-      - 省委
-      - 工信部.*收入
-      - 电信业务收入
-      - 移动用户
-      - 5G用户
-      - 油价
-      - 成品油
-      - 宏观经济.*非汽车
-      - 纯宏观政策
-      - 政府工作报告.*无关
-    # 可选：正则更强力屏蔽（未来扩展）
-    regex_patterns: []
-
 display:
   region_order:
     - hotlist
