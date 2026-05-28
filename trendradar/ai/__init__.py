@@ -7,6 +7,7 @@ TrendRadar AI 模块
 
 from .analyzer import AIAnalyzer, AIAnalysisResult
 from .filter import AIFilter, AIFilterResult
+from .strict_v3_classifier import StrictV3Classifier, StrictV3Result, StrictV3Item, run_strict_v3_on_daily_json
 from .translator import AITranslator, TranslationResult, BatchTranslationResult
 from .formatter import (
     get_ai_analysis_renderer,
@@ -25,6 +26,11 @@ __all__ = [
     # 智能筛选
     "AIFilter",
     "AIFilterResult",
+    # V3 严格分类器（用户自定义竞品整车 + 新能源/AI非整车赛道）
+    "StrictV3Classifier",
+    "StrictV3Result",
+    "StrictV3Item",
+    "run_strict_v3_on_daily_json",
     # 翻译器
     "AITranslator",
     "TranslationResult",
