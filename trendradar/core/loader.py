@@ -347,7 +347,9 @@ def _load_strict_v3_config(config_data: Dict) -> Dict:
     return {
         "ENABLED": enabled_env if enabled_env is not None else strict_v3.get("enabled", False),
         "USE_FOR_RSS_FEEDS": strict_v3.get("use_for_rss_feeds", []),
-        "MAX_CANDIDATES_PER_DAY": strict_v3.get("max_candidates_per_day", 200),
+        "MAX_CANDIDATES_PER_DAY": strict_v3.get("max_candidates_per_day", 0),
+        "BATCH_SIZE": strict_v3.get("batch_size", 20),
+        "BATCH_INTERVAL": strict_v3.get("batch_interval", 3),
         "DEBUG": strict_v3.get("debug", False),
     }
 

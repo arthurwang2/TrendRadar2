@@ -203,15 +203,17 @@ ai_translation:
 # 生成 Guizang 风格竞品整车 + 新能源/AI非整车赛道简报
 strict_v3:
   enabled: true                  # 总开关
-  use_for_rss_feeds:             # 仅对这些 feed_id 启用严格分类（留空则对所有 RSS 尝试）
+  use_for_rss_feeds:             # 留空=全部 RSS；可填 feed_id 缩小范围
     - "xiaomi-auto"
     - "byd-auto"
     - "nio"
     - "lixiang-auto"
     - "xiaopeng-auto"
     - "zeekr"
-    - "miit-gov"                 # 工信部源经常需要严格过滤
-  max_candidates_per_day: 200    # 两日+硬块过滤后最多送给 AI 的候选数（保护 token）
+    - "miit-gov"
+  max_candidates_per_day: 0      # 0=两日+硬块后全部送语义扫描；>0 则截断上限
+  batch_size: 20                 # 每批送小模型的条数（全量分批，避免撑爆上下文）
+  batch_interval: 3              # 批与批之间间隔秒数（硅基免费档防限流）
   debug: false
 
 advanced:

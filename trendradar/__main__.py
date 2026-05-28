@@ -1723,6 +1723,7 @@ class NewsAnalyzer:
                 ai_cfg,
                 reference_date=self.ctx.get_time(),
                 debug=strict_cfg.get("DEBUG", False),
+                strict_v3_config=strict_cfg,
             )
             out_dir = Path("output") / "meta"
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -1732,6 +1733,7 @@ class NewsAnalyzer:
                 "total_input": result.total_input,
                 "total_after_date_filter": result.total_after_date_filter,
                 "total_after_hardblock": result.total_after_hardblock,
+                "batches_processed": result.batches_processed,
                 "class1": [item.__dict__ for item in result.class1],
                 "class2": [item.__dict__ for item in result.class2],
                 "class3": [item.__dict__ for item in result.class3],
