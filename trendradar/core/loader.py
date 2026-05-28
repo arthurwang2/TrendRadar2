@@ -258,16 +258,36 @@ def _load_display_config(config_data: Dict) -> Dict:
     }
 
 
+def _merge_ai_secrets_overlay(config_data: Dict, config_path: Optional[str]) -> None:
+    """合并 config/secrets.yaml 中的 ai.api_key（本地密钥，不提交 git）"""
+    if not config_path:
+        return
+    secrets_path = Path(config_path).parent / "secrets.yaml"
+    if not secrets_path.exists():
+        return
+    try:
+        with open(secrets_path, "r", encoding="utf-8") as f:
+            secrets = yaml.safe_load(f) or {}
+        secret_key = (secrets.get("ai") or {}).get("api_key", "")
+        if secret_key and not config_data.get("ai", {}).get("api_key"):
+            config_data.setdefault("ai", {})["api_key"] = secret_key
+            print(f"[配置] 已从 secrets.yaml 加载 AI API Key")
+    except Exception as e:
+        print(f"[配置] 读取 secrets.yaml 失败: {e}")
+
+
 def _load_ai_config(config_data: Dict) -> Dict:
     """加载 AI 模型配置（LiteLLM 格式）"""
     ai_config = config_data.get("ai", {})
 
     timeout_env = _get_env_int_or_none("AI_TIMEOUT")
 
+    api_key = _get_env_str("AI_API_KEY") or ai_config.get("api_key", "")
+
     return {
         # LiteLLM 核心配置
         "MODEL": _get_env_str("AI_MODEL") or ai_config.get("model", ""),
-        "API_KEY": _get_env_str("AI_API_KEY") or ai_config.get("api_key", ""),
+        "API_KEY": api_key,
         "API_BASE": _get_env_str("AI_API_BASE") or ai_config.get("api_base", ""),
 
         # 生成参数
@@ -317,6 +337,18 @@ def _load_ai_translation_config(config_data: Dict) -> Dict:
             "RSS": scope.get("rss", True),
             "STANDALONE": scope.get("standalone", True),
         },
+    }
+
+
+def _load_strict_v3_config(config_data: Dict) -> Dict:
+    """加载 V3 严格分类配置（用户自定义竞品整车 + 新能源/AI非整车赛道）"""
+    strict_v3 = config_data.get("strict_v3", {})
+    enabled_env = _get_env_bool("STRICT_V3_ENABLED")
+    return {
+        "ENABLED": enabled_env if enabled_env is not None else strict_v3.get("enabled", False),
+        "USE_FOR_RSS_FEEDS": strict_v3.get("use_for_rss_feeds", []),
+        "MAX_CANDIDATES_PER_DAY": strict_v3.get("max_candidates_per_day", 200),
+        "DEBUG": strict_v3.get("debug", False),
     }
 
 
@@ -548,6 +580,8 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = yaml.safe_load(f)
 
+    _merge_ai_secrets_overlay(config_data, config_path)
+
     print(f"配置文件加载成功: {config_path}")
 
     # 合并所有配置
@@ -592,6 +626,9 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
 
     # AI 智能筛选配置
     config["AI_FILTER"] = _load_ai_filter_config(config_data)
+
+    # V3 严格分类配置
+    config["STRICT_V3"] = _load_strict_v3_config(config_data)
 
     # 筛选策略配置
     config["FILTER"] = _load_filter_config(config_data)

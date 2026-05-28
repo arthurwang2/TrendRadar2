@@ -138,19 +138,25 @@ report:
   max_news_per_keyword: 10
 
 filter:
-  method: "keyword"
+  method: "ai"
   priority_sort_enabled: true
+
+ai_filter:
+  enabled: true
+  batch_size: 200
+  batch_interval: 5
 
 display:
   region_order:
     - hotlist
     - rss
+    - ai_analysis
   regions:
     new_items: false
     hotlist: true
     rss: true
     standalone: false
-    ai_analysis: false
+    ai_analysis: true
 
 notification:
   enabled: true
@@ -171,14 +177,18 @@ storage:
 
 ai:
   model: "openai/Qwen/Qwen2.5-7B-Instruct"
+  # api_key 留空时自动读取：环境变量 AI_API_KEY > config/secrets.yaml > 此处
   api_key: ""
   api_base: "https://api.siliconflow.cn/v1"
   timeout: 120
-  temperature: 1.0
+  temperature: 0.7
   max_tokens: 5000
 
 ai_analysis:
-  enabled: false
+  enabled: true
+  max_news_for_analysis: 80
+  include_rss: true
+  include_rank_timeline: false
 
 ai_translation:
   enabled: false
@@ -187,13 +197,13 @@ ai_translation:
 # 用于每天对自有 daily-json（TrendRadar2/report/daily-json/）做精确筛选
 # 生成 Guizang 风格竞品整车 + 新能源/AI非整车赛道简报
 strict_v3:
-  enabled: false                 # 总开关
+  enabled: true                  # 总开关
   use_for_rss_feeds:             # 仅对这些 feed_id 启用严格分类（留空则对所有 RSS 尝试）
     - "xiaomi-auto"
     - "byd-auto"
     - "nio"
-    - "li-auto"
-    - "xpeng-auto"
+    - "lixiang-auto"
+    - "xiaopeng-auto"
     - "zeekr"
     - "miit-gov"                 # 工信部源经常需要严格过滤
   max_candidates_per_day: 200    # 两日+硬块过滤后最多送给 AI 的候选数（保护 token）

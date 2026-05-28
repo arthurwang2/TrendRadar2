@@ -1,0 +1,102 @@
+# ============================================
+# TrendRadar 项目 .gitignore
+# 防止 Python 缓存、敏感文件、大文件拖慢 Git 和 Cursor
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+.venv/
+venv/
+ENV/
+env/
+
+# IDE / 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Cursor 特定（本地索引和临时文件）
+.cursor/cache/
+.cursor/logs/
+.cursor/extensions/
+
+# 环境变量与密钥（绝对不能提交！）
+.env
+.env.*
+*.env
+config/secrets.yaml
+secrets/
+credentials/
+*.pem
+*.key
+
+# 日志与输出
+*.log
+logs/
+output/
+reports/
+*.tmp
+temp/
+
+# 数据与缓存（大文件）
+*.db
+*.sqlite
+*.sqlite3
+data/
+cache/
+*.parquet
+*.feather
+
+# 二进制与演示文件（除非必须提交）
+*.pptx
+*.ppt
+*.xlsx
+*.xls
+*.csv
+*.pdf
+demo-*.html
+*-demo.html
+generate_*.py   # 一次性脚本，除非想版本控制
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# 其他
+*.bak
+*.orig
+*.rej
+
+# 项目特定（根据需要调整）
+# trendradar/storage/local/   # 如果本地存储很大
+# 不要忽略 config/ 里的 yaml（配置需要提交）
