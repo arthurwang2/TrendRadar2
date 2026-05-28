@@ -143,8 +143,11 @@ filter:
 
 ai_filter:
   enabled: true
+  # 兴趣文件位于 config/custom/ai/（特斯拉交付语义规则）
+  interests_file: "ai_interests_tesla_delivery.txt"
   batch_size: 200
   batch_interval: 5
+  min_score: 0.5
 
 display:
   region_order:
@@ -176,12 +179,14 @@ storage:
     retention_days: 0
 
 ai:
+  # 硅基流动 OpenAI 兼容接口 · 免费档推荐模型
   model: "openai/Qwen/Qwen2.5-7B-Instruct"
-  # api_key 留空时自动读取：环境变量 AI_API_KEY > config/secrets.yaml > 此处
+  # 密钥：GitHub 仓库 Settings → Secrets and variables → Actions → Name=AI_API_KEY
+  # 本地可选：环境变量 AI_API_KEY 或 config/secrets.yaml（勿提交 git）
   api_key: ""
   api_base: "https://api.siliconflow.cn/v1"
   timeout: 120
-  temperature: 0.7
+  temperature: 0.3
   max_tokens: 5000
 
 ai_analysis:

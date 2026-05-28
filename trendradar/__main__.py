@@ -26,7 +26,7 @@ from trendradar.core.analyzer import convert_keyword_stats_to_platform_stats
 from trendradar.crawler import DataFetcher
 from trendradar.storage import convert_crawl_results_to_news_data
 from trendradar.utils.time import DEFAULT_TIMEZONE, is_within_days, calculate_days_old
-from trendradar.ai import AIAnalyzer, AIAnalysisResult
+from trendradar.ai import AIAnalyzer, AIAnalysisResult, run_strict_v3_on_daily_json
 from trendradar.core.scheduler import ResolvedSchedule
 
 
@@ -1704,6 +1704,49 @@ class NewsAnalyzer:
 
         return html_file
 
+    def _run_strict_v3_if_enabled(self, raw_rss_items: Optional[List[Dict]]) -> None:
+        """V3 严格语义分类（写入 output/meta/strict_v3_latest.json）"""
+        strict_cfg = self.ctx.config.get("STRICT_V3", {})
+        if not strict_cfg.get("ENABLED", False):
+            return
+        if not raw_rss_items:
+            print("[V3] 无 RSS 原始数据，跳过严格分类")
+            return
+        ai_cfg = self.ctx.config.get("AI", {})
+        if not ai_cfg.get("API_KEY"):
+            print("[V3] 未配置 AI_API_KEY，跳过严格分类（请在 GitHub Actions Secrets 添加 AI_API_KEY）")
+            return
+        try:
+            print("[V3] 开始严格语义分类（两日窗口 + 硬块 + Class1/2/3）...")
+            result = run_strict_v3_on_daily_json(
+                raw_rss_items,
+                ai_cfg,
+                reference_date=self.ctx.get_time(),
+                debug=strict_cfg.get("DEBUG", False),
+            )
+            out_dir = Path("output") / "meta"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "success": result.success,
+                "error": result.error,
+                "total_input": result.total_input,
+                "total_after_date_filter": result.total_after_date_filter,
+                "total_after_hardblock": result.total_after_hardblock,
+                "class1": [item.__dict__ for item in result.class1],
+                "class2": [item.__dict__ for item in result.class2],
+                "class3": [item.__dict__ for item in result.class3],
+            }
+            out_path = out_dir / "strict_v3_latest.json"
+            out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(
+                f"[V3] 完成: Class1={len(result.class1)} Class2={len(result.class2)} "
+                f"Class3={len(result.class3)} → {out_path}"
+            )
+        except Exception as e:
+            print(f"[V3] 严格分类失败: {e}")
+            if self.ctx.config.get("DEBUG", False):
+                raise
+
     def run(self) -> None:
         """执行分析流程"""
         try:
@@ -1724,6 +1767,8 @@ class NewsAnalyzer:
                 rss_items=rss_items, rss_new_items=rss_new_items,
                 raw_rss_items=raw_rss_items, rss_new_urls=rss_new_urls
             )
+
+            self._run_strict_v3_if_enabled(raw_rss_items)
 
         except Exception as e:
             print(f"分析流程执行出错: {e}")
