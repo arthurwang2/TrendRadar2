@@ -185,9 +185,10 @@ ai:
   # 本地可选：环境变量 AI_API_KEY 或 config/secrets.yaml（勿提交 git）
   api_key: ""
   api_base: "https://api.siliconflow.cn/v1"
-  timeout: 120
+  timeout: 180
   temperature: 0.3
   max_tokens: 5000
+  num_retries: 3
 
 ai_analysis:
   enabled: true
@@ -212,8 +213,10 @@ strict_v3:
     - "zeekr"
     - "miit-gov"
   max_candidates_per_day: 0      # 0=两日+硬块后全部送语义扫描；>0 则截断上限
-  batch_size: 20                 # 每批送小模型的条数（全量分批，避免撑爆上下文）
-  batch_interval: 3              # 批与批之间间隔秒数（硅基免费档防限流）
+  batch_size: 10                 # 7B 小模型建议≤10，降低超时与 JSON 错乱
+  batch_interval: 8              # 批间间隔，硅基免费档防限流
+  batch_timeout: 240             # 单批 API 超时（秒）
+  batch_retries: 2               # 解析失败/超时重试次数
   debug: false
 
 advanced:

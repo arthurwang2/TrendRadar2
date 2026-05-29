@@ -14,6 +14,11 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from trendradar.ai.client import AIClient
+from trendradar.ai.json_utils import (
+    extract_json_text,
+    fallback_tags_from_interests,
+    parse_json_from_llm,
+)
 from trendradar.ai.prompt_loader import load_prompt_template
 
 
@@ -143,40 +148,50 @@ class AIFilter:
                 print(f"[{m['role']}]\n{m['content']}")
             print(f"[AI筛选][DEBUG] === Prompt 结束 ===")
 
+        response = ""
         try:
-            response = self.client.chat(messages)
+            response = self.client.chat(
+                messages,
+                temperature=0.1,
+                max_tokens=2000,
+            )
 
             if self.debug:
                 print(f"\n[AI筛选][DEBUG] === 标签提取 AI 原始响应 ===")
-                # 尝试格式化 JSON 便于阅读
                 self._print_formatted_json(response)
                 print(f"[AI筛选][DEBUG] === 响应结束 ===")
 
             tags = self._parse_tags_response(response)
+            if not tags and response:
+                print("[AI筛选] JSON 解析失败，请求模型修复一次...")
+                fix_messages = messages + [
+                    {"role": "assistant", "content": response},
+                    {
+                        "role": "user",
+                        "content": (
+                            "上一段不是合法 JSON。请仅输出一个 JSON 对象，格式："
+                            '{"tags":[{"tag":"标签名","description":"说明"}]}，不要 markdown。'
+                        ),
+                    },
+                ]
+                response = self.client.chat(fix_messages, temperature=0.0, max_tokens=2000)
+                tags = self._parse_tags_response(response)
+
+            if not tags:
+                tags = fallback_tags_from_interests(interests_content)
+                print(f"[AI筛选] 使用兴趣文件回退标签（{len(tags)} 个），继续语义筛选")
+
             print(f"[AI筛选] 提取到 {len(tags)} 个标签")
             for t in tags:
                 print(f"   {t['tag']}: {t.get('description', '')}")
 
-            if self.debug:
-                json_str = self._extract_json(response)
-                if not json_str:
-                    print(f"[AI筛选][DEBUG] 无法从响应中提取 JSON")
-                else:
-                    raw_data = json.loads(json_str)
-                    raw_tags = raw_data.get("tags", [])
-                    skipped = len(raw_tags) - len(tags)
-                    if skipped > 0:
-                        print(f"[AI筛选][DEBUG] 原始标签 {len(raw_tags)} 个，有效 {len(tags)} 个，跳过 {skipped} 个（缺少 tag 字段或格式无效）")
-
             return tags
         except json.JSONDecodeError as e:
-            print(f"[AI筛选] 标签提取失败: JSON 解析错误: {e}")
-            if self.debug:
-                print(f"[AI筛选][DEBUG] 尝试解析的 JSON 内容: {self._extract_json(response) if response else '(空响应)'}")
-            return []
+            print(f"[AI筛选] 标签提取 JSON 错误: {e}，使用回退标签")
+            return fallback_tags_from_interests(interests_content)
         except Exception as e:
-            print(f"[AI筛选] 标签提取失败: {type(e).__name__}: {e}")
-            return []
+            print(f"[AI筛选] 标签提取失败: {type(e).__name__}: {e}，使用回退标签")
+            return fallback_tags_from_interests(interests_content)
 
     def update_tags(self, old_tags: List[Dict], interests_content: str) -> Optional[Dict]:
         """
@@ -289,11 +304,21 @@ class AIFilter:
 
     def _parse_tags_response(self, response: str) -> List[Dict]:
         """解析标签提取的 AI 响应"""
-        json_str = self._extract_json(response)
-        if not json_str:
+        data = parse_json_from_llm(response, expect_type=dict)
+        if not data:
+            json_str = extract_json_text(response)
+            if json_str:
+                try:
+                    from json_repair import repair_json
+
+                    data = repair_json(json_str, return_objects=True)
+                    if isinstance(data, dict):
+                        print("[AI筛选] 标签 JSON 本地修复成功（json_repair）")
+                except Exception:
+                    pass
+        if not isinstance(data, dict):
             return []
 
-        data = json.loads(json_str)
         tags_raw = data.get("tags", [])
 
         tags = []

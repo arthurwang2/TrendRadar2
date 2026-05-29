@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from trendradar.ai.client import AIClient
+from trendradar.ai.json_utils import parse_json_from_llm
 from trendradar.ai.prompt_loader import load_prompt_template
 
 
@@ -61,16 +62,20 @@ class StrictV3Classifier:
         ai_config: Dict[str, Any],
         get_time_func=None,
         debug: bool = False,
-        batch_size: int = 20,
-        batch_interval: float = 3.0,
+        batch_size: int = 10,
+        batch_interval: float = 8.0,
         max_candidates: int = 0,
+        batch_timeout: int = 240,
+        batch_retries: int = 2,
     ):
         self.client = AIClient(ai_config)
         self.get_time_func = get_time_func or (lambda: datetime.now())
         self.debug = debug
-        self.batch_size = max(5, batch_size)
+        self.batch_size = max(5, min(batch_size, 12))
         self.batch_interval = max(0, batch_interval)
         self.max_candidates = max(0, max_candidates)
+        self.batch_timeout = max(60, batch_timeout)
+        self.batch_retries = max(1, batch_retries)
 
         self.system_prompt, self.user_prompt_template = load_prompt_template(
             "strict_v3_prompt.txt",
@@ -110,36 +115,37 @@ class StrictV3Classifier:
     def _parse_response(self, response: str) -> Optional[Dict]:
         if not response:
             return None
-        json_str = response.strip()
-        if "```json" in json_str:
-            json_str = json_str.split("```json", 1)[1].split("```", 1)[0].strip()
-        elif "```" in json_str:
-            json_str = json_str.split("```", 1)[1].split("```", 1)[0].strip()
-        try:
-            data = json.loads(json_str)
-            if not isinstance(data, dict):
+        data = parse_json_from_llm(response, expect_type=dict)
+        if not data:
+            try:
+                from json_repair import repair_json
+                from trendradar.ai.json_utils import extract_json_text
+
+                repaired = repair_json(extract_json_text(response), return_objects=True)
+                if isinstance(repaired, dict):
+                    data = repaired
+                    print("[StrictV3] 批次 JSON 本地修复成功（json_repair）")
+            except Exception:
                 return None
 
-            def parse_list(key: str) -> List[StrictV3Item]:
-                out = []
-                for x in data.get(key, []):
-                    if isinstance(x, dict) and "id" in x and "category" in x:
-                        out.append(StrictV3Item(
-                            id=int(x["id"]),
-                            published_at=str(x.get("published_at", "")),
-                            title=str(x.get("title", ""))[:60],
-                            category=int(x.get("category", 0)),
-                            reason=str(x.get("reason", "")),
-                        ))
-                return out
+        def parse_list(key: str) -> List[StrictV3Item]:
+            out = []
+            for x in data.get(key, []):
+                if isinstance(x, dict) and "id" in x and "category" in x:
+                    out.append(StrictV3Item(
+                        id=int(x["id"]),
+                        published_at=str(x.get("published_at", "")),
+                        title=str(x.get("title", ""))[:60],
+                        category=int(x.get("category", 0)),
+                        reason=str(x.get("reason", "")),
+                    ))
+            return out
 
-            return {
-                "class1": parse_list("class1"),
-                "class2": parse_list("class2"),
-                "class3": parse_list("class3"),
-            }
-        except Exception:
-            return None
+        return {
+            "class1": parse_list("class1"),
+            "class2": parse_list("class2"),
+            "class3": parse_list("class3"),
+        }
 
     def _merge_parsed(self, target: StrictV3Result, parsed: Dict) -> None:
         seen = {x.id for x in target.class1 + target.class2 + target.class3}
@@ -173,8 +179,44 @@ class StrictV3Classifier:
         if self.debug:
             print(f"[StrictV3] 批次 {batch_no}/{total_batches}，条目 {len(batch)}")
 
-        response = self.client.chat(messages)
-        return self._parse_response(response)
+        last_err = None
+        for attempt in range(1, self.batch_retries + 1):
+            try:
+                response = self.client.chat(
+                    messages,
+                    temperature=0.1,
+                    max_tokens=4000,
+                    timeout=self.batch_timeout,
+                )
+                parsed = self._parse_response(response)
+                if parsed:
+                    return parsed
+                if attempt < self.batch_retries:
+                    messages = messages + [
+                        {"role": "assistant", "content": response or ""},
+                        {
+                            "role": "user",
+                            "content": (
+                                "请仅输出合法 JSON："
+                                '{"class1":[{"id":1,"category":1,"title":"","reason":""}],'
+                                '"class2":[],"class3":[]}，不要 markdown。'
+                            ),
+                        },
+                    ]
+                    print(f"[StrictV3] 批次 {batch_no} 解析失败，重试 {attempt + 1}/{self.batch_retries}")
+            except Exception as e:
+                last_err = e
+                if attempt < self.batch_retries:
+                    print(
+                        f"[StrictV3] 批次 {batch_no} 请求失败 ({type(e).__name__})，"
+                        f"重试 {attempt + 1}/{self.batch_retries}"
+                    )
+                    time.sleep(min(15, self.batch_interval * 2))
+                else:
+                    raise
+        if last_err:
+            raise last_err
+        return None
 
     def classify(
         self,
@@ -264,8 +306,10 @@ def run_strict_v3_on_daily_json(
     classifier = StrictV3Classifier(
         ai_config,
         debug=debug,
-        batch_size=cfg.get("BATCH_SIZE", 20),
-        batch_interval=cfg.get("BATCH_INTERVAL", 3),
+        batch_size=cfg.get("BATCH_SIZE", 10),
+        batch_interval=cfg.get("BATCH_INTERVAL", 8),
         max_candidates=cfg.get("MAX_CANDIDATES_PER_DAY", 0),
+        batch_timeout=cfg.get("BATCH_TIMEOUT", 240),
+        batch_retries=cfg.get("BATCH_RETRIES", 2),
     )
     return classifier.classify(raw_items, reference_date=reference_date)

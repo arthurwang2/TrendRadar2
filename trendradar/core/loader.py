@@ -296,7 +296,7 @@ def _load_ai_config(config_data: Dict) -> Dict:
         "MAX_TOKENS": ai_config.get("max_tokens", 5000),
 
         # LiteLLM 高级选项
-        "NUM_RETRIES": ai_config.get("num_retries", 2),
+        "NUM_RETRIES": _get_env_int("AI_NUM_RETRIES") or ai_config.get("num_retries", 2),
         "FALLBACK_MODELS": ai_config.get("fallback_models", []),
         "EXTRA_PARAMS": ai_config.get("extra_params", {}),
     }
@@ -348,8 +348,10 @@ def _load_strict_v3_config(config_data: Dict) -> Dict:
         "ENABLED": enabled_env if enabled_env is not None else strict_v3.get("enabled", False),
         "USE_FOR_RSS_FEEDS": strict_v3.get("use_for_rss_feeds", []),
         "MAX_CANDIDATES_PER_DAY": strict_v3.get("max_candidates_per_day", 0),
-        "BATCH_SIZE": strict_v3.get("batch_size", 20),
-        "BATCH_INTERVAL": strict_v3.get("batch_interval", 3),
+        "BATCH_SIZE": strict_v3.get("batch_size", 10),
+        "BATCH_INTERVAL": strict_v3.get("batch_interval", 8),
+        "BATCH_TIMEOUT": strict_v3.get("batch_timeout", 240),
+        "BATCH_RETRIES": strict_v3.get("batch_retries", 2),
         "DEBUG": strict_v3.get("debug", False),
     }
 
