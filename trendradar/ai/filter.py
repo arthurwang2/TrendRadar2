@@ -18,6 +18,7 @@ from trendradar.ai.json_utils import (
     extract_json_text,
     fallback_tags_from_interests,
     parse_json_from_llm,
+    parse_json_loose,
 )
 from trendradar.ai.prompt_loader import load_prompt_template
 
@@ -400,9 +401,27 @@ class AIFilter:
             print(f"[AI筛选][DEBUG] === Prompt 结束 (长度: {sum(len(m['content']) for m in messages)} 字符) ===")
 
         try:
-            response = self.client.chat(messages)
-
-            return self._parse_classify_response(response, titles, tags)
+            response = self.client.chat(
+                messages,
+                temperature=0.1,
+                max_tokens=4000,
+            )
+            parsed = self._parse_classify_response(response, titles, tags)
+            if not parsed and response:
+                print(f"[AI筛选] 分类 JSON 解析失败，重试修复（{len(titles)} 条）...")
+                fix_messages = messages + [
+                    {"role": "assistant", "content": response},
+                    {
+                        "role": "user",
+                        "content": (
+                            "请仅输出 JSON 数组：[{\"id\":1,\"tag_id\":1,\"score\":0.8},...]，"
+                            "不要 markdown，id 必须与新闻列表一致。"
+                        ),
+                    },
+                ]
+                response = self.client.chat(fix_messages, temperature=0.0, max_tokens=4000)
+                parsed = self._parse_classify_response(response, titles, tags)
+            return parsed
         except Exception as e:
             print(f"[AI筛选] 分类请求失败: {type(e).__name__}: {e}")
             return []
@@ -427,14 +446,16 @@ class AIFilter:
                 print(f"[AI筛选][DEBUG] 无法从分类响应中提取 JSON，原始响应前 500 字符: {(response or '')[:500]}")
             return []
 
-        try:
-            data = json.loads(json_str)
-        except json.JSONDecodeError as e:
-            if self.debug:
-                print(f"[AI筛选][DEBUG] 分类响应 JSON 解析失败: {e}")
-                print(f"[AI筛选][DEBUG] 提取的 JSON 文本前 500 字符: {json_str[:500]}")
-            return []
+        data = parse_json_loose(json_str, expect_type=list)
+        if data is None:
+            try:
+                from json_repair import repair_json
 
+                data = repair_json(json_str, return_objects=True)
+                if isinstance(data, list):
+                    print("[AI筛选] 分类 JSON 本地修复成功（json_repair）")
+            except Exception:
+                data = None
         if not isinstance(data, list):
             if self.debug:
                 print(f"[AI筛选][DEBUG] 分类响应顶层不是数组，实际类型: {type(data).__name__}")

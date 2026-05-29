@@ -145,8 +145,8 @@ ai_filter:
   enabled: true
   # 兴趣文件位于 config/custom/ai/（特斯拉交付语义规则）
   interests_file: "ai_interests_tesla_delivery.txt"
-  batch_size: 200
-  batch_interval: 5
+  batch_size: 40                  # 7B 小模型：小批全量扫，避免单批 JSON 错乱
+  batch_interval: 6
   min_score: 0.5
 
 display:

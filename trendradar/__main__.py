@@ -26,7 +26,8 @@ from trendradar.core.analyzer import convert_keyword_stats_to_platform_stats
 from trendradar.crawler import DataFetcher
 from trendradar.storage import convert_crawl_results_to_news_data
 from trendradar.utils.time import DEFAULT_TIMEZONE, is_within_days, calculate_days_old
-from trendradar.ai import AIAnalyzer, AIAnalysisResult, run_strict_v3_on_daily_json
+from trendradar.ai import AIAnalyzer, AIAnalysisResult, AIFilterResult, run_strict_v3_on_daily_json
+from trendradar.report.semantic_export import persist_semantic_filtered
 from trendradar.core.scheduler import ResolvedSchedule
 
 
@@ -231,6 +232,8 @@ class NewsAnalyzer:
         self.frequency_file = None
         self.filter_method = None  # None=使用全局配置 ctx.filter_method
         self.interests_file = None  # None=使用全局配置 ai_filter.interests_file
+        self._last_ai_filter_result: Optional[AIFilterResult] = None
+        self._last_filter_used_keyword_fallback: bool = False
         self.rank_threshold = self.ctx.rank_threshold
         self.is_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
         self.is_docker_container = self._detect_docker_environment()
@@ -814,10 +817,14 @@ class NewsAnalyzer:
         """统一的分析流水线：数据处理 → 统计计算（关键词/AI筛选）→ AI分析 → HTML生成"""
 
         # 根据筛选策略选择数据处理方式
+        self._last_ai_filter_result = None
+        self._last_filter_used_keyword_fallback = False
+
         if self.filter_method == "ai":
             # === AI 筛选策略 ===
             print("[筛选] 使用 AI 智能筛选策略")
             ai_filter_result = self.ctx.run_ai_filter(interests_file=self.interests_file)
+            self._last_ai_filter_result = ai_filter_result
 
             if ai_filter_result and ai_filter_result.success:
                 print(f"[筛选] AI 筛选完成: {ai_filter_result.total_matched} 条匹配, {len(ai_filter_result.tags)} 个标签")
@@ -833,6 +840,7 @@ class NewsAnalyzer:
                     rss_items = ai_rss_stats
             else:
                 # AI 筛选失败，回退到关键词匹配
+                self._last_filter_used_keyword_fallback = True
                 error_msg = ai_filter_result.error if ai_filter_result else "未知错误"
                 print(f"[筛选] AI 筛选失败: {error_msg}，回退到关键词匹配")
                 stats, total_titles = self.ctx.count_frequency(
@@ -1812,6 +1820,15 @@ class NewsAnalyzer:
             )
 
             self._run_strict_v3_if_enabled(raw_rss_items)
+
+            persist_semantic_filtered(
+                date_str=self.ctx.format_date(),
+                ai_filter_result=self._last_ai_filter_result,
+                filter_method=self.filter_method or self.ctx.filter_method,
+                used_keyword_fallback=self._last_filter_used_keyword_fallback,
+                raw_rss_items=raw_rss_items,
+                strict_v3_path=Path("output") / "meta" / "strict_v3_latest.json",
+            )
 
         except Exception as e:
             print(f"分析流程执行出错: {e}")
