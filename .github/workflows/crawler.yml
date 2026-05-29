@@ -21,7 +21,8 @@ permissions:
 jobs:
   crawl:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    # AI 筛选 + V3 分批语义扫描常超过 15 分钟，避免被 GitHub 强制 cancel
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -78,12 +79,13 @@ jobs:
         run: uv run python -m trendradar
 
       - name: Commit and Push Database
+        continue-on-error: true
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add output/*.db
-          git commit -m "Auto-update database to prevent duplicate push" || echo "No changes to commit"
-          git push
+          git add output/news/*.db output/rss/*.db 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Auto-update database to prevent duplicate push"
+          git push || echo "Database push skipped (non-fatal)"
 
       - name: Convert DB to JSON with Full Content
         run: |
