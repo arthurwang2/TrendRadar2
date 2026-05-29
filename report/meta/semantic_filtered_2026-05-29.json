@@ -5,45 +5,35 @@
     "filter_method": "ai",
     "used_keyword_fallback": false,
     "ai_filter_success": true,
-    "ai_filter_processed": 303,
-    "ai_filter_matched": 3,
-    "raw_rss_pool": 100,
+    "ai_filter_processed": 304,
+    "ai_filter_matched": 2,
+    "raw_rss_pool": 101,
     "note": "全量语义扫描在 GitHub Actions 内按批完成；本文件仅含匹配项，Cursor/简报应读本文件而非截断 daily-json 前几行。",
     "v3_success": true,
-    "v3_input": 100,
-    "v3_after_hardblock": 71,
+    "v3_input": 101,
+    "v3_after_hardblock": 76,
     "v3_batches": 1
   },
   "matched_items": [
     {
       "semantic_source": "ai_filter",
       "tag": "中国新能源竞品整车动态",
-      "tag_description": "",
+      "tag_description": "中国新能源竞品整车动态",
       "relevance_score": 0.5,
-      "title": "特朗普肖像250美元纪念钞已设计完成 只等国会“放行”",
-      "url": "https://www.zaochenbao.com/news/politics/202605/2972867.html",
-      "source_name": "联合早报",
+      "title": "涉及篡改病历、过度治疗等，4家定点医疗机构被曝光",
+      "url": "https://www.thepaper.cn/newsDetail_forward_33253498",
+      "source_name": "澎湃新闻",
       "source_type": "hotlist"
     },
     {
       "semantic_source": "ai_filter",
       "tag": "中国新能源竞品整车动态",
-      "tag_description": "",
-      "relevance_score": 0.5,
-      "title": "能源通胀加剧，美国4月PCE物价指数同比3.8%创三年新高，核心指数同比加速至3.3%",
-      "url": "https://wallstreetcn.com/articles/3773373",
-      "source_name": "华尔街见闻",
-      "source_type": "hotlist"
-    },
-    {
-      "semantic_source": "ai_filter",
-      "tag": "中国新能源竞品整车动态",
-      "tag_description": "",
-      "relevance_score": 0.5,
-      "title": "风华高科",
-      "url": "https://xueqiu.com/s/SZ000636",
-      "source_name": "雪球",
-      "source_type": "hotlist"
+      "tag_description": "中国新能源竞品整车动态",
+      "relevance_score": 1.0,
+      "title": "经纬度：“亿级车企”是个什么概念",
+      "url": "https://m.thepaper.cn/detail/33261781",
+      "source_name": "澎湃新闻-头条",
+      "source_type": "rss"
     }
   ],
   "v3": {
@@ -51,6 +41,6 @@
     "class2": [],
     "class3": []
   },
-  "matched_count": 3,
+  "matched_count": 2,
   "v3_count": 0
 }

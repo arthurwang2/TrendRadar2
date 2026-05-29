@@ -1,9 +1,9 @@
 {
   "success": true,
   "error": "部分批次失败: 7/8",
-  "total_input": 100,
-  "total_after_date_filter": 79,
-  "total_after_hardblock": 71,
+  "total_input": 101,
+  "total_after_date_filter": 83,
+  "total_after_hardblock": 76,
   "batches_processed": 1,
   "class1": [],
   "class2": [],
