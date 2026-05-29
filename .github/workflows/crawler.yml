@@ -168,11 +168,16 @@ jobs:
 
       - name: Prepare daily JSON for public GitHub Pages (Tesla Daily Briefing Skill)
         run: |
-          mkdir -p output/html/daily-json
+          mkdir -p output/html/daily-json output/html/meta
           DATE=$(TZ=Asia/Shanghai date +%Y-%m-%d)
           cp output/trendradar_full_content.json "output/html/daily-json/${DATE}.json"
           echo "✅ Daily JSON published: /report/daily-json/${DATE}.json (accessible via GitHub Pages)"
           ls -lh "output/html/daily-json/"
+          if [ -d output/meta ]; then
+            cp output/meta/*.json output/html/meta/ 2>/dev/null || true
+            echo "✅ AI meta published: /report/meta/ai_analysis_latest.json , strict_v3_latest.json"
+            ls -lh output/html/meta/ || true
+          fi
 
       - name: Deploy HTML report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

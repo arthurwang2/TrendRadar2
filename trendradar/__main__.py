@@ -1711,7 +1711,39 @@ class NewsAnalyzer:
         elif self.is_docker_container and html_file:
             print(f"HTML报告已生成（Docker环境）: {html_file}")
 
+        if ai_result is not None:
+            self._persist_ai_analysis_meta(ai_result)
+
         return html_file
+
+    def _persist_ai_analysis_meta(self, ai_result: AIAnalysisResult) -> None:
+        """落盘 AI 分析结果，供 GitHub Pages / Cursor 简报技能直接读取（不另付费模型）"""
+        out_dir = Path("output") / "meta"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        date_str = self.ctx.format_date()
+        payload = {
+            "date": date_str,
+            "success": ai_result.success,
+            "skipped": ai_result.skipped,
+            "error": ai_result.error,
+            "ai_mode": ai_result.ai_mode,
+            "total_news": ai_result.total_news,
+            "analyzed_news": ai_result.analyzed_news,
+            "hotlist_count": ai_result.hotlist_count,
+            "rss_count": ai_result.rss_count,
+            "core_trends": ai_result.core_trends,
+            "sentiment_controversy": ai_result.sentiment_controversy,
+            "signals": ai_result.signals,
+            "rss_insights": ai_result.rss_insights,
+            "outlook_strategy": ai_result.outlook_strategy,
+            "standalone_summaries": ai_result.standalone_summaries,
+        }
+        latest = out_dir / "ai_analysis_latest.json"
+        dated = out_dir / f"ai_analysis_{date_str}.json"
+        text = json.dumps(payload, ensure_ascii=False, indent=2)
+        latest.write_text(text, encoding="utf-8")
+        dated.write_text(text, encoding="utf-8")
+        print(f"[AI] 分析结果已写入: {latest}（简报/Cursor 可直接接入）")
 
     def _run_strict_v3_if_enabled(self, raw_rss_items: Optional[List[Dict]]) -> None:
         """V3 严格语义分类（写入 output/meta/strict_v3_latest.json）"""
