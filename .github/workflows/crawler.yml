@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: "0 */12 * * *"
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - "config/**"
+      - "trendradar/**"
+      - ".github/workflows/crawler.yml"
+      - "pyproject.toml"
+      - "uv.lock"
 
 permissions:
   contents: write
