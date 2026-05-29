@@ -106,6 +106,7 @@ def count_word_frequency(
     is_first_crawl_func: Optional[Callable[[], bool]] = None,
     convert_time_func: Optional[Callable[[str], str]] = None,
     quiet: bool = False,
+    filter_mode_label: str = "频率词过滤",
 ) -> Tuple[List[Dict], int]:
     """
     统计词频，支持必须词、频率词、过滤词、全局过滤词，并标记新增标题
@@ -206,9 +207,10 @@ def count_word_frequency(
         filter_status = (
             "全部显示"
             if len(word_groups) == 1 and word_groups[0]["group_key"] == "全部新闻"
-            else "频率词过滤"
+            else filter_mode_label
         )
-        print(f"当日汇总模式：处理 {total_input_news} 条新闻，模式：{filter_status}")
+        if not quiet:
+            print(f"当日汇总模式：处理 {total_input_news} 条新闻，模式：{filter_status}")
 
     word_stats = {}
     total_titles = 0
@@ -485,8 +487,7 @@ def count_word_frequency(
     # 打印过滤后的匹配新闻数
     matched_news_count = sum(len(stat["titles"]) for stat in stats if stat["count"] > 0)
     if not quiet and mode == "daily":
-        print(f"当日汇总模式：处理 {total_titles} 条新闻，模式：频率词过滤")
-        print(f"频率词过滤后：{matched_news_count} 条新闻匹配")
+        print(f"{filter_mode_label}后：{matched_news_count} 条新闻匹配")
 
     return stats, total_titles
 

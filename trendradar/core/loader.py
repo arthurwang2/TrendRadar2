@@ -647,4 +647,35 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     # 打印通知渠道配置来源
     _print_notification_sources(config)
 
+    _print_ai_stack_summary(config)
+
     return config
+
+
+def _mask_api_key(value: str) -> str:
+    """掩码显示 API Key（仅用于日志）"""
+    if not value or not str(value).strip():
+        return "未配置"
+    s = str(value).strip()
+    if len(s) <= 8:
+        return "***"
+    return f"{s[:4]}...{s[-4:]}"
+
+
+def _print_ai_stack_summary(config: Dict) -> None:
+    """启动时打印 AI 筛选 / 分析 / V3 能力，便于对照 Actions 日志"""
+    filter_method = config.get("FILTER", {}).get("METHOD", "keyword")
+    ai_analysis = config.get("AI_ANALYSIS", {}).get("ENABLED", False)
+    strict_v3 = config.get("STRICT_V3", {}).get("ENABLED", False)
+    ai_cfg = config.get("AI", {})
+    interests = config.get("AI_FILTER", {}).get("INTERESTS_FILE") or "ai_interests.txt"
+    schedule_on = config.get("SCHEDULE", {}).get("ENABLED", False)
+    print(
+        f"[AI能力] 筛选策略(config): {filter_method} | AI分析: "
+        f"{'开' if ai_analysis else '关'} | V3严格分类: {'开' if strict_v3 else '关'} | "
+        f"timeline调度: {'开' if schedule_on else '关(用全局配置)'}"
+    )
+    print(
+        f"[AI能力] 模型: {ai_cfg.get('MODEL') or '未配置'} | "
+        f"API Key: {_mask_api_key(ai_cfg.get('API_KEY', ''))} | 兴趣文件: {interests}"
+    )

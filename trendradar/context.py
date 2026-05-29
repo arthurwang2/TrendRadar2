@@ -262,6 +262,7 @@ class AppContext:
         mode: str = "daily",
         global_filters: Optional[List[str]] = None,
         quiet: bool = False,
+        filter_mode_label: str = "频率词过滤",
     ) -> Tuple[List[Dict], int]:
         """统计词频"""
         return count_word_frequency(
@@ -280,6 +281,7 @@ class AppContext:
             is_first_crawl_func=self.is_first_crawl,
             convert_time_func=self.convert_time_display,
             quiet=quiet,
+            filter_mode_label=filter_mode_label,
         )
 
     # === 报告生成 ===

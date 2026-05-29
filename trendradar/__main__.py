@@ -839,6 +839,7 @@ class NewsAnalyzer:
                     data_source, word_groups, filter_words,
                     id_to_name, title_info, new_titles,
                     mode=mode, global_filters=global_filters, quiet=quiet,
+                    filter_mode_label="AI筛选失败·频率词回退",
                 )
         else:
             # === 关键词匹配策略（默认）===
@@ -846,6 +847,7 @@ class NewsAnalyzer:
                 data_source, word_groups, filter_words,
                 id_to_name, title_info, new_titles,
                 mode=mode, global_filters=global_filters, quiet=quiet,
+                filter_mode_label="频率词过滤",
             )
 
         # 如果是 platform 模式，转换数据结构
@@ -1515,6 +1517,13 @@ class NewsAnalyzer:
 
         # 使用 schedule 决定的筛选策略覆盖默认值
         self.filter_method = schedule.filter_method or self.ctx.filter_method
+        if schedule.filter_method and schedule.filter_method != self.ctx.filter_method:
+            print(
+                f"[流水线] 筛选策略: timeline 覆盖为 {self.filter_method} "
+                f"(全局 config: {self.ctx.filter_method})"
+            )
+        else:
+            print(f"[流水线] 筛选策略: {self.filter_method}")
 
         # 使用 schedule 决定的 AI 筛选兴趣文件覆盖默认值
         self.interests_file = schedule.interests_file
