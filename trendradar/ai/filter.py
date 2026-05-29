@@ -181,6 +181,22 @@ class AIFilter:
             if not tags:
                 tags = fallback_tags_from_interests(interests_content)
                 print(f"[AI筛选] 使用兴趣文件回退标签（{len(tags)} 个），继续语义筛选")
+            else:
+                # 质量检查：如果模型给的标签描述为空或过少，合并/替换为结构化回退标签（避免只有1个空描述标签导致匹配极少）
+                poor = any(not t.get("description") or len(t.get("description", "")) < 5 for t in tags)
+                if poor or len(tags) < 3:
+                    fb = fallback_tags_from_interests(interests_content)
+                    # 优先用 fallback 的丰富描述，保留模型 tag 名如果匹配得上
+                    tag_map = {t["tag"]: t for t in tags}
+                    merged = []
+                    for f in fb:
+                        if f["tag"] in tag_map and tag_map[f["tag"]].get("description"):
+                            merged.append(tag_map[f["tag"]])
+                        else:
+                            merged.append(f)
+                    if len(merged) > len(tags):
+                        print(f"[AI筛选] 模型标签质量低（{len(tags)} 个，描述空/少），改用结构化回退 {len(merged)} 个丰富标签")
+                        tags = merged
 
             print(f"[AI筛选] 提取到 {len(tags)} 个标签")
             for t in tags:
@@ -458,7 +474,8 @@ class AIFilter:
                 data = None
         if not isinstance(data, list):
             if self.debug:
-                print(f"[AI筛选][DEBUG] 分类响应顶层不是数组，实际类型: {type(data).__name__}")
+                tname = type(data).__name__ if data is not None else "None"
+                print(f"[AI筛选][DEBUG] 分类响应顶层不是数组，实际类型: {tname}")
             return []
 
         # 构建 id 映射

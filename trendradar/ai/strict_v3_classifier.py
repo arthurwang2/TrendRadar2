@@ -128,6 +128,9 @@ class StrictV3Classifier:
             except Exception:
                 return None
 
+        if not isinstance(data, dict):
+            return None
+
         def parse_list(key: str) -> List[StrictV3Item]:
             out = []
             for x in data.get(key, []):
