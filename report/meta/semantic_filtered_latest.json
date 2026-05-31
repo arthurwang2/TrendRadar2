@@ -5,14 +5,14 @@
     "filter_method": "ai",
     "used_keyword_fallback": false,
     "ai_filter_success": true,
-    "ai_filter_processed": 262,
+    "ai_filter_processed": 248,
     "ai_filter_matched": 3,
-    "raw_rss_pool": 59,
+    "raw_rss_pool": 46,
     "note": "全量语义扫描在 GitHub Actions 内按批完成；本文件仅含匹配项，Cursor/简报应读本文件而非截断 daily-json 前几行。",
-    "v3_success": false,
-    "v3_input": 59,
-    "v3_after_hardblock": 30,
-    "v3_batches": 0
+    "v3_success": true,
+    "v3_input": 46,
+    "v3_after_hardblock": 35,
+    "v3_batches": 2
   },
   "matched_items": [
     {
@@ -20,8 +20,8 @@
       "tag": "中国新能源竞品整车动态",
       "tag_description": "中国新能源竞品整车动态",
       "relevance_score": 0.5,
-      "title": "国务院正式批复同意，粤港澳游艇自由行要来了",
-      "url": "https://www.thepaper.cn/newsDetail_forward_33270983",
+      "title": "日本何时向亚洲受害国道歉？日防卫大臣小泉避答中国代表提问",
+      "url": "https://www.thepaper.cn/newsDetail_forward_33275645",
       "source_name": "澎湃新闻",
       "source_type": "hotlist"
     },
@@ -29,20 +29,20 @@
       "semantic_source": "ai_filter",
       "tag": "中国新能源竞品整车动态",
       "tag_description": "中国新能源竞品整车动态",
-      "relevance_score": 1.0,
-      "title": "L系激进换代，理想汽车没有退路！ - 汽车之家",
-      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9hWnZ6V0pRTVotbTZPdE9yZTRNZlNqR2ItNFlPMzVzVzc3R0RDQjZXdER6UUR1VmtSUWZlODM1dTJMX19ya1FUV1RmRk1zWmxPZU9McC1JQTlXcmtOOWc?oc=5",
-      "source_name": "理想汽车(全网动态)",
-      "source_type": "rss"
+      "relevance_score": 0.5,
+      "title": "长光华芯",
+      "url": "https://xueqiu.com/s/SH688048",
+      "source_name": "雪球",
+      "source_type": "hotlist"
     },
     {
       "semantic_source": "ai_filter",
-      "tag": "补能生态",
-      "tag_description": "补能生态",
-      "relevance_score": 1.0,
-      "title": "中国足球裁判出征美加墨世界杯",
-      "url": "https://www.zaochenbao.com/news/china/202605/3173011.html",
-      "source_name": "联合早报",
+      "tag": "人形机器人与具身智能",
+      "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
+      "relevance_score": 0.5,
+      "title": "中国长城",
+      "url": "https://xueqiu.com/s/SZ000066",
+      "source_name": "雪球",
       "source_type": "hotlist"
     }
   ],
