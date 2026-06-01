@@ -1738,10 +1738,20 @@ def render_html_content(
                     return h.slice(0,2).join('，');
                 }
                 function renderUniform(wd){
-                    var tmrDow=tmr.getDay(),todayDow=now.getDay();
-                    var u=UNIFORMS[dayToIdx(tmrDow)];
-                    document.getElementById('uniformSwatch').style.background=u.color;
-                    document.getElementById('uniformColorName').textContent='明日-' +u.name;
+                    var tmrDow = tmr.getDay(), todayDow = now.getDay();
+                    var currentHour = now.getHours();
+
+                    // 时间规则（用户要求）：
+                    // 00:00 ~ 08:59（含9点前）显示「今日工服颜色」
+                    // 09:00 ~ 23:59 显示「明日工服颜色」
+                    var showTodayUniform = (currentHour >= 0 && currentHour < 9);
+
+                    var targetDow = showTodayUniform ? todayDow : tmrDow;
+                    var prefix = showTodayUniform ? '今日-' : '明日-';
+
+                    var u = UNIFORMS[dayToIdx(targetDow)];
+                    document.getElementById('uniformSwatch').style.background = u.color;
+                    document.getElementById('uniformColorName').textContent = prefix + u.name;
                     var hint='';
                     if(wd){
                         var d=wd.daily;
