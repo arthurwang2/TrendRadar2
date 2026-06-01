@@ -5,34 +5,44 @@
     "filter_method": "ai",
     "used_keyword_fallback": false,
     "ai_filter_success": true,
-    "ai_filter_processed": 248,
-    "ai_filter_matched": 2,
-    "raw_rss_pool": 45,
+    "ai_filter_processed": 256,
+    "ai_filter_matched": 3,
+    "raw_rss_pool": 53,
     "note": "全量语义扫描在 GitHub Actions 内按批完成；本文件仅含匹配项，Cursor/简报应读本文件而非截断 daily-json 前几行。",
     "v3_success": true,
-    "v3_input": 45,
-    "v3_after_hardblock": 29,
+    "v3_input": 53,
+    "v3_after_hardblock": 39,
     "v3_batches": 2
   },
   "matched_items": [
     {
       "semantic_source": "ai_filter",
-      "tag": "中国新能源竞品整车动态",
-      "tag_description": "中国新能源竞品整车动态",
+      "tag": "人形机器人与具身智能",
+      "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
       "relevance_score": 1.0,
-      "title": "乐道彻底超过蔚来，蔚来公司公布9月交付量34749辆 - 汽车之家",
-      "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9aNkIzY3JWZzc3djUwSFFLN2stWHhxck5aN281WmRSdWEyYk1zNGRzX3NsaUQzaG9sZ0F0Y1ZUZUVZYlViOTdNU1JlR1ZtWEtJOTRRT2NOWjgweEtpcmc?oc=5",
-      "source_name": "蔚来(全网动态)",
-      "source_type": "rss"
+      "title": "黄仁勋预告“PC新时代”：英伟达不想只卖GPU了，开始抢下一代AI PC入口",
+      "url": "https://wallstreetcn.com/articles/3773517",
+      "source_name": "华尔街见闻",
+      "source_type": "hotlist"
     },
     {
       "semantic_source": "ai_filter",
-      "tag": "动力电池与车规芯片",
-      "tag_description": "动力电池与车规芯片",
+      "tag": "人形机器人与具身智能",
+      "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
       "relevance_score": 1.0,
-      "title": "港车北上政策延长至2031年",
-      "url": "https://www.zaochenbao.com/news/hkMacao/202605/3173052.html",
-      "source_name": "联合早报",
+      "title": "华为 AI 眼镜“钛丝半框光学镜方形款”今日开售：钛银灰配色，2499 元",
+      "url": "https://www.ithome.com/0/957/965.htm",
+      "source_name": "IT之家",
+      "source_type": "hotlist"
+    },
+    {
+      "semantic_source": "ai_filter",
+      "tag": "人形机器人与具身智能",
+      "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
+      "relevance_score": 0.5,
+      "title": "破“唯论文”桎梏：南京大学首位没有“毕业论文”的博士答辩通过",
+      "url": "https://www.thepaper.cn/newsDetail_forward_33276669",
+      "source_name": "澎湃新闻",
       "source_type": "hotlist"
     }
   ],
@@ -41,6 +51,6 @@
     "class2": [],
     "class3": []
   },
-  "matched_count": 2,
+  "matched_count": 3,
   "v3_count": 0
 }
