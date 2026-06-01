@@ -21,8 +21,8 @@ permissions:
 jobs:
   crawl:
     runs-on: ubuntu-22.04
-    # AI 筛选 + V3 分批语义扫描常超过 15 分钟，避免被 GitHub 强制 cancel
-    timeout-minutes: 45
+    # AI 功能已全部永久关闭（AI_ANALYSIS / AI_FILTER / STRICT_V3 全部设为 false），超时可大幅降低
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -63,13 +63,15 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GENERIC_WEBHOOK_URL: ${{ secrets.GENERIC_WEBHOOK_URL }}
           GENERIC_WEBHOOK_TEMPLATE: ${{ secrets.GENERIC_WEBHOOK_TEMPLATE }}
-          AI_ANALYSIS_ENABLED: "true"
-          AI_FILTER_ENABLED: "true"
-          STRICT_V3_ENABLED: "true"
-          # 硅基流动 Key：在仓库 Settings → Secrets and variables → Actions 添加 AI_API_KEY
-          AI_API_KEY: ${{ secrets.AI_API_KEY }}
-          AI_API_BASE: "https://api.siliconflow.cn/v1"
-          AI_MODEL: "openai/Qwen/Qwen2.5-7B-Instruct"
+          # ========== AI 功能已全部永久关闭 ==========
+          # 即使 config.yaml 中有相关配置，这里也强制关闭，避免 AI 筛选/分析/V3 导致 Action 极慢
+          AI_ANALYSIS_ENABLED: "false"
+          AI_FILTER_ENABLED: "false"
+          STRICT_V3_ENABLED: "false"
+          # AI_API_KEY 等已注释，不再传递给进程
+          # AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          # AI_API_BASE: "https://api.siliconflow.cn/v1"
+          # AI_MODEL: "openai/Qwen/Qwen2.5-7B-Instruct"
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
           S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
@@ -175,7 +177,7 @@ jobs:
           ls -lh "output/html/daily-json/"
           if [ -d output/meta ]; then
             cp output/meta/*.json output/html/meta/ 2>/dev/null || true
-            echo "✅ AI meta published: /report/meta/ai_analysis_latest.json , strict_v3_latest.json"
+            echo "✅ meta published (AI 已关闭，目录可能为空): /report/meta/"
             ls -lh output/html/meta/ || true
           fi
 
