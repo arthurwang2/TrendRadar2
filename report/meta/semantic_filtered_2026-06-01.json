@@ -5,14 +5,14 @@
     "filter_method": "ai",
     "used_keyword_fallback": false,
     "ai_filter_success": true,
-    "ai_filter_processed": 256,
+    "ai_filter_processed": 240,
     "ai_filter_matched": 3,
-    "raw_rss_pool": 53,
+    "raw_rss_pool": 57,
     "note": "全量语义扫描在 GitHub Actions 内按批完成；本文件仅含匹配项，Cursor/简报应读本文件而非截断 daily-json 前几行。",
     "v3_success": true,
-    "v3_input": 53,
-    "v3_after_hardblock": 39,
-    "v3_batches": 2
+    "v3_input": 57,
+    "v3_after_hardblock": 46,
+    "v3_batches": 1
   },
   "matched_items": [
     {
@@ -20,8 +20,8 @@
       "tag": "人形机器人与具身智能",
       "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
       "relevance_score": 1.0,
-      "title": "黄仁勋预告“PC新时代”：英伟达不想只卖GPU了，开始抢下一代AI PC入口",
-      "url": "https://wallstreetcn.com/articles/3773517",
+      "title": "黄仁勋：Vera Rubin全面量产，AI Agent是重点方向，挑战英特尔剑指下一代AI PC入口",
+      "url": "https://wallstreetcn.com/articles/3773548",
       "source_name": "华尔街见闻",
       "source_type": "hotlist"
     },
@@ -29,10 +29,10 @@
       "semantic_source": "ai_filter",
       "tag": "人形机器人与具身智能",
       "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
-      "relevance_score": 1.0,
-      "title": "华为 AI 眼镜“钛丝半框光学镜方形款”今日开售：钛银灰配色，2499 元",
-      "url": "https://www.ithome.com/0/957/965.htm",
-      "source_name": "IT之家",
+      "relevance_score": 0.5,
+      "title": "关停三年后，天涯社区今起开放访问：争取6月逐步恢复互动功能",
+      "url": "https://www.thepaper.cn/newsDetail_forward_33278860",
+      "source_name": "澎湃新闻",
       "source_type": "hotlist"
     },
     {
@@ -40,9 +40,9 @@
       "tag": "人形机器人与具身智能",
       "tag_description": "新能源/AI 非整车 · 人形机器人与具身智能",
       "relevance_score": 0.5,
-      "title": "破“唯论文”桎梏：南京大学首位没有“毕业论文”的博士答辩通过",
-      "url": "https://www.thepaper.cn/newsDetail_forward_33276669",
-      "source_name": "澎湃新闻",
+      "title": "这个周末，美伊忙着“改条件”，以色列忙着打黎巴嫩",
+      "url": "https://wallstreetcn.com/articles/3773530",
+      "source_name": "华尔街见闻",
       "source_type": "hotlist"
     }
   ],

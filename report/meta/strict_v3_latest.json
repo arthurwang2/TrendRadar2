@@ -1,10 +1,10 @@
 {
   "success": true,
-  "error": "部分批次失败: 2/4",
-  "total_input": 53,
-  "total_after_date_filter": 43,
-  "total_after_hardblock": 39,
-  "batches_processed": 2,
+  "error": "部分批次失败: 4/5",
+  "total_input": 57,
+  "total_after_date_filter": 51,
+  "total_after_hardblock": 46,
+  "batches_processed": 1,
   "class1": [],
   "class2": [],
   "class3": []
