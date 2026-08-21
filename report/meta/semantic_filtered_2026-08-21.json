@@ -7,7 +7,7 @@
     "ai_filter_success": false,
     "ai_filter_processed": 0,
     "ai_filter_matched": 0,
-    "raw_rss_pool": 62,
+    "raw_rss_pool": 68,
     "note": "全量语义扫描在 GitHub Actions 内按批完成；本文件仅含匹配项，Cursor/简报应读本文件而非截断 daily-json 前几行。"
   },
   "matched_items": [],
