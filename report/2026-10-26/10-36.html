@@ -1,0 +1,1746 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>雷达简报</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <style>
+            * { box-sizing: border-box; }
+            :root {
+                --gm: rgba(255,255,255,0.13);
+                --gb: rgba(255,255,255,0.10);
+                --gl: rgba(255,255,255,0.07);
+                --bd: rgba(255,255,255,0.20);
+                --bdl: rgba(255,255,255,0.12);
+                --tw: rgba(255,255,255,0.96);
+                --tm: rgba(255,255,255,0.65);
+                --td: rgba(255,255,255,0.40);
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                margin: 0; padding: 16px;
+                background: #e8edf2;
+                color: rgba(255,255,255,0.9);
+                line-height: 1.5;
+            }
+            .container {
+                max-width: 600px; margin: 0 auto;
+                background: transparent;
+                border-radius: 20px; overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.14);
+            }
+
+            /* ── Header ── */
+            .header {
+                position: relative; overflow: hidden;
+                padding: 18px 18px 16px;
+                background: linear-gradient(160deg, #546e7a 0%, #607d8b 50%, #78909c 100%);
+                transition: background 1.2s ease;
+            }
+            .header-watermark {
+                position: absolute; top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: clamp(36px, 7vw, 68px); font-weight: 900; letter-spacing: 0.06em;
+                color: rgba(255,255,255,0.045); pointer-events: none; white-space: nowrap;
+                user-select: none; z-index: 0;
+            }
+
+            .header-top {
+                position: relative; z-index: 2;
+                display: flex; align-items: center; justify-content: space-between;
+                margin-top: 36px; margin-bottom: 12px;
+            }
+            .header-title { font-size: 18px; font-weight: 700; color: var(--tw); }
+            .gen-time-pill {
+                display: flex; align-items: center; gap: 5px;
+                background: var(--gm); border: 1px solid var(--bd);
+                border-radius: 20px; padding: 4px 11px;
+                font-size: 12px; font-weight: 600; color: var(--tw);
+            }
+            .gen-dot {
+                width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0;
+                animation: pulse-dot 2.2s ease-in-out infinite;
+            }
+            @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.75);} }
+
+            /* ── 挂件面板 ── */
+            .panel { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; }
+
+            /* 今日+明日 双列 */
+            .weather-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+            /* 今日卡 */
+            .today-card {
+                background: var(--gm); border: 1px solid var(--bd);
+                border-radius: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                padding: 14px 14px 12px; position: relative; overflow: hidden;
+            }
+            .today-card::before {
+                content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.38), transparent);
+            }
+            .today-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+            .today-icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; }
+            .today-icon img { width: 44px; height: 44px; object-fit: contain; filter: brightness(1.05) drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
+            
+            .today-temp-row { display: flex; align-items: baseline; gap: 2px; margin-bottom: 3px; }
+            .today-temp { font-size: 38px; font-weight: 200; color: var(--tw); letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+            .today-unit { font-size: 16px; font-weight: 300; color: var(--tm); }
+            .today-city { font-size: 38px; font-weight: 200; color: var(--tw); margin-left: 6px; letter-spacing: -1.5px; line-height: 1; }
+            
+            .today-desc { font-size: 12px; font-weight: 500; color: var(--tw); margin-top: 2px; }
+            .today-range { font-size: 10.5px; color: var(--tm); margin-top: 2px; font-variant-numeric: tabular-nums; }
+            
+            .today-details { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; border-top: 1px solid var(--bdl); }
+            .detail-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--tm); }
+            .detail-row svg { width: 11px; height: 11px; opacity: 0.7; flex-shrink: 0; }
+            .detail-val { color: var(--tw); font-weight: 500; }
+
+            /* 明日卡 */
+            .tomorrow-card {
+                background: var(--gb); border: 1px solid var(--bdl);
+                border-radius: 16px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 14px 14px 12px; display: flex; flex-direction: column;
+            }
+            .tmr-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .tmr-label { font-size: 9px; font-weight: 700; color: var(--td); letter-spacing: 0.9px; text-transform: uppercase; }
+            .tmr-date { font-size: 9.5px; color: var(--td); }
+            
+            .tmr-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: auto; }
+            .tmr-icon { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; }
+            .tmr-icon img { width: 34px; height: 34px; object-fit: contain; filter: brightness(1.05) drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+            
+            .tmr-desc { font-size: 13px; font-weight: 600; color: var(--tw); margin-bottom: 2px; }
+            .tmr-range { font-size: 10.5px; color: var(--tm); font-variant-numeric: tabular-nums; }
+            
+            .tmr-stats { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+            .tmr-stat { display: flex; align-items: center; gap: 4px; font-size: 10.5px; color: var(--tm); }
+            .tmr-stat svg { width: 10px; height: 10px; opacity: 0.7; }
+            .tmr-stat-val { color: var(--tw); font-weight: 600; }
+            
+            .tmr-bar-wrap { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--bdl); }
+            .tmr-bar-label { display: flex; justify-content: space-between; font-size: 9px; color: var(--td); margin-bottom: 4px; }
+            .tmr-bar-track { height: 3px; border-radius: 2px; background: var(--gl); position: relative; overflow: hidden; }
+            .tmr-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, #60a5fa, #f97316); transition: left .9s ease, right .9s ease; }
+
+            /* TSLA + 工服 整合卡 */
+            .combo-card {
+                background: var(--gb); border: 1px solid var(--bdl);
+                border-radius: 14px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                padding: 14px 16px;
+            }
+            .combo-inner { display: flex; align-items: center; }
+            .combo-tsla { flex: 0 0 auto; padding-right: 16px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 16px; }
+            .tsla-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+            .tsla-logo { width: 22px; height: 22px; background: #e82127; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+            .tsla-logo svg { width: 13px; height: 13px; }
+            .tsla-ticker { font-size: 13px; font-weight: 700; color: var(--tw); }
+            .tsla-price { font-size: 20px; font-weight: 600; color: var(--tw); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; line-height: 1.1; }
+            .tsla-chg { font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 5px; margin-top: 3px; display: inline-block; font-variant-numeric: tabular-nums; }
+            .tsla-chg.up { background: rgba(74,222,128,0.18); color: #4ade80; }
+            .tsla-chg.down { background: rgba(248,113,113,0.18); color: #f87171; }
+            .tsla-chg.flat { background: rgba(255,255,255,0.10); color: var(--tm); }
+
+            .combo-uniform { flex: 1; display: flex; align-items: center; gap: 10px; }
+            .uniform-swatch { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.30); box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+            .uniform-info { flex: 1; }
+            .uniform-color-name { font-size: 14px; font-weight: 700; color: var(--tw); margin-bottom: 3px; }
+            .uniform-hint { font-size: 10.5px; color: var(--tm); line-height: 1.45; }
+            .uniform-week { display: flex; gap: 4px; align-items: center; margin-left: auto; }
+            .udot-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+            .udot-lbl { font-size: 8px; color: var(--td); }
+            .udot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.14); }
+            .udot-wrap.today .udot { border-color: rgba(255,255,255,0.7); box-shadow: 0 0 5px rgba(255,255,255,0.35); }
+            .udot-wrap.tomorrow .udot { border-color: rgba(255,255,255,0.45); }
+
+            /* 更新时间 (城市已移至上面) */
+            .wt-footer { display: flex; align-items: center; justify-content: flex-end; padding: 0 2px; margin-top: 2px; }
+            .wt-update { font-size: 10px; color: var(--td); }
+
+            /* 骨架 */
+            @keyframes shimmer { 0%,100%{opacity:.3;}50%{opacity:.6;} }
+            .skeleton { animation: shimmer 1.6s ease-in-out infinite; background: var(--gb); border-radius: 8px; }
+
+            /* ══ 内容区 — 深色统一风格 ══ */
+            .content {
+                padding: 18px;
+                background: linear-gradient(180deg, #4a5e6a 0%, #3d5060 100%);
+            }
+            .search-bar { display: none; padding: 0 0 12px 0; }
+            .search-input {
+                width: 100%; padding: 9px 14px;
+                background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16);
+                border-radius: 10px; font-size: 13px; outline: none; color: rgba(255,255,255,0.9);
+                transition: border-color 0.2s, background 0.2s; box-sizing: border-box;
+            }
+            .search-input:focus { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.13); }
+            .search-input::placeholder { color: rgba(255,255,255,0.35); }
+
+            .error-section { background: rgba(220,38,38,0.14); border: 1px solid rgba(220,38,38,0.30); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+            .error-title { color: #fca5a5; font-size: 13px; font-weight: 600; margin: 0 0 6px 0; }
+            .error-list { list-style: none; padding: 0; margin: 0; }
+            .error-item { color: #fecaca; font-size: 12px; padding: 2px 0; font-family: 'SF Mono', Consolas, monospace; }
+
+            .section-divider { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+
+            .word-group { margin-bottom: 22px; }
+            .word-group:first-child { margin-top: 0; }
+            .word-header {
+                display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 10px; padding: 9px 12px;
+                background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.11);
+                border-radius: 11px;
+            }
+            .word-info { display: flex; align-items: center; gap: 9px; }
+            .word-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.95); }
+            .word-count { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.50); background: rgba(255,255,255,0.09); padding: 1px 7px; border-radius: 9px; }
+            .word-count.hot { color: #fca5a5; background: rgba(220,38,38,0.18); }
+            .word-count.warm { color: #fdba74; background: rgba(234,88,12,0.18); }
+            .word-index { color: rgba(255,255,255,0.32); font-size: 11px; }
+
+            .news-item {
+                display: flex; gap: 9px; align-items: flex-start;
+                padding: 11px 12px; margin-bottom: 6px;
+                background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+                border-radius: 12px; position: relative;
+                transition: background 0.15s, border-color 0.15s;
+            }
+            .news-item:last-child { margin-bottom: 0; }
+            .news-item:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.16); }
+            .news-item.new::after {
+                content: "NEW"; position: absolute; top: 9px; right: 9px;
+                background: rgba(251,191,36,0.88); color: #1a1a1a;
+                font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px;
+            }
+            .news-number {
+                color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700;
+                flex-shrink: 0; background: rgba(255,255,255,0.12); border-radius: 50%;
+                width: 21px; height: 21px; display: flex; align-items: center; justify-content: center;
+                margin-top: 1px; position: relative; cursor: pointer;
+                transition: background 0.15s, color 0.15s;
+            }
+            .news-number .num-text { transition: opacity 0.15s; }
+            .news-number .copy-icon { position: absolute; opacity: 0; transition: opacity 0.15s; }
+            .news-item:hover .news-number .num-text { opacity: 0; }
+            .news-item:hover .news-number .copy-icon { opacity: 1; }
+            .news-item:hover .news-number { background: rgba(255,255,255,0.20); color: rgba(255,255,255,0.9); }
+            .news-number.copied { background: rgba(34,197,94,0.25) !important; }
+            .news-number.copied .num-text { opacity: 0 !important; }
+            .news-number.copied .copy-icon { opacity: 1 !important; }
+
+            .news-content { flex: 1; min-width: 0; padding-right: 34px; }
+            .news-item.new .news-content { padding-right: 44px; }
+            .news-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; flex-wrap: wrap; }
+            .source-name { color: rgba(255,255,255,0.50); font-size: 11px; font-weight: 500; }
+            .keyword-tag { color: #93c5fd; font-size: 11px; font-weight: 600; background: rgba(59,130,246,0.18); padding: 1px 5px; border-radius: 4px; }
+            .rank-num { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.18); font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 7px; min-width: 16px; text-align: center; }
+            .rank-num.top { background: rgba(220,38,38,0.55); color: #fecaca; }
+            .rank-num.high { background: rgba(234,88,12,0.50); color: #fdba74; }
+            .time-info { color: rgba(255,255,255,0.38); font-size: 10.5px; }
+            .count-info { color: #6ee7b7; font-size: 10.5px; font-weight: 500; }
+            .news-title { font-size: 13.5px; line-height: 1.5; color: rgba(255,255,255,0.88); margin: 0; }
+            .news-title a { color: #93c5fd; text-decoration: none; }
+            .news-title a:hover { color: #bfdbfe; text-decoration: underline; }
+
+            .new-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+            .new-section-title { color: rgba(255,255,255,0.80); font-size: 13px; font-weight: 700; margin: 0 0 12px 0; }
+            .new-source-group { margin-bottom: 16px; }
+            .new-source-title { color: rgba(255,255,255,0.45); font-size: 11.5px; font-weight: 600; margin: 0 0 7px 0; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.09); }
+            .new-item { display: flex; align-items: center; gap: 9px; padding: 8px 11px; margin-bottom: 4px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; transition: background 0.15s; }
+            .new-item:hover { background: rgba(255,255,255,0.10); }
+            .new-item-number { color: rgba(255,255,255,0.40); font-size: 10.5px; font-weight: 700; flex-shrink: 0; background: rgba(255,255,255,0.10); border-radius: 50%; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; }
+            .new-item-rank { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.15); font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 6px; min-width: 18px; text-align: center; flex-shrink: 0; }
+            .new-item-rank.top { background: rgba(220,38,38,0.50); color: #fecaca; }
+            .new-item-rank.high { background: rgba(234,88,12,0.45); color: #fdba74; }
+            .new-item-content { flex: 1; min-width: 0; }
+            .new-item-title { font-size: 13px; line-height: 1.45; color: rgba(255,255,255,0.85); margin: 0; }
+
+            .rss-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+            .rss-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .rss-section-title { font-size: 13px; font-weight: 700; color: #6ee7b7; }
+            .rss-section-count { color: rgba(255,255,255,0.40); font-size: 11.5px; }
+            .feed-group { margin-bottom: 16px; }
+            .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; padding-bottom: 5px; border-bottom: 1px solid rgba(110,231,183,0.30); }
+            .feed-name { font-size: 12.5px; font-weight: 700; color: #6ee7b7; }
+            .feed-count { color: rgba(255,255,255,0.40); font-size: 11px; }
+            .rss-item { margin-bottom: 5px; padding: 9px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); border-left: 2px solid rgba(110,231,183,0.50); border-radius: 9px; transition: background 0.15s; }
+            .rss-item:hover { background: rgba(255,255,255,0.10); }
+            .rss-meta { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; flex-wrap: wrap; }
+            .rss-time { color: rgba(255,255,255,0.38); font-size: 10.5px; }
+            .rss-author { color: #6ee7b7; font-size: 10.5px; font-weight: 500; }
+            .rss-title { font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85); }
+            .rss-link { color: #93c5fd; text-decoration: none; font-weight: 500; }
+            .rss-link:hover { color: #bfdbfe; text-decoration: underline; }
+
+            .standalone-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.10); }
+            .standalone-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+            .standalone-section-title { font-size: 13px; font-weight: 700; color: #6ee7b7; }
+            .standalone-section-count { color: rgba(255,255,255,0.40); font-size: 11.5px; }
+            .standalone-group { margin-bottom: 20px; }
+            .standalone-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding: 7px 11px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.11); border-radius: 9px; }
+            .standalone-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.90); }
+            .standalone-count { color: rgba(255,255,255,0.40); font-size: 11px; }
+
+            .ai-section { margin-top: 20px; padding: 14px; background: rgba(3,105,161,0.18); border-radius: 12px; border: 1px solid rgba(186,230,253,0.20); }
+            .ai-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+            .ai-section-title { font-size: 13px; font-weight: 700; color: #7dd3fc; }
+            .ai-section-badge { background: rgba(14,165,233,0.35); color: #bae6fd; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+            .ai-block { margin-bottom: 8px; padding: 11px; background: rgba(255,255,255,0.07); border-radius: 9px; border: 1px solid rgba(255,255,255,0.10); }
+            .ai-block-title { font-size: 12px; font-weight: 700; color: #7dd3fc; margin-bottom: 5px; }
+            .ai-block-content { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.78); white-space: pre-wrap; }
+
+            .footer { padding: 16px 20px; background: rgba(30,42,50,0.95); border-top: 1px solid rgba(255,255,255,0.10); text-align: center; }
+            .footer-content { font-size: 12px; color: rgba(255,255,255,0.40); line-height: 1.6; }
+            .footer-link { color: rgba(147,197,253,0.80); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+            .footer-link:hover { color: #93c5fd; text-decoration: underline; }
+            .project-name { font-weight: 600; color: rgba(255,255,255,0.60); }
+
+            /* 其他组件样式 */
+            .save-buttons { position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 10; }
+            .save-btn-group { position: relative; display: flex; }
+            .save-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28); color: white; padding: 8px 14px; border-radius: 6px 0 0 6px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s ease; backdrop-filter: blur(10px); white-space: nowrap; min-height: 34px; border-right: none; }
+            .save-btn:hover { background: rgba(255,255,255,0.28); }
+            .save-dropdown-trigger { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28); color: white; padding: 8px 9px; border-radius: 0 6px 6px 0; cursor: pointer; font-size: 11px; transition: all 0.2s ease; backdrop-filter: blur(10px); min-height: 34px; display: flex; align-items: center; }
+            .save-dropdown-trigger:hover { background: rgba(255,255,255,0.30); }
+            .save-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 4px; background: rgba(25,25,40,0.94); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 4px; min-width: 130px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+            .save-btn-group:hover .save-dropdown-menu, .save-dropdown-menu:hover { opacity: 1; visibility: visible; transform: translateY(0); }
+            .save-dropdown-item { display: block; width: 100%; padding: 8px 12px; background: none; border: none; color: white; font-size: 12px; cursor: pointer; border-radius: 5px; text-align: left; transition: background 0.15s; white-space: nowrap; }
+            .save-dropdown-item:hover { background: rgba(255,255,255,0.14); }
+            .dropdown-icon { width: 13px; height: 13px; margin-right: 7px; vertical-align: -2px; flex-shrink: 0; }
+
+            body.wide-mode .container { max-width: 1200px; }
+            body.wide-mode .content { padding: 28px 36px; }
+            body.wide-mode .rss-feeds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            body.wide-mode .feed-group { margin-bottom: 0; }
+            body.wide-mode .ai-section .ai-blocks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            body.wide-mode .ai-block { margin-bottom: 0; }
+            body.wide-mode .new-section .new-sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            body.wide-mode .new-source-group { margin-bottom: 0; }
+            body.wide-mode .standalone-section .standalone-groups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            body.wide-mode .standalone-group { margin-bottom: 0; }
+
+            .tab-bar {
+                display: none; overflow-x: auto; white-space: nowrap;
+                padding: 0 0 12px 0; margin-bottom: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.12);
+                -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+                position: sticky; top: 0;
+                background: linear-gradient(180deg, #4a5e6a 0%, #4a5e6a 100%);
+                z-index: 10; gap: 6px;
+            }
+            body.wide-mode .tab-bar { display: flex; }
+            body.wide-mode .tab-bar.tab-hidden { display: none; }
+            .tab-btn {
+                display: inline-flex; align-items: center; gap: 6px;
+                padding: 7px 14px; border: 1px solid rgba(255,255,255,0.14);
+                background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.60);
+                border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 500;
+                white-space: nowrap; transition: all 0.2s ease; flex-shrink: 0;
+            }
+            .tab-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.90); }
+            .tab-btn.active { background: rgba(255,255,255,0.20); color: white; border-color: rgba(255,255,255,0.30); }
+            .tab-count { font-size: 10.5px; background: rgba(255,255,255,0.12); padding: 1px 5px; border-radius: 8px; }
+            .tab-btn.active .tab-count { background: rgba(255,255,255,0.25); }
+            .tab-bar::-webkit-scrollbar { height: 3px; }
+            .tab-bar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 2px; }
+            .tab-bar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.20); border-radius: 2px; }
+
+            .collapse-icon { display: none; margin-right: 5px; font-size: 11px; color: rgba(255,255,255,0.35); transition: transform 0.2s; user-select: none; }
+            .word-header.collapsible { cursor: pointer; }
+            .word-header.collapsible .collapse-icon { display: inline; }
+            .word-header.collapsible:hover { background: rgba(255,255,255,0.12); }
+            .word-group.collapsed .news-item { display: none; }
+            .word-group.collapsed .collapse-icon { transform: rotate(-90deg); }
+            body.wide-mode .word-group[data-tab-index] { animation: tabFadeIn 0.2s ease; }
+            @keyframes tabFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+            .fab-bar { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 100; opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; }
+            .fab-bar.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+            .fab-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(79,70,229,0.85); color: white; border: none; cursor: pointer; font-size: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.25); transition: transform 0.2s, background 0.2s; display: flex; align-items: center; justify-content: center; position: relative; backdrop-filter: blur(8px); }
+            .fab-btn:hover { transform: scale(1.1); background: rgba(79,70,229,1); }
+            .fab-tooltip { position: absolute; bottom: 0; right: 52px; background: rgba(20,20,35,0.95); backdrop-filter: blur(12px); color: white; border-radius: 10px; padding: 12px 16px; white-space: nowrap; font-size: 12px; line-height: 1.8; box-shadow: 0 8px 24px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.10); opacity: 0; visibility: hidden; transform: translateY(6px); transition: all 0.2s ease; pointer-events: none; }
+            .fab-btn:hover .fab-tooltip, .fab-btn.show-tip .fab-tooltip { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+            .fab-tooltip .tip-row { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+            .fab-tooltip .tip-key { background: rgba(255,255,255,0.12); border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; margin-left: 8px; }
+
+            .reading-progress { position: fixed; top: 0; left: 0; width: 0; height: 3px; background: linear-gradient(90deg, #4f46e5, #7c3aed); z-index: 9999; transition: width 0.1s linear; }
+
+            body.dark-mode { background: #1a2530; }
+            body.dark-mode .container { box-shadow: 0 8px 32px rgba(0,0,0,0.45); }
+            body.dark-mode .content { background: linear-gradient(180deg, #2a3a44 0%, #1e2e38 100%); }
+            body.dark-mode .tab-bar { background: linear-gradient(180deg, #2a3a44 0%, #2a3a44 100%); }
+            body.dark-mode .header { background: linear-gradient(135deg, #0f3460 0%, #533483 100%); }
+            body.dark-mode .footer { background: rgba(15,25,32,0.98); }
+            body.dark-mode .reading-progress { background: linear-gradient(90deg, #8ab4f8, #c58af9); }
+            body.dark-mode .fab-btn { background: rgba(83,52,131,0.85); }
+            body.dark-mode .fab-btn:hover { background: rgba(109,40,217,1); }
+
+            @media (max-width: 480px) {
+                body { padding: 10px; }
+                .header { padding: 24px 18px; }
+                .content { padding: 16px; }
+                .footer { padding: 14px 18px; }
+                .today-temp { font-size: 28px; }
+                .today-city { font-size: 28px; }
+                .today-icon-img { width: 36px; height: 36px; }
+                .today-details { display: none; }
+                .combo-inner { flex-direction: column; align-items: stretch; gap: 14px; }
+                .combo-tsla { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-right: 0; padding-bottom: 12px; margin-right: 0; display: flex; justify-content: space-between; align-items: center; }
+                .tsla-top { margin-bottom: 0; }
+                .tsla-price { text-align: right; }
+                .uniform-week { margin-left: 0; margin-top: 8px; justify-content: flex-end; }
+                .save-buttons { position: static; margin-bottom: 14px; display: flex; gap: 8px; justify-content: center; width: 100%; }
+                .save-btn-group { flex: 1; }
+                .save-btn { width: 100%; border-radius: 6px 0 0 6px; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="reading-progress"></div>
+        <div class="container">
+            <div class="header" id="mainHeader">
+                <div class="header-watermark" id="watermark">TrendRadar</div>
+
+                <div class="save-buttons">
+                    <button class="toggle-wide-btn" onclick="toggleWideMode()" title="切换宽屏/窄屏">⛶</button>
+                    <button class="toggle-dark-btn" onclick="toggleDarkMode()" title="切换暗色/亮色">☽</button>
+                    <div class="save-btn-group">
+                        <button class="save-btn" onclick="saveAsImage()">导出</button>
+                        <button class="save-dropdown-trigger">▾</button>
+                        <div class="save-dropdown-menu">
+                            <button class="save-dropdown-item" onclick="saveAsImage()"><svg class="dropdown-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><circle cx="8" cy="7.5" r="2.5"/><path d="M12 4h.01"/></svg>整页截图</button>
+                            <button class="save-dropdown-item" onclick="saveAsMultipleImages()"><svg class="dropdown-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="10" height="10" rx="1.5"/><path d="M5 4V2.5A1.5 1.5 0 016.5 1h7A1.5 1.5 0 0115 2.5v7a1.5 1.5 0 01-1.5 1.5H12"/></svg>分段截图</button>
+                            <button class="save-dropdown-item" onclick="saveAsMarkdown()"><svg class="dropdown-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 2h11A1.5 1.5 0 0115 3.5v9a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9A1.5 1.5 0 012.5 2z"/><path d="M4 11V5l2.5 3L9 5v6"/><path d="M11.5 8v3m0 0l-1.5-2m1.5 2l1.5-2"/></svg>Markdown</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-top">
+                    <div class="header-title">雷达简报</div>
+                    <div class="gen-time-pill">
+                        <div class="gen-dot"></div>
+                        <span id="genTime">10-26 10:36</span>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <!-- 今日+明日 两列 -->
+                    <div class="weather-dual">
+                        <!-- 今日（左） -->
+                        <div class="today-card" id="todayCard">
+                            <div class="skeleton" style="width:100%;height:90px;border-radius:10px;"></div>
+                        </div>
+                        <!-- 明日（右） -->
+                        <div class="tomorrow-card" id="tmrCard" style="opacity:0.5;">
+                            <div class="tmr-label-row">
+                                <div class="tmr-label">明日天气</div>
+                                <div class="tmr-date" id="tmrDate">—</div>
+                            </div>
+                            <div class="tmr-top">
+                                <div class="tmr-icon-wrap" id="tmrIconWrap">
+                                    <div class="skeleton" style="width:34px;height:34px;border-radius:50%;"></div>
+                                </div>
+                                <div class="tmr-main">
+                                    <div class="tmr-desc" id="tmrDesc">—</div>
+                                    <div class="tmr-range" id="tmrRange">—</div>
+                                </div>
+                            </div>
+                            <div class="tmr-stats" id="tmrStats"></div>
+                            <div class="tmr-bar-wrap">
+                                <div class="tmr-bar-label">
+                                    <span id="tmrBarMin">—</span>
+                                    <span style="color:var(--td);font-size:8.5px;">温度区间</span>
+                                    <span id="tmrBarMax">—</span>
+                                </div>
+                                <div class="tmr-bar-track">
+                                    <div class="tmr-bar-fill" id="tmrBarFill" style="left:0%;right:0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TSLA + 工服 整合卡 -->
+                    <div class="card-plain combo-card" id="comboCard" style="display:none;">
+                        <div class="combo-inner">
+                            <!-- 左侧：TSLA -->
+                            <div class="combo-tsla">
+                                <div class="tsla-top">
+                                    <div class="tsla-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+                                    <div class="tsla-ticker">TSLA</div>
+                                </div>
+                                <div>
+                                    <div class="tsla-price" id="tslaPrice">--</div>
+                                    <div class="tsla-chg flat" id="tslaChg">--</div>
+                                </div>
+                            </div>
+                            <!-- 右侧：工服 -->
+                            <div class="combo-uniform">
+                                <div class="uniform-swatch" id="uniformSwatch"></div>
+                                <div class="uniform-info">
+                                    <div class="uniform-color-name" id="uniformColorName">—</div>
+                                    <div class="uniform-hint" id="uniformHint">—</div>
+                                </div>
+                                <div class="uniform-week" id="uniformWeek"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 更新时间 -->
+                    <div class="wt-footer" id="wtFooter" style="display:none;">
+                        <div class="wt-update" id="wtUpdate">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="搜索新闻标题..." oninput="handleSearch(this.value)">
+                </div>
+                <div class="error-section">
+                    <div class="error-title">⚠️ 请求失败的平台</div>
+                    <ul class="error-list"><li class="error-item">36kr</li>
+                    </ul>
+                </div>
+                <div class="hotlist-section"><div class="tab-bar"><button class="tab-btn" data-tab-index="0">🏛️ 要闻与政策<span class="tab-count">3</span></button><button class="tab-btn" data-tab-index="1">🇨🇳 核心车企与产业<span class="tab-count">14</span></button><button class="tab-btn" data-tab-index="2">🤖 科技与AI前沿<span class="tab-count">8</span></button><button class="tab-btn" data-tab-index="3">🌍 地缘与供应链<span class="tab-count">3</span></button><button class="tab-btn" data-tab-index="4">📊 市场与销量<span class="tab-count">1</span></button><button class="tab-btn" data-tab-index="all">全部</button></div>
+                <div class="word-group" data-tab-index="0">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">🏛️ 要闻与政策</div>
+                            <div class="word-count ">3 条</div>
+                        </div>
+                        <div class="word-index"><span class="collapse-icon">▼</span>1/5</div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">澎湃新闻</span><span class="rank-num top">2</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://m.thepaper.cn/newsDetail_forward_34329840" target="_blank" class="news-link">六大议题、90余场活动，2026进博会上海会议活动开放报名</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">2</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">财联社热门</span><span class="rank-num high">4</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.cls.cn/detail/2514282" target="_blank" class="news-link">【早报】美发布新版对外投资限制拟议规则，商务部回应；国内金饰克价跌穿1200元</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">3</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">雪球</span><span class="rank-num ">29</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://xueqiu.com/s/SH600838" target="_blank" class="news-link">上海九百</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="word-group" data-tab-index="1">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">🇨🇳 核心车企与产业</div>
+                            <div class="word-count hot">14 条</div>
+                        </div>
+                        <div class="word-index"><span class="collapse-icon">▼</span>2/5</div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num top">3</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/773.htm" target="_blank" class="news-link">特斯拉官宣全系现款在售车型标配被动安全系统，称安全永远是设计的首要目标</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">2</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">澎湃新闻</span><span class="rank-num top">3</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://m.thepaper.cn/newsDetail_forward_34329756" target="_blank" class="news-link">马上评｜如果批评小鹏都不被允许，那也没必要赞美它</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">3</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num high">5</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/771.htm" target="_blank" class="news-link">上市 7 个月，华为畅享 90 系列手机累计发货量突破 1000 万台</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">4</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">雪球</span><span class="rank-num high">5</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://xueqiu.com/s/SZ300750" target="_blank" class="news-link">宁德时代</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">5</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">澎湃新闻</span><span class="rank-num ">7</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://m.thepaper.cn/newsDetail_forward_34328596" target="_blank" class="news-link">言短意长｜与其纠结“老登”，小鹏汽车不如多关心自身安全性能</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">6</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">财联社热门</span><span class="rank-num ">8</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.cls.cn/detail/2514289" target="_blank" class="news-link">机器人IPO门槛提高 具身智能一级市场预期变了</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">7</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">9</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/767.htm" target="_blank" class="news-link">华为路由 X2 系列首销：书本设计、Wi‑Fi 7+、AI Mesh 组网，478 元起</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">8</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">13</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/762.htm" target="_blank" class="news-link">比亚迪腾势 N8 宽五座 SUV 开启小订，11 月正式上市</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">9</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">15</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/757.htm" target="_blank" class="news-link">小鹏 MONA WORLD 车主聚会暨 L05 中国上市发布会定档 10 月 29 日</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">10</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">18</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/753.htm" target="_blank" class="news-link">网友成功将一加 Ace 5 刷入真 · 纯血鸿蒙 6 系统：机型显示华为 Mate 80 Pro，实现 GPU 完美修复</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="word-group" data-tab-index="2">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">🤖 科技与AI前沿</div>
+                            <div class="word-count warm">8 条</div>
+                        </div>
+                        <div class="word-index"><span class="collapse-icon">▼</span>3/5</div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">华尔街见闻</span><span class="rank-num ">8</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://wallstreetcn.com/articles/3784410" target="_blank" class="news-link">SemiAnalysis创始人深度解析：AI投资还能撑多久？英伟达护城河还能守住吗？内存荒何时结束？</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">2</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">华尔街见闻</span><span class="rank-num ">9</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://wallstreetcn.com/articles/3784406" target="_blank" class="news-link">野村：AI军备竞赛有75%的概率继续，2027年存储芯片短缺已基本锁定</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">3</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">11</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/764.htm" target="_blank" class="news-link">英伟达瞄准 AI 软件订阅收入，黄仁勋提出每块 GPU 每年约 2000 美元</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">4</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">财联社电报</span><span class="rank-num ">12</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://api3.cls.cn/share/article/2514703?os=web&amp;sv=7.7.5&amp;app=" target="_blank" class="news-link">财联社10月26日电，港股大模型“双雄”双双下跌，MINIMAX-W跌超10%，智谱跌超5%。</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">5</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">雪球</span><span class="rank-num ">21</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://xueqiu.com/s/SZ301660" target="_blank" class="news-link">粤芯半导体-U</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">6</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">财联社电报</span><span class="rank-num ">22</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://api3.cls.cn/share/article/2514688?os=web&amp;sv=7.7.5&amp;app=" target="_blank" class="news-link">财联社10月26日电，港股芯片股多数下跌，华虹宏力跌超7%，壁仞科技、天数智芯、兆易创新跌超5%。</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">7</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">22</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/747.htm" target="_blank" class="news-link">德国普鲁士电力与英伟达合作，评估停运核电站改建 AI 工厂可行性</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">8</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">财联社电报</span><span class="rank-num ">25</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://api3.cls.cn/share/article/2514681?os=web&amp;sv=7.7.5&amp;app=" target="_blank" class="news-link">部分港股人工智能股走强 群核科技涨近19%</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="word-group" data-tab-index="3">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">🌍 地缘与供应链</div>
+                            <div class="word-count ">3 条</div>
+                        </div>
+                        <div class="word-index"><span class="collapse-icon">▼</span>4/5</div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">财联社热门</span><span class="rank-num ">13</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.cls.cn/detail/2514302" target="_blank" class="news-link">关税博弈VS选战诉求：特朗普将“官宣”大众赴美建厂，为中期选举争取支持</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">2</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">参考消息</span><span class="rank-num ">17</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://ckxxapp.ckxx.net/pages/2026/10/25/4f523294a3aa4420ae7b000fa192ca27.html" target="_blank" class="news-link">中东石油出口回升至战前水平</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">3</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">IT之家</span><span class="rank-num ">26</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.ithome.com/1/017/742.htm" target="_blank" class="news-link">2026 年前三季度，我国摩托车整车出口 1516.36 万辆同比增长 11.76%</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="word-group" data-tab-index="4">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">📊 市场与销量</div>
+                            <div class="word-count ">1 条</div>
+                        </div>
+                        <div class="word-index"><span class="collapse-icon">▼</span>5/5</div>
+                    </div>
+                    <div class="news-item new">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header"><span class="source-name">联合早报</span><span class="rank-num ">9</span><span class="time-info">10:32</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.zaochenbao.com/news/opinion/202610/2684133.html" target="_blank" class="news-link">评论：现代汽车和起亚在华单月销量跌破1万辆</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div class="section-divider rss-section">
+                    <div class="rss-section-header">
+                        <div class="rss-section-title">RSS 订阅更新</div>
+                        <div class="rss-section-count">36 条</div>
+                    </div>
+                    <div class="rss-feeds-grid">
+                    <div class="feed-group">
+                        <div class="feed-header">
+                            <div class="feed-name">🏛️ 要闻与政策</div>
+                            <div class="feed-count">10 条</div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 07:17</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMif0FVX3lxTE55M2NOX2NBZ2lnaDJNTWJ4Qzd0aFZXT2UzSnNWcFpxcEF2bGlvTkZnaXF4VGpQQTNBY3Y3NG5tTE1FZDNwMW9lc05rRGJzLUVtX3FXT0dYb1BPbGtqWk1oeGl4RXVENlJxdXVJVTBiYjN6MEVvakxWSlBBb0VtemM?oc=5" target="_blank" class="rss-link">AI 眼镜、智能大厨齐亮相，上海把城市变成消费创新试验场 - 手机新浪网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 20:39</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiYEFVX3lxTE0xRUZLT3k1ZmdCb05LeVZuV3I0X1hjWjFpOXI2eVFabHFqVEFQZWs2WldmUnFLSzlLOWJva2FOQi1XM1dvUGxSc3ZsaG1PR0NZRHc0T2x1c0JMaDR5clRicw?oc=5" target="_blank" class="rss-link">六大议题、90余场活动，2026进博会上海会议活动开放报名 - ThePaper.cn</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 20:31</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMieEFVX3lxTFBIbVJ2amgyV19DR0o0Q3dfQ1hKXzdFWVVWWmZpZXBZV0RDbHNEWklXS2JIX01aREVicWYzdmc2VWZZd0xIYWcwNnZhOGFiWFNybDBpUFExQ2ItUjJ3QVBJb2pMbmwxTjF6VkR5M0R3MlpHTG1uRUJueA?oc=5" target="_blank" class="rss-link">上海举办首届“人工智能+消费”创新大赛 激活消费新动能 - 新浪财经</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 18:04</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMif0FVX3lxTE5CYk04Wi1DajNOLUloOFpTcThlbTFIZUs3eHNrQjNHY1Qzc2FMLVJ4b3ZhZW9uS2EwUndoNGYxdGRZVGxqNG1pLV9PUk90X1NDbHRwUjlha1VzMGN3SV9aTnpSaWtpaVdCMURjRXR1Ml9fQjlXeC1TU05ZaGJNWVU?oc=5" target="_blank" class="rss-link">全方位挖掘人工智能赋能消费升级的创新成果，首届上海“人工智能+消费”创新大赛成功举办 - 手机新浪网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 17:38</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMigwFBVV95cUxQRlQtNXo5OC1JTFJkQWRwNUVaX2Y5MmIxOXVERjQwWTE5bFpjYkZYQ1VpeHEyMmYyWWJseVJKWWJDbmVZdGhvV3NKYW9kOGRXU05WbDhhbVpHLUEzU01sN1VzMmtUOEFaYnVxZnpHQ2g1TjVKdS1XUndYQmljc1gzRDVIRQ?oc=5" target="_blank" class="rss-link">2026进博会上海会议活动将于11月6-9日举办，全景勾勒开放合作与创新增长的最新脉动 - 劳动观察</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 16:00</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMieEFVX3lxTFBya0EyQTJaNlpwVE83M3FxOVVzYldkZkw1cjRTTkpLM1FSd0hDSmE4LVBlZ1ZvaWFuejBvR1dNYnVWQ1lWWURnS01XX3VZYnM1STIyRk9hUUQ0M2IySWppY3pFVERkNlJXLWxDZTcyUEVOSFFOaXNTZg?oc=5" target="_blank" class="rss-link">“沪航者”跨境供应链合规和风险应对：上海市走出去综合服务平台开放日系列活动（六）开始报名！ - 新浪财经</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 15:02</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiYEFVX3lxTFA1SF9JaHFoc2s5NURTUVVsakNXODJadGlDQ010VEdPLWRadFdEdE5ROU8wVnpuX3VGSXBtV1dlb2hHb1VkQWtLNVBrZWstOHI1eHFDQkQxYTc4aURXTkNNeA?oc=5" target="_blank" class="rss-link">把退税窗口搬进“四叶草”：中行上海市分行以离境退税全链路服务，护航第九届进博会 - ThePaper.cn</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 14:56</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMijAFBVV95cUxPMmY2dnNVdW9KZVJadEJvOW5KbTlQbmRxV3UtdFUxZXBMWnB6dm1paWxJQWJXVWk1OUNZOHVzRlpoSDhfdGtkYjJrcGdaR3RNT0tfYWVwT1ZDRWl6WlVrSS15eS1LcGc3V01vNGxtU2tYTHp4eU9TZDIyamptUlRwdUJ0cHpGbXFIdWdxLQ?oc=5" target="_blank" class="rss-link">把退税窗口搬进“四叶草”，中行上海市分行以全链路服务护航第九届进博会 - 搜狐网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 14:21</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiS0FVX3lxTE1IcEtIci1taU1SX2lhQXlsTGlDa1lOVkhsUUVEV0ZSX2VPeHFhWkRRakRDTVZTWmR3ZjNBa1psZ3hucGJlT0hHX1A2WQ?oc=5" target="_blank" class="rss-link">上海举办首届“人工智能+消费”创新大赛 - 手机新浪网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 14:18</span><span class="rss-author">上海市商务委-新闻动态</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiaEFVX3lxTE9HYjV0TGlEZWdLeTV1dEprNGlmN0VFMmVCYkNFWWpfQnlfQmlzdmNnNVV2RVhOODdxUTR4ejdaYUFJdkFNcWpfcWhpZlk1b1F2VzVKWklCUUlGcEZUeFNsTkg2YVBESERC?oc=5" target="_blank" class="rss-link">上海举办首届“人工智能+消费”创新大赛 - 中国新闻网</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feed-group">
+                        <div class="feed-header">
+                            <div class="feed-name">🇨🇳 核心车企与产业</div>
+                            <div class="feed-count">10 条</div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 10:07</span><span class="rss-author">小米汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiiAFBVV95cUxOVW5KTVdaNE9ianVkYzdXNTdHakQ0ZDFKcWlvQzFoR2tWaFh1RFUwWS1IdHpiMVpsTG1ja1RCeFFDVHc4MTVVWTdRRlRMbENfWnJVakZWSS1kSzgyY2hFbnpsYm85NkJ2RlE1V2Z5bmRkcHNNd3F0QVpVcl9hN0RWSUxBNmZVbDl0?oc=5" target="_blank" class="rss-link">小米汽车在浙江国际赛车场交付新车 副总裁李肖爽现身 - 手机搜狐网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 09:54</span><span class="rss-author">小鹏汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMickFVX3lxTE5nYzR0dFJmczJuTVF6ZHlnejlUV0MxdTZxa0IwbC1ZdzhjSEpTZWJGNXpQdlh6RmZZWDFjVF9NU2ROZ0luYW9HdE9LSUlKWHE5Sl9ENEs5SFFkUlV3NUIxd1JGNWVuaG9iSE5qNXdLaUpZdw?oc=5" target="_blank" class="rss-link">小鹏MONA WORLD车主聚会暨L05中国上市发布会定档10月29日 - 手机新浪网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 09:49</span><span class="rss-author">小鹏汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMi3AFBVV95cUxNVTNzVVZQemZWTGtjTF8zSDNfTUwzUm93WFVZU3F4Mnl4aERpWDRNcVBNMExLSF9uSThRLXhxbExuX1BSOU5oTlRwWDZKZ09mRDAzV3RweUlGdUg1UnlSUXNtd2N2N1VjU2ZXekhwSUxGTEtPVGVST0xOdkF2MTZBbjFBOE8wbHZhXzNtc0llZDFJZEpmcm5MdHZHd05TNDFCVjVCWGhjVTNxbWplaUNzc0g3NG50UlNVNjZrQm5Ia1gwbmJGNDdWWWJ1aEluMnNDUVQ2cnU1eWVxZkZP?oc=5" target="_blank" class="rss-link">小鹏MONA WORLD车主聚会暨L05中国上市发布会定档10月29日 - 手机新浪网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 09:16</span><span class="rss-author">小鹏汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMid0FVX3lxTE9vczFqWEtNR1ZSeHFBM3R2YWVfZ3pINTV5ZFdxM0w2OG56RUZwbkNrUVhHUDdlMndkT0JZOUFmR01mdl9sTFJ0Vk9HTUFpZDF5bllFZEdqcVRmRlA2T0w0MXBVVjZid2tzOVFFLThzLWs1d1ZFOXRz?oc=5" target="_blank" class="rss-link">产品经理就“老登”言论道歉，小鹏副总裁回应称并未感到不悦 - 中青在线</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 03:37</span><span class="rss-author">小鹏汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMic0FVX3lxTFBBb3p4R3hBSFVOZldtRDhMVk5WdGE2WE11ZW40X3doVWQ5cFZDb2tFbW9zbG9EcmlRMjhrMUROaHdnQ0FMdTBYdl9INUZhbWtmZWdPeHBrVEgwNDZZREdYWWZsZ2M0eVY1RlpXb0s5MXlUVEE?oc=5" target="_blank" class="rss-link">何小鹏直言创业九死一生 目标不聚焦即方向不明 - 手机新浪网</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 01:47</span><span class="rss-author">小米汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTFBwaFI5RUFGYXFaczE4Smh3aUdMWloybHpaUkhWNTlmQkNJdW9tMFR5dE5BeWdLcTNmUnhaQm9sVlFzNjlTVUgzUTFSNGJudmNuaFRBNWdaUXNDRTA?oc=5" target="_blank" class="rss-link">Q1交卷后，小米汽车需要一个销量奇迹？ - 汽车之家</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 23:53</span><span class="rss-author">零跑汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiXkFVX3lxTE1LNS1VMkFVdm1sb2lHTlpwV1pVWkZlQUNzWTVMcWdvY0doN096dGI5cXZISXY3ZC1zcmpSM3NkNGd3elp2TTQxSjRIWWRXV0J0MUNkTjNHb05SOGo3YXc?oc=5" target="_blank" class="rss-link">售价9.28万元， 零跑A10s正式上市，黑化风格 - 汽车之家</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 22:28</span><span class="rss-author">零跑汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE5pdnJuTFlHV010N0hIZFRRWDF4bklwV1FwZnpna0k5NDRLNkJ5aXJIRFZMVXZxSWI2eE9UZlVURHYwYU1YSnlpTkwwd29kM1hEaGZ3X0lvb3NocmM?oc=5" target="_blank" class="rss-link">零跑A10s官图发布，续航505km+智驾 - 汽车之家</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 21:57</span><span class="rss-author">小鹏汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMi4wRBVV95cUxNNG5BY2lkVGk3eEM4X3JmMGNJUF9BazFuTFhJcGFlQ1g0WUJRSmpGekY1VWdEZERrSkhrUjJxQko5amlTRnFmZXF6ci1IaHg1Q0RvUGExOWQ4MjlnamtlMWRaeldqV0pCMTdTLXdVanhFb0Y4NlhmOVU2SVJnTURuMi0tU2F6dlBndlM1Ym5yZHNqSHJZVkdDQVpRc21MMHVPSG5iN2lKMXNVeE9qc3c4RVUwMWFjY1J6cEEyMTFOTDhZcHZBTXM4OVRscDY5Mk1BY1Z1RnVrQnpVZU03YkVyQnRMcXpNaTZqMGJpQWZBbVlsZ21ScEtaRHBzaEZ0Q3JpN19udUdOZDNMaVNkZWd5X2ZydE9wa1hJMVpOeDcxYXF0RzYxNGRKaWdMM2kwdHE2MkM2clFqRmxEUXhmWm52bFdIWmhrUEp4VHUxME5EUDZ2ZmN0X1cza3BacGRwYVJ4aWlMcFpYVGRYWW44UFBodDlieTNJX01wdVY4WW5YSUlMcXZ0T0lmYTdMTVVSN05aQmNVU1NvZTYxTFY2OWZSazFHTFNvekxCZ00zSXBrb3RwWWQtN1lvUFFJc195U2dCX2Z4alUyMldfempkUmc5cnIyMkFBYXFSYnR4QjhONnFaYTZhdkJpMHRQNlVUZVptZC1WMmJNTC1XbEhqWFY0YnBSVHNCZ1NTRU1DVGpOZkx4LXFDY3k3bFBkMTZQTC1SMTY1MXppQi04SFlDOXBiazE4UDZuQnBZUlR6VjBjc3g3SUtIZm9yYVR5bU0xcm9WVTdlV1cwNGZJOTdTU3Q1RGtGMA?oc=5" target="_blank" class="rss-link">小鹏汽车副总裁：如果有人能证明我们让自媒体炒作老登事件 我奖励100万元 - finance.sina.com.cn</a>
+                            </div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-25 19:39</span><span class="rss-author">零跑汽车(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE1zYm9OSHpvUjVDZXBpalVnbG5vMG16RkgwR01rTlBTUzFFcVZfQ1VObXQtMjlmZEtROW8yeXJDMTB1Z0xKdkhZdFlWa2xOWjZRdDNTQVFKdVE5T28?oc=5" target="_blank" class="rss-link">有望8月正式上市 零跑A05开启盲订 - 汽车之家</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feed-group">
+                        <div class="feed-header">
+                            <div class="feed-name">📊 市场与销量</div>
+                            <div class="feed-count">1 条</div>
+                        </div>
+                        <div class="rss-item">
+                            <div class="rss-meta"><span class="rss-time">10-26 00:13</span><span class="rss-author">问界AITO(全网动态)</span>
+                            </div>
+                            <div class="rss-title"><a href="https://news.google.com/rss/articles/CBMigAFBVV95cUxNN09TOEZXSWhUdTVyUmJyR2NMem1fNHJESThneVZuMEtaZUxyUDdabVhFMV85MThvOHBSQ3NkZldVNDJSMjRBdEY4NS1Ka3RjVFdkVXJsZHhLVGg2UTdxMlZlR2xWNFg4VEc4ZnJ4R0JCbmlzVEJaU3lKTE5YNzNyLQ?oc=5" target="_blank" class="rss-link">鸿蒙智行三周年累计交付超150万辆 - 手机新浪网</a>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="footer-content">
+                    由 <span class="project-name">TrendRadar</span> 生成 ·
+                    <a href="https://github.com/sansan0/TrendRadar" target="_blank" class="footer-link">
+                        GitHub 开源项目
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="fab-bar">
+            <button class="fab-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="返回顶部">↑</button>
+            <button class="fab-btn fab-help">
+                <span>?</span>
+                <div class="fab-tooltip">
+                    <div class="tip-row"><span>切换宽屏</span><span class="tip-key">W</span></div>
+                    <div class="tip-row"><span>暗色模式</span><span class="tip-key">D</span></div>
+                    <div class="tip-row"><span>搜索</span><span class="tip-key">/</span></div>
+                    <div class="tip-row"><span>上一个 Tab</span><span class="tip-key">←</span></div>
+                    <div class="tip-row"><span>下一个 Tab</span><span class="tip-key">→</span></div>
+                    <div class="tip-row"><span>序号可复制</span><span class="tip-key">点击</span></div>
+                </div>
+            </button>
+        </div>
+
+        <script>
+            // ===== 浏览器增强功能 =====
+
+            function toggleWideMode() {
+                document.body.classList.toggle('wide-mode');
+                var isWide = document.body.classList.contains('wide-mode');
+                try { localStorage.setItem('trendradar-wide-mode', isWide ? '1' : '0'); } catch(e) {}
+                var btn = document.querySelector('.toggle-wide-btn');
+                if (btn) btn.textContent = isWide ? '⊡' : '⛶';
+                initTabVisibility();
+                initCollapseVisibility();
+                initStandaloneTabVisibility();
+            }
+
+            function toggleDarkMode() {
+                var isDark = document.body.classList.toggle('dark-mode');
+                try { localStorage.setItem('trendradar-dark-mode', isDark ? '1' : '0'); } catch(e) {}
+                var btn = document.querySelector('.toggle-dark-btn');
+                if (btn) btn.textContent = isDark ? '☀' : '☽';
+            }
+
+            function initTabs() {
+                var tabBar = document.querySelector('.tab-bar');
+                if (!tabBar) return;
+                var tabs = tabBar.querySelectorAll('.tab-btn');
+                var groups = document.querySelectorAll('.word-group[data-tab-index]');
+                initTabVisibility();
+
+                function activateTab(index) {
+                    tabs.forEach(function(t) { t.classList.remove('active'); });
+                    if (index === 'all') {
+                        var allBtn = tabBar.querySelector('[data-tab-index="all"]');
+                        if (allBtn) allBtn.classList.add('active');
+                        groups.forEach(function(g) { g.style.display = ''; });
+                        try { history.replaceState(null, '', '#all'); } catch(e) {}
+                        return;
+                    }
+                    var idx = parseInt(index);
+                    tabs.forEach(function(t) {
+                        if (parseInt(t.dataset.tabIndex) === idx) t.classList.add('active');
+                    });
+                    if (document.body.classList.contains('wide-mode') && !tabBar.classList.contains('tab-hidden')) {
+                        groups.forEach(function(g) {
+                            g.style.display = (parseInt(g.dataset.tabIndex) === idx) ? '' : 'none';
+                        });
+                    }
+                    try { history.replaceState(null, '', '#tab-' + idx); } catch(e) {}
+                }
+
+                tabs.forEach(function(tab) {
+                    tab.addEventListener('click', function() {
+                        var idx = tab.dataset.tabIndex;
+                        activateTab(idx === 'all' ? 'all' : parseInt(idx));
+                    });
+                });
+
+                tabBar.addEventListener('keydown', function(e) {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                        var tabsArr = Array.from(tabs);
+                        var ci = tabsArr.findIndex(function(t) { return t.classList.contains('active'); });
+                        var dir = e.key === 'ArrowRight' ? 1 : -1;
+                        var ni = Math.max(0, Math.min(tabsArr.length - 1, ci + dir));
+                        var nt = tabsArr[ni];
+                        activateTab(nt.dataset.tabIndex === 'all' ? 'all' : parseInt(nt.dataset.tabIndex));
+                        nt.focus();
+                        e.preventDefault();
+                    }
+                });
+
+                var hash = window.location.hash;
+                if (hash === '#all') { activateTab('all'); }
+                else if (hash.indexOf('#tab-') === 0) { activateTab(parseInt(hash.replace('#tab-', ''))); }
+                else { activateTab(0); }
+            }
+
+            function initTabVisibility() {
+                var tabBar = document.querySelector('.tab-bar');
+                if (!tabBar) return;
+                var groups = document.querySelectorAll('.word-group[data-tab-index]');
+                var isWide = document.body.classList.contains('wide-mode');
+                if (!isWide || groups.length <= 2) {
+                    tabBar.classList.add('tab-hidden');
+                    groups.forEach(function(g) { g.style.display = ''; });
+                } else {
+                    tabBar.classList.remove('tab-hidden');
+                    var activeTab = tabBar.querySelector('.tab-btn.active');
+                    if (activeTab) { activeTab.click(); }
+                    else {
+                        var firstTab = tabBar.querySelector('.tab-btn');
+                        if (firstTab) firstTab.click();
+                    }
+                }
+            }
+
+            function handleSearch(query) {
+                query = query.toLowerCase();
+                document.querySelectorAll('.news-item').forEach(function(item) {
+                    var title = (item.querySelector('.news-title') || {}).textContent || '';
+                    item.style.display = (!query || title.toLowerCase().indexOf(query) !== -1) ? '' : 'none';
+                });
+                document.querySelectorAll('.rss-item').forEach(function(item) {
+                    var title = (item.querySelector('.rss-title') || {}).textContent || '';
+                    item.style.display = (!query || title.toLowerCase().indexOf(query) !== -1) ? '' : 'none';
+                });
+            }
+
+            function initBackToTop() {
+                var fabBar = document.querySelector('.fab-bar');
+                if (!fabBar) return;
+                window.addEventListener('scroll', function() {
+                    fabBar.classList.toggle('visible', window.scrollY > 300);
+                });
+            }
+
+            function initCollapse() {
+                document.querySelectorAll('.word-header').forEach(function(header) {
+                    header.addEventListener('click', function() {
+                        var tabBar = document.querySelector('.tab-bar');
+                        if (document.body.classList.contains('wide-mode') && tabBar && !tabBar.classList.contains('tab-hidden')) return;
+                        var group = header.closest('.word-group');
+                        if (group) group.classList.toggle('collapsed');
+                    });
+                });
+                initCollapseVisibility();
+            }
+
+            function initCollapseVisibility() {
+                var headers = document.querySelectorAll('.word-header');
+                var tabBar = document.querySelector('.tab-bar');
+                var isTabMode = document.body.classList.contains('wide-mode') && tabBar && !tabBar.classList.contains('tab-hidden');
+                headers.forEach(function(h) {
+                    if (isTabMode) { h.classList.remove('collapsible'); }
+                    else { h.classList.add('collapsible'); }
+                });
+                if (isTabMode) {
+                    document.querySelectorAll('.word-group.collapsed').forEach(function(g) {
+                        g.classList.remove('collapsed');
+                    });
+                }
+            }
+
+            function initStandaloneTabs() {
+                var tabBar = document.querySelector('.standalone-tab-bar');
+                if (!tabBar) return;
+                var groups = document.querySelectorAll('.standalone-group[data-standalone-tab]');
+                var btns = tabBar.querySelectorAll('.tab-btn[data-standalone-tab]');
+
+                function activateStandaloneTab(val) {
+                    btns.forEach(function(b) {
+                        var bVal = b.getAttribute('data-standalone-tab');
+                        b.classList.toggle('active', bVal === String(val));
+                    });
+                    groups.forEach(function(g) {
+                        var gVal = g.getAttribute('data-standalone-tab');
+                        g.style.display = (val === 'all' || gVal === String(val)) ? '' : 'none';
+                    });
+                }
+
+                btns.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        activateStandaloneTab(btn.getAttribute('data-standalone-tab'));
+                    });
+                });
+
+                initStandaloneTabVisibility();
+            }
+
+            function initStandaloneTabVisibility() {
+                var tabBar = document.querySelector('.standalone-tab-bar');
+                if (!tabBar) return;
+                var groups = document.querySelectorAll('.standalone-group[data-standalone-tab]');
+                var isWide = document.body.classList.contains('wide-mode');
+                if (!isWide || groups.length <= 1) {
+                    tabBar.classList.add('tab-hidden');
+                    groups.forEach(function(g) { g.style.display = ''; });
+                } else {
+                    tabBar.classList.remove('tab-hidden');
+                    var activeBtn = tabBar.querySelector('.tab-btn.active');
+                    if (activeBtn) activeBtn.click();
+                    else { var first = tabBar.querySelector('.tab-btn'); if (first) first.click(); }
+                }
+            }
+
+            function prepareForScreenshot() {
+                var state = { wasWide: document.body.classList.contains('wide-mode'), hiddenGroups: [] };
+                document.body.classList.remove('wide-mode');
+                state.wasDark = document.body.classList.contains('dark-mode');
+                document.body.classList.remove('dark-mode');
+                document.querySelectorAll('.word-group[data-tab-index]').forEach(function(g, i) {
+                    if (g.style.display === 'none') { state.hiddenGroups.push(i); g.style.display = ''; }
+                });
+                state.hiddenStandaloneGroups = [];
+                document.querySelectorAll('.standalone-group[data-standalone-tab]').forEach(function(g, i) {
+                    if (g.style.display === 'none') { state.hiddenStandaloneGroups.push(i); g.style.display = ''; }
+                });
+                document.querySelectorAll('.tab-bar, .standalone-tab-bar, .search-bar, .fab-bar, .toggle-wide-btn').forEach(function(el) {
+                    el.dataset.prevDisplay = el.style.display || ''; el.style.display = 'none';
+                });
+                document.querySelectorAll('.toggle-dark-btn').forEach(function(el) {
+                    el.dataset.prevDisplay = el.style.display || ''; el.style.display = 'none';
+                });
+                document.querySelectorAll('.reading-progress').forEach(function(el) { el.style.display = 'none'; });
+                document.querySelectorAll('.header-watermark').forEach(function(el) { el.style.display = 'none'; });
+                return state;
+            }
+
+            function restoreAfterScreenshot(state) {
+                if (state.wasWide) document.body.classList.add('wide-mode');
+                if (state.wasDark) document.body.classList.add('dark-mode');
+                var groups = document.querySelectorAll('.word-group[data-tab-index]');
+                state.hiddenGroups.forEach(function(i) { if (groups[i]) groups[i].style.display = 'none'; });
+                var standaloneGroups = document.querySelectorAll('.standalone-group[data-standalone-tab]');
+                if (state.hiddenStandaloneGroups) {
+                    state.hiddenStandaloneGroups.forEach(function(i) { if (standaloneGroups[i]) standaloneGroups[i].style.display = 'none'; });
+                }
+                document.querySelectorAll('.tab-bar, .standalone-tab-bar, .search-bar, .fab-bar, .toggle-wide-btn').forEach(function(el) {
+                    el.style.display = el.dataset.prevDisplay || ''; delete el.dataset.prevDisplay;
+                });
+                document.querySelectorAll('.toggle-dark-btn').forEach(function(el) {
+                    el.style.display = el.dataset.prevDisplay || ''; delete el.dataset.prevDisplay;
+                });
+                document.querySelectorAll('.reading-progress').forEach(function(el) { el.style.display = ''; });
+                document.querySelectorAll('.header-watermark').forEach(function(el) { el.style.display = ''; });
+                initTabVisibility(); initCollapseVisibility(); initStandaloneTabVisibility();
+                var fabBar = document.querySelector('.fab-bar');
+                if (fabBar && window.scrollY > 300) fabBar.classList.add('visible');
+            }
+
+            async function saveAsImage() {
+                const button = event.target; const originalText = button.textContent;
+                try {
+                    button.textContent = '生成中...'; button.disabled = true; window.scrollTo(0, 0);
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    var screenshotState = prepareForScreenshot();
+                    const buttons = document.querySelector('.save-buttons');
+                    buttons.style.visibility = 'hidden';
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    const container = document.querySelector('.container');
+                    const canvas = await html2canvas(container, {
+                        backgroundColor: '#ffffff', scale: 1.5, useCORS: true, allowTaint: false,
+                        imageTimeout: 10000, removeContainer: false, foreignObjectRendering: false, logging: false,
+                        width: container.offsetWidth, height: container.offsetHeight,
+                        x: 0, y: 0, scrollX: 0, scrollY: 0, windowWidth: window.innerWidth, windowHeight: window.innerHeight
+                    });
+
+                    buttons.style.visibility = 'visible'; restoreAfterScreenshot(screenshotState);
+
+                    const link = document.createElement('a'); const now = new Date();
+                    const filename = `TrendRadar_雷达简报_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}$${String(now.getDate()).padStart(2, '0')}_$${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.png`;
+
+                    link.download = filename; link.href = canvas.toDataURL('image/png', 1.0);
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+
+                    button.textContent = '保存成功!';
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
+                } catch (error) {
+                    const buttons = document.querySelector('.save-buttons'); buttons.style.visibility = 'visible';
+                    restoreAfterScreenshot(screenshotState); button.textContent = '保存失败';
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
+                }
+            }
+
+            async function saveAsMultipleImages() {
+                const button = event.target; const originalText = button.textContent;
+                const container = document.querySelector('.container'); const scale = 1.5; const maxHeight = 5000 / scale;
+                var screenshotState2 = prepareForScreenshot();
+
+                try {
+                    button.textContent = '分析中...'; button.disabled = true;
+                    const newsItems = Array.from(container.querySelectorAll('.news-item'));
+                    const wordGroups = Array.from(container.querySelectorAll('.word-group'));
+                    const newSection = container.querySelector('.new-section');
+                    const errorSection = container.querySelector('.error-section');
+                    const header = container.querySelector('.header');
+                    const footer = container.querySelector('.footer');
+
+                    const containerRect = container.getBoundingClientRect(); const elements = [];
+                    elements.push({ type: 'header', element: header, top: 0, bottom: header.offsetHeight, height: header.offsetHeight });
+
+                    if (errorSection) {
+                        const rect = errorSection.getBoundingClientRect();
+                        elements.push({ type: 'error', element: errorSection, top: rect.top - containerRect.top, bottom: rect.bottom - containerRect.top, height: rect.height });
+                    }
+
+                    wordGroups.forEach(group => {
+                        const groupRect = group.getBoundingClientRect();
+                        const groupNewsItems = group.querySelectorAll('.news-item');
+                        const wordHeader = group.querySelector('.word-header');
+                        if (wordHeader) {
+                            const headerRect = wordHeader.getBoundingClientRect();
+                            elements.push({ type: 'word-header', element: wordHeader, parent: group, top: groupRect.top - containerRect.top, bottom: headerRect.bottom - containerRect.top, height: headerRect.height });
+                        }
+                        groupNewsItems.forEach(item => {
+                            const rect = item.getBoundingClientRect();
+                            elements.push({ type: 'news-item', element: item, parent: group, top: rect.top - containerRect.top, bottom: rect.bottom - containerRect.top, height: rect.height });
+                        });
+                    });
+
+                    if (newSection) {
+                        const rect = newSection.getBoundingClientRect();
+                        elements.push({ type: 'new-section', element: newSection, top: rect.top - containerRect.top, bottom: rect.bottom - containerRect.top, height: rect.height });
+                    }
+
+                    const footerRect = footer.getBoundingClientRect();
+                    elements.push({ type: 'footer', element: footer, top: footerRect.top - containerRect.top, bottom: footerRect.bottom - containerRect.top, height: footer.offsetHeight });
+
+                    const segments = []; let currentSegment = { start: 0, end: 0, height: 0, includeHeader: true };
+                    let headerHeight = header.offsetHeight; currentSegment.height = headerHeight;
+
+                    for (let i = 1; i < elements.length; i++) {
+                        const element = elements[i]; const potentialHeight = element.bottom - currentSegment.start;
+                        if (potentialHeight > maxHeight && currentSegment.height > headerHeight) {
+                            currentSegment.end = elements[i - 1].bottom; segments.push(currentSegment);
+                            currentSegment = { start: currentSegment.end, end: 0, height: element.bottom - currentSegment.end, includeHeader: false };
+                        } else {
+                            currentSegment.height = potentialHeight; currentSegment.end = element.bottom;
+                        }
+                    }
+                    if (currentSegment.height > 0) { currentSegment.end = container.offsetHeight; segments.push(currentSegment); }
+
+                    button.textContent = `生成中 (0/${segments.length})...`;
+                    const buttons = document.querySelector('.save-buttons'); buttons.style.visibility = 'hidden';
+
+                    const images = [];
+                    for (let i = 0; i < segments.length; i++) {
+                        const segment = segments[i]; button.textContent = `生成中 ($${i + 1}/$${segments.length})...`;
+                        const tempContainer = document.createElement('div');
+                        tempContainer.style.cssText = `position: absolute; left: -9999px; top: 0; width: ${container.offsetWidth}px; background: white;`;
+                        tempContainer.className = 'container';
+
+                        const clonedContainer = container.cloneNode(true);
+                        const clonedButtons = clonedContainer.querySelector('.save-buttons');
+                        if (clonedButtons) { clonedButtons.style.display = 'none'; }
+
+                        tempContainer.appendChild(clonedContainer); document.body.appendChild(tempContainer);
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                        const canvas = await html2canvas(clonedContainer, {
+                            backgroundColor: '#ffffff', scale: scale, useCORS: true, allowTaint: false,
+                            imageTimeout: 10000, logging: false, width: container.offsetWidth, height: segment.end - segment.start,
+                            x: 0, y: segment.start, windowWidth: window.innerWidth, windowHeight: window.innerHeight
+                        });
+
+                        images.push(canvas.toDataURL('image/png', 1.0)); document.body.removeChild(tempContainer);
+                    }
+
+                    buttons.style.visibility = 'visible';
+                    const now = new Date();
+                    const baseFilename = `TrendRadar_雷达简报_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}$${String(now.getDate()).padStart(2, '0')}_$${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+
+                    for (let i = 0; i < images.length; i++) {
+                        const link = document.createElement('a'); link.download = `$${baseFilename}_part$${i + 1}.png`;
+                        link.href = images[i]; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+
+                    button.textContent = `已保存 ${segments.length} 张图片!`;
+                    restoreAfterScreenshot(screenshotState2);
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
+
+                } catch (error) {
+                    const buttons = document.querySelector('.save-buttons'); buttons.style.visibility = 'visible';
+                    restoreAfterScreenshot(screenshotState2); button.textContent = '保存失败';
+                    setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
+                }
+            }
+
+            function saveAsMarkdown() {
+                var lines = []; var now = new Date();
+                var dateStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+                var headerTitle = document.querySelector('.header-title');
+                lines.push('# ' + (headerTitle ? headerTitle.textContent.trim() : '雷达简报')); lines.push('');
+
+                function extractItem(item, idx) {
+                    var titleEl = item.querySelector('.news-title a');
+                    var titleText = ''; var url = '';
+                    if (titleEl) { titleText = titleEl.textContent.trim(); url = titleEl.href || ''; }
+                    else { var titleDiv = item.querySelector('.news-title') || item.querySelector('.new-item-title'); if (titleDiv) titleText = titleDiv.textContent.trim(); }
+                    if (!titleText) return '';
+
+                    var meta = [];
+                    var rank = item.querySelector('.rank-num, .new-item-rank');
+                    if (rank && rank.textContent.trim() && rank.textContent.trim() !== '?') meta.push('#' + rank.textContent.trim());
+                    var source = item.querySelector('.source-name'); if (source) meta.push(source.textContent.trim());
+                    var keyword = item.querySelector('.keyword-tag'); if (keyword) meta.push(keyword.textContent.trim());
+                    var time = item.querySelector('.time-info'); if (time) meta.push(time.textContent.trim());
+                    var count = item.querySelector('.count-info'); if (count) meta.push(count.textContent.trim());
+
+                    var line = idx + '. ';
+                    /* 修复了此处 Python 的 SyntaxWarning：将 \] 替换为 \\] */
+                    if (url) { line += '[' + titleText.replace(/[[\]]/g, '') + '](' + url + ')'; } else { line += titleText; }
+                    if (meta.length) line += '  `' + meta.join(' | ') + '`';
+                    return line;
+                }
+
+                var wordGroups = document.querySelectorAll('.hotlist-section > .word-group');
+                if (wordGroups.length) {
+                    lines.push('## 热点新闻'); lines.push('');
+                    wordGroups.forEach(function(group) {
+                        var wordName = group.querySelector('.word-name'); var wordCount = group.querySelector('.word-count');
+                        if (wordName) { lines.push('### ' + wordName.textContent.trim() + (wordCount ? ' (' + wordCount.textContent.trim() + ')' : '')); lines.push(''); }
+                        var items = group.querySelectorAll('.news-item');
+                        items.forEach(function(item, i) { var line = extractItem(item, i + 1); if (line) lines.push(line); });
+                        lines.push('');
+                    });
+                }
+
+                var newSection = document.querySelector('.new-section');
+                if (newSection) {
+                    var newTitle = newSection.querySelector('.new-section-title');
+                    lines.push('## ' + (newTitle ? newTitle.textContent.trim() : '本次新增热点')); lines.push('');
+                    var sourceGroups = newSection.querySelectorAll('.new-source-group');
+                    sourceGroups.forEach(function(sg) {
+                        var srcTitle = sg.querySelector('.new-source-title');
+                        if (srcTitle) { lines.push('### ' + srcTitle.textContent.trim()); lines.push(''); }
+                        var items = sg.querySelectorAll('.new-item');
+                        items.forEach(function(item, i) { var line = extractItem(item, i + 1); if (line) lines.push(line); });
+                        lines.push('');
+                    });
+                }
+
+                var standaloneSection = document.querySelector('.standalone-section');
+                if (standaloneSection) {
+                    var standaloneTitle = standaloneSection.querySelector('.standalone-section-title');
+                    lines.push('## ' + (standaloneTitle ? standaloneTitle.textContent.trim() : '独立展示区')); lines.push('');
+                    var groups = standaloneSection.querySelectorAll('.standalone-group');
+                    groups.forEach(function(group) {
+                        var name = group.querySelector('.standalone-name'); var cnt = group.querySelector('.standalone-count');
+                        if (name) { lines.push('### ' + name.textContent.trim() + (cnt ? ' (' + cnt.textContent.trim() + ')' : '')); lines.push(''); }
+                        var items = group.querySelectorAll('.news-item');
+                        items.forEach(function(item, i) { var line = extractItem(item, i + 1); if (line) lines.push(line); });
+                        lines.push('');
+                    });
+                }
+
+                var errorSection = document.querySelector('.error-section');
+                if (errorSection) {
+                    var errorItems = errorSection.querySelectorAll('.error-item');
+                    if (errorItems.length) {
+                        lines.push('## 抓取异常'); lines.push('');
+                        errorItems.forEach(function(item) { lines.push('- ' + item.textContent.trim()); });
+                        lines.push('');
+                    }
+                }
+
+                lines.push('---'); lines.push('*Generated by TrendRadar*');
+
+                var md = lines.join('\n');
+                var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+                var link = document.createElement('a'); var filename = 'TrendRadar_' + dateStr + '_' + timeStr.replace(':', '') + '.md';
+                link.download = filename; link.href = URL.createObjectURL(blob);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                window.scrollTo(0, 0);
+
+                var savedMode = null;
+                try { savedMode = localStorage.getItem('trendradar-wide-mode'); } catch(e) {}
+                if (savedMode === '1' || (savedMode === null && window.innerWidth > 768)) {
+                    document.body.classList.add('wide-mode');
+                    var btn = document.querySelector('.toggle-wide-btn');
+                    if (btn) btn.textContent = '⊡';
+                }
+
+                var savedDark = null;
+                try { savedDark = localStorage.getItem('trendradar-dark-mode'); } catch(e) {}
+                if (savedDark === '1') {
+                    document.body.classList.add('dark-mode');
+                    var darkBtn = document.querySelector('.toggle-dark-btn');
+                    if (darkBtn) darkBtn.textContent = '☀';
+                }
+
+                var searchBar = document.querySelector('.search-bar');
+                if (searchBar) searchBar.style.display = 'block';
+
+                initTabs(); initBackToTop(); initCollapse(); initStandaloneTabs();
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    var helpBtn = document.querySelector('.fab-help');
+                    switch(e.key) {
+                        case '?':
+                            if (helpBtn) { helpBtn.classList.toggle('show-tip'); var fabBar = document.querySelector('.fab-bar'); if (fabBar) fabBar.classList.add('visible'); }
+                            break;
+                        case 'Escape': if (helpBtn) helpBtn.classList.remove('show-tip'); break;
+                        case 'w': case 'W': toggleWideMode(); break;
+                        case 'd': case 'D': toggleDarkMode(); break;
+                        case '/': e.preventDefault(); var si = document.querySelector('.search-input'); if (si) si.focus(); break;
+                    }
+                });
+
+                var progressBar = document.querySelector('.reading-progress');
+                if (progressBar) {
+                    window.addEventListener('scroll', function() {
+                        var h = document.documentElement.scrollHeight - window.innerHeight;
+                        progressBar.style.width = (h > 0 ? (window.scrollY / h * 100) : 0) + '%';
+                    });
+                }
+
+                var copySvg = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-7A1.5 1.5 0 013.5 1h7A1.5 1.5 0 0112 2.5V5"/></svg>';
+                var checkSvg = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#22c55e" stroke-width="2"><path d="M3 8.5l3.5 3.5 7-7"/></svg>';
+                document.querySelectorAll('.news-item .news-number').forEach(function(numEl) {
+                    var item = numEl.closest('.news-item');
+                    var titleEl = item ? item.querySelector('.news-title a') : null;
+                    if (!titleEl) return;
+                    var numText = numEl.textContent.trim();
+                    numEl.innerHTML = '<span class="num-text">' + numText + '</span><span class="copy-icon">' + copySvg + '</span>';
+                    numEl.title = '点击复制标题和链接';
+                    numEl.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var text = titleEl.textContent.trim() + ' ' + titleEl.href;
+                        navigator.clipboard.writeText(text).then(function() {
+                            numEl.classList.add('copied'); numEl.querySelector('.copy-icon').innerHTML = checkSvg;
+                            setTimeout(function() { numEl.classList.remove('copied'); numEl.querySelector('.copy-icon').innerHTML = copySvg; }, 1500);
+                        });
+                    });
+                });
+            });
+
+            // ===== 挂件面板初始化逻辑 (天气 + 股票 + 工服) =====
+            (function initWidgets() {
+                var pad = function(n) { return String(n).padStart(2, '0'); };
+                var now = new Date();
+                var tmr = new Date(now); tmr.setDate(tmr.getDate() + 1);
+                var weekNames = ['周日','周一','周二','周三','周四','周五','周六'];
+
+                document.getElementById('tmrDate').textContent = (tmr.getMonth() + 1) + '月' + tmr.getDate() + '日·' + weekNames[tmr.getDay()];
+                var uniformDateEl = document.getElementById('uniformDate');
+                if (uniformDateEl) uniformDateEl.textContent = weekNames[tmr.getDay()];
+
+                // 城市中文映射
+                var cityMap = {
+                    'Shanghai':'上海', 'Beijing':'北京', 'Guangzhou':'广州', 'Shenzhen':'深圳',
+                    'Chengdu':'成都', 'Hangzhou':'杭州', 'Wuhan':'武汉', 'Xi\'an':'西安',
+                    'Chongqing':'重庆', 'Nanjing':'南京', 'Suzhou':'苏州', 'Tianjin':'天津',
+                    'Zhengzhou':'郑州', 'Changsha':'长沙', 'Dongguan':'东莞', 'Qingdao':'青岛',
+                    'Shenyang':'沈阳', 'Hefei':'合肥', 'Foshan':'佛山', 'Jinan':'济南'
+                };
+
+                // ── 1. 天气与图标配置 (OWM 真实图标) ──
+                var WMO = {
+                    0:{d:'01d',n:'01n',t:'晴'},
+                    1:{d:'02d',n:'02n',t:'大部晴'},
+                    2:{d:'03d',n:'03n',t:'多云'},
+                    3:{d:'04d',n:'04n',t:'阴'},
+                    45:{d:'50d',n:'50n',t:'雾'},
+                    48:{d:'50d',n:'50n',t:'雾凇'},
+                    51:{d:'09d',n:'09n',t:'毛毛雨'},
+                    53:{d:'09d',n:'09n',t:'毛毛雨'},
+                    55:{d:'09d',n:'09n',t:'细雨'},
+                    61:{d:'10d',n:'10n',t:'小雨'},
+                    63:{d:'10d',n:'10n',t:'中雨'},
+                    65:{d:'10d',n:'10n',t:'大雨'},
+                    71:{d:'13d',n:'13n',t:'小雪'},
+                    73:{d:'13d',n:'13n',t:'中雪'},
+                    75:{d:'13d',n:'13n',t:'大雪'},
+                    77:{d:'13d',n:'13n',t:'冰粒'},
+                    80:{d:'09d',n:'09n',t:'阵雨'},
+                    81:{d:'09d',n:'09n',t:'阵雨'},
+                    82:{d:'09d',n:'09n',t:'大雨'},
+                    85:{d:'13d',n:'13n',t:'阵雪'},
+                    86:{d:'13d',n:'13n',t:'大雪'},
+                    95:{d:'11d',n:'11n',t:'雷暴'},
+                    96:{d:'11d',n:'11n',t:'雷暴冰雹'},
+                    99:{d:'11d',n:'11n',t:'强雷暴'},
+                };
+                function wdesc(c){ return (WMO[c]||WMO[3]).t; }
+
+                function setIcon(container, code, isDay, size){
+                    var e = WMO[code]||WMO[3];
+                    var file = (isDay ? e.d : e.n);
+                    var desc = e.t;
+                    container.innerHTML = '<img src="https://openweathermap.org/img/wn/'+file+'@4x.png" style="width:'+size+'px;height:'+size+'px;object-fit:contain;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.22));" alt="'+desc+'">';
+                }
+
+                var SKY={
+                    sd:'linear-gradient(160deg,#1565c0 0%,#1e88e5 35%,#42a5f5 70%,#81d4fa 100%)',
+                    sn:'linear-gradient(160deg,#050d1f 0%,#0a1628 40%,#0d2040 100%)',
+                    cd:'linear-gradient(160deg,#546e7a 0%,#607d8b 50%,#78909c 100%)',
+                    cn:'linear-gradient(160deg,#1a2535 0%,#263040 50%,#2e3d50 100%)',
+                    r:'linear-gradient(160deg,#263238 0%,#37474f 50%,#455a64 100%)',
+                    s:'linear-gradient(160deg,#4a5568 0%,#718096 50%,#a0aec0 100%)',
+                    t:'linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)',
+                    f:'linear-gradient(160deg,#6b7280 0%,#9ca3af 100%)',
+                };
+                function getSky(c,d){
+                    if(c===0||c===1)return d?SKY.sd:SKY.sn;
+                    if(c===2||c===3)return d?SKY.cd:SKY.cn;
+                    if(c>=45&&c<=48)return SKY.f;
+                    if(c>=51&&c<=82)return SKY.r;
+                    if(c>=71&&c<=77||c>=85&&c<=86)return SKY.s;
+                    if(c>=95)return SKY.t;
+                    return d?SKY.sd:SKY.sn;
+                }
+
+                var svgDrop='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0C19 10 12 2 12 2z"/></svg>';
+                var svgWind='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>';
+                var svgTherm='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>';
+
+                function windLabel(k){
+                    if(k<12)return'微风';
+                    if(k<29)return'中风';
+                    if(k<39)return'强风';
+                    return'大风';
+                }
+
+                // ── 2. 渲染今日天气 ──
+                function renderToday(data,city){
+                    var c=data.current,code=c.weather_code,isDay=!!c.is_day;
+                    var temp=Math.round(c.temperature_2m),feel=Math.round(c.apparent_temperature);
+                    var hum=c.relative_humidity_2m,wind=Math.round(c.wind_speed_10m);
+                    var tmax=data.daily?Math.round(data.daily.temperature_2m_max[0]):null;
+                    var tmin=data.daily?Math.round(data.daily.temperature_2m_min[0]):null;
+
+                    var cnCity = cityMap[city] || city;
+
+                    document.getElementById('mainHeader').style.background=getSky(code,isDay);
+                    var el=document.getElementById('todayCard');
+                    el.innerHTML='';
+
+                    var topDiv=document.createElement('div'); topDiv.className='today-top';
+                    var iconWrap=document.createElement('div'); iconWrap.className='today-icon';
+                    setIcon(iconWrap, code, isDay, 56);
+                    topDiv.appendChild(iconWrap);
+
+                    var mainDiv=document.createElement('div'); mainDiv.className='today-main';
+                    mainDiv.innerHTML='<div class="today-temp-row"><span class="today-temp">'+temp+'</span><span class="today-unit">°C</span><span class="today-city">'+cnCity+'</span></div>'+
+                        '<div class="today-desc">'+wdesc(code)+'</div>'+
+                        (tmax!==null?'<div class="today-range">最高 '+tmax+'° · 最低 '+tmin+'°</div>':'');
+                    topDiv.appendChild(mainDiv);
+                    el.appendChild(topDiv);
+
+                    var detDiv=document.createElement('div'); detDiv.className='today-details';
+                    detDiv.innerHTML=
+                        '<div class="detail-row">'+svgDrop+'<span>湿度</span><span class="detail-val">'+hum+'%</span></div>'+
+                        '<div class="detail-row">'+svgTherm+'<span>体感</span><span class="detail-val">'+feel+'°</span></div>'+
+                        '<div class="detail-row">'+svgWind+'<span>'+wind+' km/h</span><span class="detail-val">'+windLabel(wind)+'</span></div>';
+                    el.appendChild(detDiv);
+
+                    var t=new Date();
+                    document.getElementById('wtUpdate').textContent='更新于 '+pad(t.getHours())+':'+pad(t.getMinutes());
+                    document.getElementById('wtFooter').style.display='flex';
+                }
+
+                // ── 3. 渲染明日天气 ──
+                function renderTomorrow(data){
+                    var daily=data.daily; if(!daily||daily.time.length<2) return;
+                    var code=daily.weather_code[1];
+                    var tmax=Math.round(daily.temperature_2m_max[1]);
+                    var tmin=Math.round(daily.temperature_2m_min[1]);
+                    var pop=daily.precipitation_probability_max?daily.precipitation_probability_max[1]:null;
+                    var wind=daily.wind_speed_10m_max?Math.round(daily.wind_speed_10m_max[1]):null;
+
+                    document.getElementById('tmrDesc').textContent=wdesc(code);
+                    document.getElementById('tmrRange').textContent='最高 '+tmax+'° / 最低 '+tmin+'°';
+
+                    var iconWrap=document.getElementById('tmrIconWrap');
+                    setIcon(iconWrap, code, true, 34);
+
+                    var statsHtml='';
+                    if(pop!==null) statsHtml+='<div class="tmr-stat">'+svgDrop.replace('viewBox','style="width:10px;height:10px;opacity:.7;" viewBox')+'<span class="tmr-stat-val">'+pop+'%</span><span>降水</span></div>';
+                    if(wind!==null) statsHtml+='<div class="tmr-stat">'+svgWind.replace('viewBox','style="width:10px;height:10px;opacity:.7;" viewBox')+'<span class="tmr-stat-val">'+wind+'</span><span>km/h</span></div>';
+                    document.getElementById('tmrStats').innerHTML=statsHtml;
+
+                    var refMin=Math.min(daily.temperature_2m_min[0],tmin)-2;
+                    var refMax=Math.max(daily.temperature_2m_max[0],tmax)+2;
+                    var range=refMax-refMin||1;
+                    document.getElementById('tmrBarMin').textContent=tmin+'°';
+                    document.getElementById('tmrBarMax').textContent=tmax+'°';
+                    document.getElementById('tmrBarFill').style.left=((tmin-refMin)/range*100).toFixed(1)+'%';
+                    document.getElementById('tmrBarFill').style.right=(100-(tmax-refMin)/range*100).toFixed(1)+'%';
+                    document.getElementById('tmrCard').style.opacity='1';
+                }
+
+                // ── 4. 工服卡与穿衣建议 ──
+                var UNIFORMS=[null,
+                    {name:'黑色工服',color:'#1a1a1a'},
+                    {name:'金色工服',color:'#c9a227'},
+                    {name:'红色工服',color:'#c0392b'},
+                    {name:'黑色工服',color:'#1a1a1a'},
+                    {name:'金色工服',color:'#c9a227'},
+                    {name:'红色工服',color:'#c0392b'},
+                    {name:'红色工服',color:'#c0392b'},
+                ];
+                function dayToIdx(d){return d===0?7:d;}
+                function genHint(tmax,tmin,pop,wind,code){
+                    var h=[];
+                    if(tmax<=5)h.push('气温较低，建议厚外套加保暖内搭');
+                    else if(tmax<=12)h.push('天气偏凉，外套不可少');
+                    else if(tmax<=20)h.push('温度适中，薄外套或卫衣即可');
+                    else if(tmax<=28)h.push('气温舒适，轻薄穿搭为主');
+                    else h.push('天气较热，透气轻薄为主');
+                    if(tmax-tmin>=10)h.push('早晚温差大，备一件外套');
+                    if(code>=71&&code<=77||code>=85&&code<=86)h.push('有降雪，注意防滑保暖');
+                    else if(pop>=50)h.push('降水概率高，记得带伞');
+                    else if(pop>=30)h.push('可能有雨，备好雨具');
+                    if(wind>=40)h.push('注意防风');
+                    return h.slice(0,2).join('，');
+                }
+                function renderUniform(wd){
+                    var tmrDow = tmr.getDay(), todayDow = now.getDay();
+                    var currentHour = now.getHours();
+
+                    // 时间规则（用户要求）：
+                    // 00:00 ~ 08:59（含9点前）显示「今日工服颜色」
+                    // 09:00 ~ 23:59 显示「明日工服颜色」
+                    var showTodayUniform = (currentHour >= 0 && currentHour < 9);
+
+                    var targetDow = showTodayUniform ? todayDow : tmrDow;
+                    var prefix = showTodayUniform ? '今日-' : '明日-';
+
+                    var u = UNIFORMS[dayToIdx(targetDow)];
+                    document.getElementById('uniformSwatch').style.background = u.color;
+                    document.getElementById('uniformColorName').textContent = prefix + u.name;
+                    var hint='';
+                    if(wd){
+                        var d=wd.daily;
+                        var tmax=d?Math.round(d.temperature_2m_max[1]):20;
+                        var tmin=d?Math.round(d.temperature_2m_min[1]):10;
+                        var pop=d&&d.precipitation_probability_max?d.precipitation_probability_max[1]:0;
+                        var wind=d&&d.wind_speed_10m_max?Math.round(d.wind_speed_10m_max[1]):0;
+                        var code=d?d.weather_code[1]:0;
+                        hint=genHint(tmax,tmin,pop,wind,code);
+                    }
+                    document.getElementById('uniformHint').textContent=hint||'—';
+                    var weekEl=document.getElementById('uniformWeek');
+                    weekEl.innerHTML='';
+                    var dayLabels=['日','一','二','三','四','五','六'];
+                    [1,2,3,4,5,6,0].forEach(function(d){
+                        var uu=UNIFORMS[dayToIdx(d)];
+                        var dot=document.createElement('div');
+                        dot.className='udot-wrap'+(d===todayDow?' today':'')+(d===tmrDow?' tomorrow':'');
+                        dot.innerHTML='<div class="udot" style="background:'+uu.color+';"></div><div class="udot-lbl">'+dayLabels[d]+'</div>';
+                        weekEl.appendChild(dot);
+                    });
+                    document.getElementById('comboCard').style.display='block';
+                }
+
+                // ── 5. 特斯拉股票 (精简版) ──
+                function fetchTsla(){
+                    var s=document.createElement('script');
+                    s.src='https://qt.gtimg.cn/q=usTSLA';
+                    s.onload=function(){
+                        var raw=window.v_usTSLA;
+                        if(!raw){document.getElementById('comboCard').style.display='block';return;}
+                        var d=raw.split('~');
+                        if(d.length<35){document.getElementById('comboCard').style.display='block';return;}
+                        var price=parseFloat(d[3]);
+                        var change=parseFloat(d[31]),pct=parseFloat(d[32]);
+                        document.getElementById('tslaPrice').textContent=price.toFixed(2);
+                        var chgEl=document.getElementById('tslaChg');
+                        if(change>=0){chgEl.className='tsla-chg up';chgEl.textContent='+'+change.toFixed(2)+' (+'+pct.toFixed(2)+'%)';}
+                        else{chgEl.className='tsla-chg down';chgEl.textContent=change.toFixed(2)+' ('+pct.toFixed(2)+'%)';}
+                        document.getElementById('comboCard').style.display='block';
+                    };
+                    s.onerror=function(){document.getElementById('comboCard').style.display='block';};
+                    document.head.appendChild(s);
+                }
+
+                // ── 6. 天气请求 ──
+                function fetchWeather(lat,lon,city){
+                    var url='https://api.open-meteo.com/v1/forecast'+
+                        '?latitude='+lat+'&longitude='+lon+
+                        '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day'+
+                        '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max'+
+                        '&wind_speed_unit=kmh&timezone=auto&forecast_days=2';
+                    fetch(url)
+                        .then(function(r){return r.json();})
+                        .then(function(d){renderToday(d,city);renderTomorrow(d);renderUniform(d);})
+                        .catch(function(){
+                            document.getElementById('todayCard').innerHTML='<span style="font-size:12px;color:var(--tm);">天气数据暂时不可用</span>';
+                            renderUniform(null);
+                        });
+                }
+
+                // 【已修复】不再使用动态 IP 获取位置，直接固定获取上海天气（保证电脑手机双端显示一致）
+                // 如果需要北京，可改为 fetchWeather(39.9042, 116.4074, 'Beijing');
+                fetchWeather(31.2304, 121.4737, 'Shanghai');
+
+                fetchTsla();
+            })();
+        </script>
+    </body>
+    </html>
+    
